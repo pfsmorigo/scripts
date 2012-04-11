@@ -12,11 +12,11 @@ Without parameters it will show the current state of pomodoro, e.g.:
     $ pomodoro
     T 02:05:49 (7)
 
-First part is the letter representing the state. It could be started (S), stopped (T), short break (B) or long break (L).
+ * First part is the letter representing the state. It could be started (S), stopped (T), short break (B) or long break (L).
 
-Second part is the time releated to the last state change. It will be a countdown for the started and breaks states and a countup for the stopped state.
+ * Second part is the time releated to the last state change. It will be a countdown for the started and breaks states and a countup for the stopped state.
 
-The last part is a counter for the number of completed pomodoros.
+ * The last part is a counter for the number of completed pomodoros. You can set a new value to the counter using the `set` commmand or reset the counter using the `reset` command.
 
 ### Important notes
 
