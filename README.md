@@ -28,7 +28,25 @@ Without parameters it will show the current state of pomodoro, e.g.:
 
     $ pomodoro start
     S 00:25:00 (7)
+
     $ pomodoro
     S 00:24:53 (7)
 
- 
+    $ pomodoro
+    S 00:24:49 (7)
+
+    $ pomodoro stop
+    T 00:00:00 (7)
+
+    $ pomodoro set 4
+    T 00:00:06 (4)
+
+    $ pomodoro reset
+    T 00:00:12 (0)
+
+    $ pomodoro shortbreak
+    B 00:05:00 (0)
+
+    $ pomodoro longbreak
+    L 00:15:00 (0)
+
