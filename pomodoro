@@ -1,0 +1,91 @@
+#!/bin/bash
+
+# config
+POMODORO_FILE=~/.pomodoro
+POMODORO_GOING=25
+POMODORO_SHORTBREAK=5
+POMODORO_LONGBREAK=15
+
+NOW=$(date -u +%s)
+
+# first time
+if [ ! -f $POMODORO_FILE ]; then
+	echo "T $NOW 0 0" > $POMODORO_FILE
+fi
+
+POMODORO_STAGE=$(cut -f 1 -d " " $POMODORO_FILE)
+POMODORO_TIME=$(cut -f 2 -d " " $POMODORO_FILE)
+POMODORO_COUNT=$(cut -f 3 -d " " $POMODORO_FILE)
+POMODORO_ATJOB=$(cut -f 4 -d " " $POMODORO_FILE)
+
+function set_pomodoro() {
+	POMODORO_STAGE=$1
+	POMODORO_TIME=$(( $NOW + $2 * 60 ))
+
+	# remove the old one job (if is there one)
+	if [ "$(atq | cut -f1 | grep $POMODORO_ATJOB)" != "" ]; then
+		atrm $POMODORO_ATJOB
+	fi
+
+	if [ $POMODORO_STAGE != T ]; then
+		# set the at to the end of the current state (using sleep to get seconds precision)
+		POMODORO_ATJOB=$(echo "sleep $(date -d @$POMODORO_TIME "+%S"); $0" | at "$(date -d @$POMODORO_TIME "+%H:%M %b %d")" 2>&1 | awk '{ print $2 }')
+	fi
+
+	TEXT=
+	case $POMODORO_STAGE in
+		S) TEXT="Start";;
+		T) TEXT="Stop";;
+		B) TEXT="Short break (${POMODORO_SHORTBREAK}min)";;
+		L) TEXT="Long break (${POMODORO_LONGBREAK}min)";;
+	esac
+	
+	if [ $POMODORO_STAGE != T ]; then
+		TEXT="$TEXT, until $(date -d @${POMODORO_TIME} +%T)"
+	fi
+
+	notify-send -i appointment-soon -t 3000 Pomodoro "$TEXT"
+
+	record
+}
+
+function record() {
+	echo "$POMODORO_STAGE $POMODORO_TIME $POMODORO_COUNT $POMODORO_ATJOB" > $POMODORO_FILE
+}
+
+case $1 in
+	start | s)       set_pomodoro S $POMODORO_GOING;;
+	stop | t)        set_pomodoro T 0;;
+	shortbreak | sb) set_pomodoro B $POMODORO_SHORTBREAK;;
+	longbreak | lb)  set_pomodoro L $POMODORO_LONGBREAK;;
+	set)             POMODORO_COUNT=$2; record;;
+	reset)           POMODORO_COUNT=0; record;;
+esac
+
+echo -n "$POMODORO_STAGE "
+
+DIFF=$(( $POMODORO_TIME - $NOW ))
+
+# posprocessing. If time is over => change the state
+if [ $DIFF -le 0 ]; then
+	case $POMODORO_STAGE in
+		S)
+			let POMODORO_COUNT++
+
+			if [ $(( POMODORO_COUNT % 4 )) = 0 ]; then
+				set_pomodoro L $POMODORO_LONGBREAK
+			else
+				set_pomodoro B $POMODORO_SHORTBREAK
+			fi
+		;;
+		B|L) set_pomodoro T 0;;
+	esac
+fi
+
+# for the stop stage the time is progressive
+if [ $POMODORO_STAGE = T ]; then
+	DIFF=$(( $NOW - $POMODORO_TIME ))
+fi
+
+echo "$(date -u -d @${DIFF} +%T) ($POMODORO_COUNT)"
+
