@@ -1,3 +1,6 @@
-= My Scripts =
+= pfsmorigo scripts =
 
+== Pomodoro ==
+
+Commands available: {{{start}}} ({{{s}}}), {{{stop}}} ({{{t}}}), {{{shortbreak}}} ({{{sb}}}), {{{longbreak}}} ({{{lb}}}), {{{set}}} and {{{reset}}}.
 
