@@ -24,7 +24,7 @@ Without parameters it will show the current state of pomodoro, e.g.:
  * The break state could be short or long depending on the counter total;
 
 
-### Example of usage
+### Examples of usage
 
     $ pomodoro start
     S 00:25:00 (7)
