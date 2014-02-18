@@ -1,0 +1,161 @@
+#!/bin/bash
+
+export PROMPT_COMMAND="smowprompt $*"
+
+smowprompt() {
+    local EXITSTATUS="$?" # need to be the first
+
+#         foreground                 emphasized                 background
+    local FK="\[\033[0;30m\]"; local EK="\[\033[1;30m\]"; local BK="\[\033[40m\]" # black
+    local FR="\[\033[0;31m\]"; local ER="\[\033[1;31m\]"; local BR="\[\033[41m\]" # red
+    local FG="\[\033[0;32m\]"; local EG="\[\033[1;32m\]"; local BG="\[\033[42m\]" # green
+    local FY="\[\033[0;33m\]"; local EY="\[\033[1;33m\]"; local BY="\[\033[43m\]" # yellow
+    local FB="\[\033[0;34m\]"; local EB="\[\033[1;34m\]"; local BB="\[\033[44m\]" # blue
+    local FM="\[\033[0;35m\]"; local EM="\[\033[1;35m\]"; local BM="\[\033[45m\]" # magenta
+    local FC="\[\033[0;36m\]"; local EC="\[\033[1;36m\]"; local BC="\[\033[46m\]" # cyan
+    local FW="\[\033[0;37m\]"; local EW="\[\033[1;37m\]"; local BW="\[\033[47m\]" # white
+    local NN="\[\033[0m\]" # unsets color
+
+	local TIME="\t"
+    local WHO="\u"
+    local WHERE="\h"
+	local DIRECTORY="\w"
+	local HISTORYNUM="\!"
+	local COMMANDNUM="\#"
+
+	# clear variable
+	PS1=
+
+	case "$TERM" in
+		screen*) PS1='\[\033k\033\\\]'
+	esac
+
+	case $1 in
+		""|smow)
+			local TYPE=$EY
+			local GITBRANCH=$(git rev-parse --abbrev-ref HEAD 2> /dev/null)
+			local GITSTATUS=$(git status -s 2> /dev/null | wc -l)
+			local CURLOAD=$(cat /proc/loadavg | awk '{ print $1 }')
+			local PROCESSOR=$(grep -c ^processor /proc/cpuinfo)
+
+			if [ -f /proc/acpi/ibm/thermal ]; then
+				local TEMPERATURE=$(cat /proc/acpi/ibm/thermal | awk '{ print $2 }')
+			else
+				local TEMPERATURE=0
+			fi
+
+			case $USER in
+				root)
+					WHO=
+					TYPE=${ER}
+					;;
+
+				pfsmorigo)
+					WHO=
+					;;
+				*)
+					;;
+			esac
+
+			if [ -n "$(cat /proc/cpuinfo | grep 'emulated by qemu')" ]; then
+				TYPE=${EM}
+			elif [ -n "$(env | grep 'SSH_CLIENT')" ]; then
+				TYPE=${EG}
+			else
+				TYPE=${EY}
+				WHERE=
+			fi
+
+			DIRECTORY+="${FY}$(__symlink_dir)${NN}"
+
+			PS1+="${EW}${BC} ${TIME} ${NN} "
+
+			if [ $EXITSTATUS != 0 ]; then
+				PS1+="${BR}${EW} ${EXITSTATUS} ${NN} "
+			fi
+
+			if $(echo | awk 'END { exit ( !( '"$CURLOAD > $PROCESSOR"')); }'); then
+				PS1+="${BM}${EW} ${CURLOAD} ${NN} "
+			fi
+
+			#if [ $CURLOAD > $PROCESSOR ]; then
+
+			if [ $TEMPERATURE -gt 70 ]; then
+				PS1+="${BM}${EW} ${TEMPERATURE}°C ${NN} "
+			fi
+
+			if [ "$GITBRANCH" != "" ]; then
+				PS1+="${BB}"
+				[[ $GITSTATUS -eq 0 ]] && PS1+=${EW} || PS1+=${EY}
+				PS1+=" ${GITBRANCH}$(__git_ps1) ${NN} "
+			fi
+
+			#PS1+="${HISTORYNUM} ${COMMANDNUM} "
+			PS1+="${TYPE}${WHO}@${WHERE}:${DIRECTORY}${NN}\$ "
+			;;
+
+		dos)
+			PS1="C:$PWD> "
+			;;
+
+		*)
+			PS1="[${WHO}@${WHERE} \W]\$ "
+			;;
+
+	esac
+
+}
+
+__git_ps1 () {
+	local LINE
+
+	LINE=$(git branch -v | grep '^*' | awk 'NR>1{print $1}' RS=[ FS=])
+	LINE=${LINE/behind /-}
+	LINE=${LINE/ahead /+}
+
+	[[ -n "$LINE" ]] &&	echo " $LINE"
+}
+
+#__git_ps1 () {
+	#local g="$(git rev-parse --git-dir 2>/dev/null)"
+	#if [ -n "$g" ]; then
+		#local r
+		#local b
+		#if [ -d "$g/../.dotest" ]
+		#then
+			#local b="$(git symbolic-ref HEAD 2>/dev/null)"
+			#r="|REBASING"
+		#elif [ -d "$g/.dotest-merge" ]
+		#then
+			#r="|REBASING"
+			#b="$(cat $g/.dotest-merge/head-name)"
+		#elif [ -f "$g/MERGE_HEAD" ]
+		#then
+			#r="|MERGING"
+			#b="$(git symbolic-ref HEAD 2>/dev/null)"
+		#else
+			#if [ -f $g/BISECT_LOG ]
+			#then
+				#r="|BISECTING"
+			#fi
+			#if ! b="$(git symbolic-ref HEAD 2>/dev/null)"
+			#then
+				#b="$(cut -c1-7 $g/HEAD)..."
+			#fi
+		#fi
+		#if [ -n "$1" ]; then
+			#printf "$1" "${b##refs/heads/}$r"
+		#else
+			#printf " (%s)" "${b##refs/heads/}$r"
+		#fi
+	#fi
+#}
+
+__symlink_dir () {
+	[[ $(pwd) != $(pwd -P) ]] && echo " ($(__home_dir $(pwd -P)))"
+}
+
+__home_dir () {
+	echo ${*/"$HOME"/'~'}
+}
+
