@@ -1,0 +1,107 @@
+#!/bin/bash
+
+if ! command -v realpath >/dev/null 2>&1; then
+	echo "You need to install some packages. Use: $0 deps"
+	exit 1
+fi
+
+# I always checkout the dotfiles repo in the same directory as the script one.
+DIR=$(dirname $(realpath $0)| sed 's/scripts/dotfiles/')
+
+if test -d $DIR; then
+	echo "There is no dotfiles directory. Cloning one."
+	git clone http://github.com/pfsmorigo/dotfiles.git $DIR
+fi
+
+dotinstall() {
+	if [ -e ~/.$1 ]; then
+
+		if diff ~/.$1 $DIR/$1; then
+			echo "Skipping $1..."
+			return
+		fi
+
+		backup $1
+	fi
+
+	mkdir -p $(dirname ~/$1)
+
+	echo "Linking $1...."
+	ln -sf $DIR/$1 ~/.$1
+}
+
+backup() {
+	NEWFILE=$1.$(date +%F_%T)
+	echo "Renaming $1 to $NEWFILE..."
+	mv ~/$1 ~/$NEWFILE
+}
+
+setup_vim() {
+	cd $DIR && git submodule init && git submodule update
+}
+
+setup_git() {
+	GIT_FILE=$HOME/.gitconfig-userinfo
+	if [ -f "$GIT_FILE" ]; then
+		read -p "$GIT_FILE already exists. Overwrite? (y/n) " RESP
+		if [ "$RESP" = "y" ]; then
+			backup $GIT_FILE
+		else
+			return
+		fi
+	fi
+
+	FULLNAME=$(getent passwd $LOGNAME | cut -d ":" -f 5)
+	EMAIL="$LOGNAME@gmail.com"
+
+	echo -n "Enter your full name [$FULLNAME]: "
+	read NEWFULLNAME
+	[ -n "$NEWFULLNAME" ] && FULLNAME=$NEWFULLNAME
+	echo -n "Enter your email [$EMAIL]: "
+	read NEWEMAIL
+	[ -n "$NEWEMAIL" ] && EMAIL=$NEWEMAIL
+
+	echo "[user]" > $GIT_FILE
+	echo "    name = $FULLNAME" >> $GIT_FILE
+	echo "    email = $EMAIL" >> $GIT_FILE
+}
+
+case $1 in
+	deps|dependencies)
+		if [ -f /usr/bin/apt-get ]; then
+			sudo /usr/bin/apt-get install coreutils realpath
+		elif [ -f /usr/bin/yum ]; then
+			sudo /usr/bin/yum install coreutils
+		fi
+		;;
+
+	clean)
+		rm -f ~/.bash_profile.*
+		rm -f ~/.bashrc.*
+		rm -f ~/.gtkrc-2.0.*
+		rm -f ~/.screenrc.*
+		rm -f ~/.vim.*
+		rm -f ~/.vimrc.*
+		rm -f ~/.taskrc.*
+		rm -f ~/.XCompose.*
+		rm -f ~/.Xresources.*
+		rm -f ~/.gitconfig.*
+		;;
+
+	*)
+		dotinstall bash_profile
+		dotinstall bashrc
+		dotinstall gtkrc-2.0
+		dotinstall screenrc
+		dotinstall vimrc
+		dotinstall vim
+		dotinstall taskrc
+		dotinstall XCompose
+		dotinstall Xresources
+		dotinstall inputrc
+		dotinstall gitconfig
+		setup_vim
+		setup_git
+		;;
+esac
+
