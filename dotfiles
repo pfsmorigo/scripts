@@ -12,8 +12,8 @@ fi
 # I always checkout the dotfiles repo in the same directory as the script one.
 DIR=$(dirname $(realpath $0)| sed 's/scripts/dotfiles/')
 
-if test -d $DIR; then
-	echo "There is no dotfiles directory. Cloning one."
+if ! test -d $DIR; then
+	echo "There is no dotfiles directory. Cloning one..."
 	git clone http://github.com/pfsmorigo/dotfiles.git $DIR
 fi
 
@@ -108,8 +108,8 @@ case $1 in
 		dotinstall Xresources
 		dotinstall inputrc
 		dotinstall gitconfig
-		setup_vim
 		setup_git
+		setup_vim
 		;;
 esac
 
