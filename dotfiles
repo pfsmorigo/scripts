@@ -1,8 +1,12 @@
 #!/bin/bash
 
 if ! command -v realpath >/dev/null 2>&1; then
-	echo "You need to install some packages. Use: $0 deps"
-	exit 1
+	read -p "You need to install some packages. Install now?" RESP
+	if [ "$RESP" = "y" ]; then
+		install_dependencies
+	else
+		exit 1
+	fi
 fi
 
 # I always checkout the dotfiles repo in the same directory as the script one.
@@ -28,6 +32,14 @@ dotinstall() {
 
 	echo "Linking $1...."
 	ln -sf $DIR/$1 ~/.$1
+}
+
+install_dependencies() {
+	if [ -f /usr/bin/apt-get ]; then
+		sudo /usr/bin/apt-get install coreutils realpath
+	elif [ -f /usr/bin/yum ]; then
+		sudo /usr/bin/yum install coreutils
+	fi
 }
 
 backup() {
@@ -68,11 +80,7 @@ setup_git() {
 
 case $1 in
 	deps|dependencies)
-		if [ -f /usr/bin/apt-get ]; then
-			sudo /usr/bin/apt-get install coreutils realpath
-		elif [ -f /usr/bin/yum ]; then
-			sudo /usr/bin/yum install coreutils
-		fi
+		install_dependencies
 		;;
 
 	clean)
