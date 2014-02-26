@@ -25,7 +25,7 @@ dotinstall() {
 			return
 		fi
 
-		backup $1
+		backup_file $1
 	fi
 
 	mkdir -p $(dirname ~/$1)
@@ -42,7 +42,11 @@ install_dependencies() {
 	fi
 }
 
-backup() {
+initial_dirs() {
+	mkdir -p ~/logs/screen
+}
+
+backup_file() {
 	NEWFILE=$1.$(date +%F_%T)
 	echo "Renaming $1 to $NEWFILE..."
 	mv ~/$1 ~/$NEWFILE
@@ -57,7 +61,7 @@ setup_git() {
 	if [ -f "$GIT_FILE" ]; then
 		read -p "$GIT_FILE already exists. Overwrite? (y/n) " RESP
 		if [ "$RESP" = "y" ]; then
-			backup $GIT_FILE
+			backup_file $GIT_FILE
 		else
 			return
 		fi
@@ -97,6 +101,7 @@ case $1 in
 		;;
 
 	*)
+		initial_dirs
 		dotinstall bash_profile
 		dotinstall bashrc
 		dotinstall gtkrc-2.0
