@@ -15,6 +15,9 @@ DIR=$(dirname $(realpath $0)| sed 's/scripts/dotfiles/')
 if ! test -d $DIR; then
 	echo "There is no dotfiles directory. Cloning one..."
 	git clone http://github.com/pfsmorigo/dotfiles.git $DIR
+else
+	cd $DIR
+	git pull
 fi
 
 dotinstall() {
@@ -43,7 +46,7 @@ install_dependencies() {
 }
 
 initial_dirs() {
-	mkdir -p ~/logs/screen
+	mkdir -p ~/log/screen
 }
 
 backup_file() {
