@@ -1,0 +1,124 @@
+#!/bin/bash
+
+echo "$(date) | $*" >> /tmp/computer
+
+upower() {
+	dbus-send --system --dest=org.freedesktop.UPower --type=method_call \
+	          --print-reply /org/freedesktop/UPower org.freedesktop.UPower.$1
+}
+
+irc() {
+	case $1 in
+		connect|reconnect|disconnect)
+			echo "*/$1 -all" > ~/.weechat/weechat_fifo_*
+			;;
+		*)
+			echo "don't know what $1 is..."
+	esac
+}
+
+wifi() {
+	STATE=$(nmcli nm wifi | grep -v WIFI | tr -d ' ')
+
+	case $1 in
+		toggle)
+			[[ "$STATE" = "disabled" ]] && wifi on || wifi off
+			;;
+		on|off)
+			nmcli nm wifi $1
+			wifi
+			;;
+		"")
+			echo $STATE
+			;;
+		*)
+			echo "don't know what $1 is..." && exit 1
+	esac
+}
+
+display() {
+	case $1 in
+		undock|removeall)
+			# remove all connected outputs apart from LVDS
+			for OUTPUT in $(/usr/bin/xrandr -d :0.0 --verbose | grep " connected" | grep -v LVDS | awk '{print $1}'); do
+				/usr/bin/xrandr -d :0.0 --output $OUTPUT --off
+			done
+			;;
+
+		dock)
+			/usr/bin/xrandr -d :0.0 --output HDMI2 --right-of LVDS1 --auto
+			;;
+
+		*)
+			echo "don't know what $1 is..."
+	esac
+}
+
+status() {
+	echo "wifi... $(wifi)"
+}
+
+show_window() {
+	echo "As you wish!"
+	#zenity --question --title="$1" --text="Timeout 5s" --timeout=5
+}
+
+#show_window $1
+
+case $1 in
+	suspend)
+		irc disconnect
+		xautolock -locknow
+		vpn off
+		#upower Suspend
+		sudo pm-suspend
+		;;
+
+	hibernate)
+		irc disconnect
+		vpn off
+		#upower Hibernate
+		sudo pm-hibernate
+		;;
+
+	halt)
+		irc disconnect
+		upower Stop
+		;;
+
+	reboot)
+		irc disconnect
+		upower Restart
+		;;
+
+	dock)
+		wifi off
+		display dock
+		#irc reconnect
+		;;
+
+	undock)
+		wifi on
+		display removeall
+		;;
+
+	status|irc|wifi|display)
+		$*
+		;;
+
+	*)
+		echo "sub commands: "
+		echo -n "display "
+		echo -n "dock "
+		echo -n "halt "
+		echo -n "hibernate "
+		echo -n "irc "
+		echo -n "reboot "
+		echo -n "status "
+		echo -n "suspend "
+		echo -n "undock "
+		echo -n "wifi "
+		echo ""
+		;;
+esac
+
