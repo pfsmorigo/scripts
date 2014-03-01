@@ -1,0 +1,44 @@
+#!/bin/bash
+
+DISTRO=$(head -n1 /etc/issue | cut -d ' ' -f 1)
+PACKAGES=
+
+add_package() {
+	while getopts ":f:d:" OPT; do
+		case "${OPT}" in
+			f) [ "$DISTRO" = "Fedora" ] && PACKAGES="$PACKAGES $OPTARG";;
+			d) [ "$DISTRO" = "Debian" ] && PACKAGES="$PACKAGES $OPTARG";;
+			*) echo "Unknow parameter!" && exit 1 ;;
+		esac
+		#shift 2
+	done
+	shift $((OPTIND-1))
+	OPTIND=0
+
+	PACKAGES="$PACKAGES $1"
+}
+
+distro_package_setup() {
+	add_package acpid                   # for dock detection
+	add_package git-cvs
+	add_package istanbul                # screen capture
+	add_package kpcli                   # keepassx cli tool
+	add_package perl-LWP-Protocol-https # so rt can access https
+	add_package poppler-utils           # extract images from pdf
+	add_package python-keyring          # use keyring in scripts
+	add_package rt                      # request tracker
+	add_package sox                     # audio tools (used by bin/monitor_audio)
+
+	INSTALLER=
+	[ "$DISTRO" = "Fedora" ] && INSTALLER="sudo yum install"
+	[ "$DISTRO" = "Debian" ] && INSTALLER="sudo apt-get install"
+
+	$INSTALLER $PACKAGES
+
+	#for PACKAGE in $PACKAGES; do
+			#echo "($PACKAGE)"
+	#done
+}
+
+distro_package_setup
+
