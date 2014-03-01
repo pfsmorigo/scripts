@@ -1,0 +1,10 @@
+#!/bin/bash
+
+i3-msg floating enabled
+i3-msg resize shrink width 1250px
+i3-msg resize shrink height 700px
+i3-msg move right 1240px
+i3-msg move down 10px
+i3-msg border none
+i3-msg move workspace 9
+

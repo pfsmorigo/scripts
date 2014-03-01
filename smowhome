@@ -9,11 +9,11 @@ create_symlinks() {
 	DIR=$(dirname $(realpath $0))
 	echo [$DIR]
 
-	for FILE in $(ls $DIR); do
-		[ $FILE = README.md ] && continue
+	for FILE in $(find $DIR -type f -executable -not -iwholename '*.git*'); do
+		FILE=$(echo $FILE | sed "s,${DIR}\/,,g")
 
-		echo "Creating $FILE symlink in ~/bin..."
-		ln -fs $DIR/$FILE ~/bin/$FILE
+		echo "Creating $(basename $FILE) symlink in ~/bin..."
+		ln -fs $DIR/$FILE ~/bin/$(basename $FILE)
 	done
 }
 

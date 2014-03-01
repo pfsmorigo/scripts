@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rsync -avzh --delete /home/pfsmorigo/.minecraft/saves/SmoWorld/ /home/pfsmorigo/Dropbox/Minecraft/saves/SmoWorld/
+
