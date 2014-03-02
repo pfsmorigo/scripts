@@ -7,9 +7,8 @@ fi
 
 create_symlinks() {
 	DIR=$(dirname $(realpath $0))
-	echo [$DIR]
 
-	for FILE in $(find $DIR -type f -executable -not -iwholename '*.git*'); do
+	for FILE in $(find $DIR -type f -executable -not -iwholename '*.git*' | sort); do
 		FILE=$(echo $FILE | sed "s,${DIR}\/,,g")
 
 		echo "Creating $(basename $FILE) symlink in ~/bin..."
