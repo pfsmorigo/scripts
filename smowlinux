@@ -22,6 +22,8 @@ distro_package_setup() {
 	add_package acpid                   # for dock detection
 	add_package git-cvs
 	add_package istanbul                # screen capture
+	add_package julius                  # voice recognition
+	add_package julius-voxforge         # voice recognition
 	add_package kpcli                   # keepassx cli tool
 	add_package perl-LWP-Protocol-https # so rt can access https
 	add_package poppler-utils           # extract images from pdf
