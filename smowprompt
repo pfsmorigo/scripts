@@ -30,6 +30,29 @@ smowprompt() {
 		screen*) PS1='\[\033k\033\\\]'
 	esac
 
+	while getopts hc OPT; do
+		case $OPT in
+
+			c)
+				# don't set colors
+				FK=; EK=; BK=; FR=; ER=; BR=; FG=; EG=; BG=; FY=; EY=; BY=
+				FB=; EB=; BB=; FM=; EM=; BM=; FC=; EC=; BC=; FW=; EW=; BW=
+				NN=
+				;;
+
+			s)
+				# don't set title
+				#TODO
+				;;
+
+			*)
+				PS1+="(ERROR)"
+				;;
+		esac
+	done
+	shift $((OPTIND-1))
+	OPTIND=0
+
 	case $1 in
 		""|smow)
 			local TYPE=$EY
@@ -95,11 +118,11 @@ smowprompt() {
 			;;
 
 		dos)
-			PS1="C:$PWD> "
+			PS1+="C:$PWD> "
 			;;
 
 		*)
-			PS1="[${WHO}@${WHERE} \W]\$ "
+			PS1+="[${WHO}@${WHERE} \W]\$ "
 			;;
 
 	esac
@@ -112,6 +135,7 @@ __git_ps1 () {
 	LINE=$(git branch -v | grep '^*' | awk 'NR>1{print $1}' RS=[ FS=])
 	LINE=${LINE/behind /-}
 	LINE=${LINE/ahead /+}
+	LINE=${LINE/,/}
 
 	[[ -n "$LINE" ]] &&	echo " $LINE"
 }
