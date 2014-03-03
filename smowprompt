@@ -91,26 +91,26 @@ smowprompt() {
 
 			DIRECTORY+="${FY}$(__symlink_dir)${NN}"
 
-			PS1+="${EW}${BC} ${TIME} ${NN} "
+			PS1+="${BC}${EC}[${EW}${TIME}${EC}]${NN} "
 
 			if [ $EXITSTATUS != 0 ]; then
-				PS1+="${BR}${EW} ${EXITSTATUS} ${NN} "
+				PS1+="${BR}${ER}[${EW}${EXITSTATUS}${ER}]${NN} "
 			fi
 
 			if $(echo | awk 'END { exit ( !( '"$CURLOAD > $PROCESSOR"')); }'); then
-				PS1+="${BM}${EW} ${CURLOAD} ${NN} "
+				PS1+="${BM}${EM}[${EW}${CURLOAD}${EM}]${NN} "
 			fi
 
 			#if [ $CURLOAD > $PROCESSOR ]; then
 
 			if [ $TEMPERATURE -gt 70 ]; then
-				PS1+="${BM}${EW} ${TEMPERATURE}°C ${NN} "
+				PS1+="${BM}${EM}[${EW}${TEMPERATURE}°C${EM}]${NN} "
 			fi
 
 			if [ "$GITBRANCH" != "" ]; then
-				PS1+="${BB}"
+				PS1+="${BB}${EB}["
 				[[ $GITSTATUS -eq 0 ]] && PS1+=${EW} || PS1+=${EY}
-				PS1+=" ${GITBRANCH}$(__git_ps1) ${NN} "
+				PS1+="${GITBRANCH}$(__git_ps1)${EB}]${NN} "
 			fi
 
 			#PS1+="${HISTORYNUM} ${COMMANDNUM} "
