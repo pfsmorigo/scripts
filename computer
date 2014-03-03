@@ -89,7 +89,7 @@ case $1 in
 		;;
 
 	dock)
-		wifi off
+		#wifi off
 		display dock
 		#irc reconnect
 		;;

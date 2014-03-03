@@ -1,0 +1,32 @@
+#!/bin/bash
+
+[[ -z $1 ]] && echo "No args!" && exit 1
+
+WHOAMI="$(whoami)"
+COMMAND=$1
+NAME="$2"
+
+case $COMMAND in
+	set)
+		echo -n "Password: "
+		stty -echo
+		read PASSWD
+		stty echo
+
+		python -c "import keyring;keyring.set_password('""$NAME""','""$WHOAMI""','""$PASSWD""')"
+		if [ ! $? -eq 0 ]; then
+			echo "$? : python returned an error"
+		else
+			echo "Password ($NAME) saved"
+			exit 0
+		fi
+		;;
+
+	get)
+		echo -n $(python -c "import keyring;print keyring.get_password('""$NAME""', '""$WHOAMI""')")
+		;;
+
+	help|*)
+		;;
+esac
+
