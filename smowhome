@@ -6,6 +6,7 @@ if ! command -v realpath >/dev/null 2>&1; then
 fi
 
 create_symlinks() {
+	echo -e "\nCreating symlinks\n-----------------------------------"
 	DIR=$(dirname $(realpath $0))
 
 	for FILE in $(find $DIR -type f -executable -not -iwholename '*.git*' | sort); do
@@ -16,10 +17,39 @@ create_symlinks() {
 	done
 }
 
-create_symlinks
+backup() {
+	BACKUP_DIR=~/Private/Backup/Linux
+	cd $BACKUP_DIR
+	check_private
+	echo -e "\nBackup\n-----------------------------------"
+	rsync -avz --delete --progress ~/.local/share/shotwell/data/* $BACKUP_DIR/Shotwell
+	git add .
+	git commit -q -m "backup shotwell"
+	rsync -avz --delete --progress ~/Dropbox/KeePassX/* $BACKUP_DIR/KeePassX
+	git add .
+	git commit -q -m "backup keepassx"
+}
 
+check_private() {
+	if test -f ~/Private/README.txt; then
+		echo -e "\nMounting Private\n-----------------------------------"
+		ecryptfs-mount-private
+		if test -f ~/Private/README.txt; then
+			echo "Unable to open Private!"
+			exit 1
+		fi
+	fi
+}
 
+case $1 in
 
+	backup)
+		backup
+		;;
 
+	*)
+		create_symlinks
+		;;
+esac
 
-
+echo -e "\nDone.\n"
