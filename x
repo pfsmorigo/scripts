@@ -1,21 +1,23 @@
 #!/bin/bash
 
+SCREEN_CMD="screen -S pfsmorigo -X screen"
+
 case $1 in
 	vimwiki)
-		screen -t vimwiki 7 vim ~/Dropbox/Wiki/index.wiki
+		$SCREEN_CMD -t vimwiki 7 vim ~/Dropbox/Wiki/index.wiki
 		;;
 
 	mutt)
 		cd ~/Downloads
-		screen -t mutt 8 mutt
+		$SCREEN_CMD -t mutt 8 mutt
 		;;
 
 	weechat)
-		screen -t weechat 9 weechat-curses
+		$SCREEN_CMD -t weechat 9 weechat-curses
 		;;
 
 	neb)
-		screen -t neb 10 ssh -L 10000:127.0.0.1:10000 neb
+		$SCREEN_CMD -t neb 10 ssh -L 10000:127.0.0.1:10000 neb
 		;;
 
 	all)
