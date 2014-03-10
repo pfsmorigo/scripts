@@ -121,6 +121,9 @@ smowprompt() {
 			PS1+="C:$PWD> "
 			;;
 
+		debian)
+			PS1="${debian_chroot:+($debian_chroot)}\u@\h:\w\$"
+
 		*)
 			PS1+="[${WHO}@${WHERE} \W]\$ "
 			;;
