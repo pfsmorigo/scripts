@@ -1,0 +1,3 @@
+[submodule "local/vivobox_huawei"]
+	path = local/vivobox_huawei
+	url = https://github.com/pfsmorigo/vivobox_huawei.git

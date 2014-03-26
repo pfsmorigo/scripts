@@ -5,12 +5,17 @@ if ! command -v realpath >/dev/null 2>&1; then
 	exit 1
 fi
 
+EXTRA=
+
 create_symlinks() {
 	mkdir -p ~/bin
 	echo -e "\nCreating symlinks\n-----------------------------------"
 	DIR=$(dirname $(realpath $0))
 
-	for FILE in $(find $DIR -type f -executable -not -iwholename '*.git*' | sort); do
+	# skip "local" scripts
+	[ -n "$(env | grep 'SSH_CLIENT')" ] && EXTRA="-not -iwholename '*local*'"
+
+	for FILE in $(find $DIR -type f -executable -not -iwholename '*.git*' $EXTRA | sort); do
 		FILE=$(echo $FILE | sed "s,${DIR}\/,,g")
 
 		echo "Creating $(basename $FILE) symlink in ~/bin..."

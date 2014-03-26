@@ -4,8 +4,9 @@ SCREEN_CMD="screen -S pfsmorigo -X screen"
 
 check() {
 	PROC=$1
+
 	[ -n "$2" ] && PROC=$2 || PROC=$1
-	if [ -n "$(ps -x | grep $PROC | grep -v "grep\|$$")" ]; then
+	if [ -n "$(ps -x | grep $PROC | grep -v "grep\|x $1")" ]; then
 		notify-send "$1 already on!"
 		exit 1
 	fi
