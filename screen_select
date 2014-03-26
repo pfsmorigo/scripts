@@ -1,0 +1,19 @@
+#!/bin/bash
+SCREEN_LIST=$(ls -1 /var/run/screen/S-$USER | sort -h)
+
+SCREEN_ARRAY=
+COUNT=0
+
+screen -wipe > /dev/null 2>&1
+
+echo ""
+for SCREEN in $SCREEN_LIST; do
+        COUNT=$(( $COUNT + 1 ))
+        SCREEN_ARRAY[$COUNT]=$SCREEN
+        printf " %2s) %s\n" $COUNT $SCREEN
+done
+echo ""
+
+read -p "Pick one: " PICK
+screen -x ${SCREEN_ARRAY[$PICK]}
+
