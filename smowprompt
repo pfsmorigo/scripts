@@ -62,6 +62,7 @@ smowprompt() {
 			local PROCESSOR=$(grep -c ^processor /proc/cpuinfo)
 			local SCREEN_TOTAL=$(ls -1 /var/run/screen/S-$USER | wc -l)
 			local SCREEN_CURRENT=$(echo $STY | cut -d. -f2)
+			local FREE_SPACE=$(df . | tail -n 1 | awk '{ print $4 }')
 
 			if [ -f /proc/acpi/ibm/thermal ]; then
 				local TEMPERATURE=$(cat /proc/acpi/ibm/thermal | awk '{ print $2 }')
@@ -111,6 +112,10 @@ smowprompt() {
 
 			if [ $SCREEN_TOTAL -gt 1 ]; then
 				PS1+="${BG}${EG}[${EW}$SCREEN_CURRENT|${SCREEN_TOTAL}${EG}]${NN} "
+			fi
+
+			if [ $FREE_SPACE -lt 1048576 ]; then
+				PS1+="${BM}${EM}[${EW}${FREE_SPACE}KB${EM}]${NN} "
 			fi
 
 			if [ "$GITBRANCH" != "" ]; then
