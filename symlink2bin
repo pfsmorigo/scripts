@@ -1,0 +1,20 @@
+#!/bin/bash
+
+[ -n "$1" ] && DIR=$1 || DIR=$PWD
+[ ! -d "$DIR" ] && echo "$DIR not found!" && exit 1
+
+set -o noglob
+FIND_PARAM='-type f -executable -not -iwholename '*.git*''
+env | grep -q SSH_CLIENT || FIND_PARAM=$FIND_PARAM' -not -iwholename '*local*''
+set +o noglob
+
+mkdir -p ~/bin
+cd $DIR
+
+for FILE in $(find $DIR $FIND_PARAM | sort); do
+	FILE=$(echo $FILE | sed "s,${DIR}\/,,g")
+
+	echo "Creating $(basename $FILE) symlink in ~/bin..."
+	ln -fs $DIR/$FILE ~/bin/$(basename $FILE)
+done
+

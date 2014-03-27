@@ -60,6 +60,8 @@ smowprompt() {
 			local GITSTATUS=$(git status -s 2> /dev/null | wc -l)
 			local CURLOAD=$(cat /proc/loadavg | awk '{ print $1 }')
 			local PROCESSOR=$(grep -c ^processor /proc/cpuinfo)
+			local SCREEN_TOTAL=$(ls -1 /var/run/screen/S-$USER | wc -l)
+			local SCREEN_CURRENT=$(echo $STY | cut -d. -f2)
 
 			if [ -f /proc/acpi/ibm/thermal ]; then
 				local TEMPERATURE=$(cat /proc/acpi/ibm/thermal | awk '{ print $2 }')
@@ -107,6 +109,10 @@ smowprompt() {
 				PS1+="${BM}${EM}[${EW}${TEMPERATURE}°C${EM}]${NN} "
 			fi
 
+			if [ $SCREEN_TOTAL -gt 1 ]; then
+				PS1+="${BG}${EG}[${EW}$SCREEN_CURRENT|${SCREEN_TOTAL}${EG}]${NN} "
+			fi
+
 			if [ "$GITBRANCH" != "" ]; then
 				PS1+="${BB}${EB}["
 				[[ $GITSTATUS -eq 0 ]] && PS1+=${EW} || PS1+=${EY}
@@ -114,7 +120,7 @@ smowprompt() {
 			fi
 
 			#PS1+="${HISTORYNUM} ${COMMANDNUM} "
-			PS1+="${TYPE}${WHO}@${WHERE}:${DIRECTORY}${NN}\$ "
+			PS1+="${TYPE}${WHO}@${WHERE}:${DIRECTORY}${NN}\n\$ "
 			;;
 
 		dos)
@@ -122,7 +128,7 @@ smowprompt() {
 			;;
 
 		debian)
-			PS1="${debian_chroot:+($debian_chroot)}\u@\h:\w\$"
+			PS1="${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "
 			;;
 
 		*)
