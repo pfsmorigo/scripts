@@ -5,7 +5,7 @@
 
 set -o noglob
 FIND_PARAM='-type f -executable -not -iwholename '*.git*''
-env | grep -q SSH_CLIENT || FIND_PARAM=$FIND_PARAM' -not -iwholename '*local*''
+env | grep -q SSH_CLIENT && FIND_PARAM=$FIND_PARAM' -not -iwholename '*local*''
 set +o noglob
 
 mkdir -p ~/bin
