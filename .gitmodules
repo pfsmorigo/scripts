@@ -1,3 +1,3 @@
-[submodule "local/vivobox_huawei"]
-	path = local/vivobox_huawei
-	url = https://github.com/pfsmorigo/vivobox_huawei.git
+[submodule "local/routerinfo"]
+	path = local/routerinfo
+	url = https://github.com/pfsmorigo/routerinfo.git
