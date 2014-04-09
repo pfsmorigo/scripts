@@ -91,31 +91,33 @@ case $1 in
 		;;
 
 	clean)
-		rm -f ~/.bash_profile.*
-		rm -f ~/.bashrc.*
-		rm -f ~/.gtkrc-2.0.*
-		rm -f ~/.screenrc.*
-		rm -f ~/.vim.*
-		rm -f ~/.vimrc.*
-		rm -f ~/.taskrc.*
 		rm -f ~/.XCompose.*
 		rm -f ~/.Xresources.*
+		rm -f ~/.bash_profile.*
+		rm -f ~/.bashrc.*
 		rm -f ~/.gitconfig.*
+		rm -f ~/.gtkrc-2.0.*
+		rm -f ~/.i3.*
+		rm -f ~/.screenrc.*
+		rm -f ~/.taskrc.*
+		rm -f ~/.vim.*
+		rm -f ~/.vimrc.*
 		;;
 
 	*)
 		initial_dirs
-		dotinstall bash_profile
-		dotinstall bashrc
-		dotinstall gtkrc-2.0
-		dotinstall screenrc
-		dotinstall vimrc
-		dotinstall vim
-		dotinstall taskrc
 		dotinstall XCompose
 		dotinstall Xresources
-		dotinstall inputrc
+		dotinstall bash_profile
+		dotinstall bashrc
 		dotinstall gitconfig
+		dotinstall gtkrc-2.0
+		dotinstall i3
+		dotinstall inputrc
+		dotinstall screenrc
+		dotinstall taskrc
+		dotinstall vim
+		dotinstall vimrc
 		setup_git
 		setup_vim
 		;;

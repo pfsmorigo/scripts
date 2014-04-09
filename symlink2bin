@@ -1,5 +1,13 @@
 #!/bin/bash
 
+while getopts c OPT; do
+	case $OPT in
+		c) JUST_REMOTE=1 ;;
+	esac
+done
+shift $((OPTIND-1))
+OPTIND=0
+
 [ -n "$1" ] && SOURCE=$1 || SOURCE=$PWD
 [ -n "$2" ] && DEST=$1 || DEST=~/bin
 [ ! -d "$SOURCE" ] && echo "$SOURCE not found!" && exit 1
@@ -16,6 +24,8 @@ if [ -d $DEST ]; then
 else
 	mkdir $DEST
 fi
+
+[ "$JUST_REMOTE" = "1" ] && exit
 
 cd $SOURCE
 for FILE in $(find $SOURCE $FIND_PARAM $FIND_EXTRA | sort); do
