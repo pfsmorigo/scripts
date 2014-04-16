@@ -1,0 +1,53 @@
+#!/bin/bash
+
+finger_print() {
+	if grep -q taskwarrior NEWS; then
+		echo task
+		return
+	else
+		echo "unknown"
+		return 1
+	fi
+}
+
+title() {
+	echo -e "\n $*\n=======================================================\n"
+}
+
+check_deps() {
+	title Checking dependencies
+
+	for DEP in $*; do
+		echo -n "Checking $DEP... "
+		if ! rpm -qa | grep -q $DEP; then
+			echo "not installed!"
+			sudo yum install $1
+		else
+			echo "installed."
+		fi
+	done
+	echo ""
+}
+
+step() {
+	title $*
+	time $*
+	echo -e "\nDone. Exit: $?\n"
+}
+
+PROJECT=$(finger_print)
+
+case $PROJECT in
+	task)
+		check_deps libuuid-devel
+		step cmake .
+		step make
+		step sudo make install
+		;;
+
+	unknown)
+		echo "Don't know"
+		exit 1
+		;;
+esac
+

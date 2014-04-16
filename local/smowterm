@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCREEN="screen -AOxRR pfsmorigo"
+SCREEN="screen -AOxRR $USER; sleep 100"
 NAME="URxvt"
 COMMAND=
 
