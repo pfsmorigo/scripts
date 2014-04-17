@@ -4,6 +4,8 @@ finger_print() {
 	if grep -q taskwarrior NEWS; then
 		echo task
 		return
+	elif [ -f chrome2keepass.rb ]; then
+		echo chrome2keepass
 	else
 		echo "unknown"
 		return 1
@@ -16,16 +18,19 @@ title() {
 
 check_deps() {
 	title Checking dependencies
+	local TO_INSTALL=
 
 	for DEP in $*; do
 		echo -n "Checking $DEP... "
 		if ! rpm -qa | grep -q $DEP; then
 			echo "not installed!"
-			sudo yum install $1
+			TO_INSTALL+="$DEP "
 		else
 			echo "installed."
 		fi
 	done
+	echo ""
+	[ -n "$TO_INSTALL" ] && sudo yum install $TO_INSTALL
 	echo ""
 }
 
@@ -43,6 +48,10 @@ case $PROJECT in
 		step cmake .
 		step make
 		step sudo make install
+		;;
+
+	chrome2keepass)
+		check_deps rubygem-{sqlite3,builder}
 		;;
 
 	unknown)
