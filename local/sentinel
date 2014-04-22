@@ -1,0 +1,13 @@
+#!/bin/bash
+
+TICK=60
+
+while true; do
+
+
+
+
+
+	sleep $TICK
+done
+
