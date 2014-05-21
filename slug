@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo -n "$*" | sed -e 's/[^[:alnum:]]/_/g' | tr -s '_' | tr A-Z a-z

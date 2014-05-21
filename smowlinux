@@ -30,6 +30,7 @@ distro_package_setup() {
 	add_package python-keyring          # use keyring in scripts
 	add_package rt                      # request tracker
 	add_package sox                     # audio tools (used by bin/monitor_audio)
+	add_package libproxy-python         # for gsharkdown
 
 	INSTALLER=
 	[ "$DISTRO" = "Fedora" ] && INSTALLER="sudo yum install"

@@ -13,11 +13,16 @@ check_server() {
 	fi
 }
 
-while getopts ":b" OPTION
+while getopts ":bs" OPTION
 do
 	case $OPTION in
 		b)
 			NAME="${NAME}Big"
+			shift $((OPTIND-1))
+			;;
+
+		s)
+			NAME="${NAME}Small"
 			shift $((OPTIND-1))
 			;;
 	esac

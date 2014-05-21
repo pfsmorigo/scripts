@@ -1,0 +1,37 @@
+#! /bin/bash
+
+notify-send "$(basename $0) $1"
+
+while [ 1 ]; do
+	case $1 in
+		zf)
+			for NUM in $(seq 1 50); do
+				xte 'mouseclick 1'
+				sleep 0.2
+			done
+
+			xte 'key a'
+			xte 'key d'
+			xte 'mousedown 3'
+			sleep 5
+			xte 'mouseup 3'
+			;;
+
+		f)
+			xte 'mousedown 3'
+			xte 'mouseup 3'
+			sleep 0.5
+			;;
+
+		ff)
+			xte 'mousedown 3'
+			exit 0
+			;;
+
+		*)
+			notify-send "automatic what?"
+			exit 1
+			;;
+	esac
+done
+
