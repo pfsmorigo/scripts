@@ -1,3 +1,5 @@
 #!/bin/bash
 
-echo -n "$*" | sed -e 's/[^[:alnum:]]/_/g' | tr -s '_' | tr A-Z a-z
+[ -n "$2" ] && LIMIT=$2 || LIMIT=1000
+
+echo -n "$*" | sed -e 's/[^[:alnum:]]/_/g' | tr -s '_' | tr A-Z a-z | cut -c-$LIMIT
