@@ -102,6 +102,7 @@ case $1 in
 		rm -f ~/.taskrc.*
 		rm -f ~/.vim.*
 		rm -f ~/.vimrc.*
+		rm -f ~/.rpmmacros.*
 		;;
 
 	*)
@@ -118,6 +119,7 @@ case $1 in
 		dotinstall taskrc
 		dotinstall vim
 		dotinstall vimrc
+		dotinstall rpmmacros
 		setup_git
 		setup_vim
 		;;
