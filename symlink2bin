@@ -27,12 +27,12 @@ fi
 
 [ "$JUST_REMOTE" = "1" ] && exit
 
-cd $SOURCE
+cd $DEST
 for FILE in $(find $SOURCE $FIND_PARAM $FIND_EXTRA | sort); do
 	FILE=$(echo $FILE | sed "s,${SOURCE}\/,,g")
 
 	echo "Creating $(basename $FILE) symlink in ${DEST}..."
-	ln -fs $SOURCE/$FILE $DEST/$(basename $FILE)
+	ln -fs ${SOURCE/$HOME/..}/$FILE $(basename $FILE)
 done
 
 set +o noglob
