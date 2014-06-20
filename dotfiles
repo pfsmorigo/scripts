@@ -1,29 +1,21 @@
 #!/bin/bash
 
-if ! command -v realpath >/dev/null 2>&1; then
-	read -p "You need to install some packages. Install now? (y/n) " RESP
-	if [ "$RESP" = "y" ]; then
-		install_dependencies
-	else
-		exit 1
-	fi
-fi
+BIN_DIR="$(cd $(dirname $0); pwd)"
 
 # I always checkout the dotfiles repo in the same directory as the script one.
-DIR=$(dirname $(realpath $0)| sed 's/scripts/dotfiles/')
+DOT_DIR="$(cd $BIN_DIR/$(dirname $(readlink $0) | sed 's/scripts/dotfiles/'); pwd)"
 
-if ! test -d $DIR; then
+if ! test -d $DOT_DIR; then
 	echo "There is no dotfiles directory. Cloning one..."
-	git clone http://github.com/pfsmorigo/dotfiles.git $DIR
+	git clone --recursive http://github.com/pfsmorigo/dotfiles.git $DOT_DIR
 else
-	cd $DIR
+	cd $DOT_DIR
 	git pull
 fi
 
 dotinstall() {
 	if [ -e ~/.$1 ]; then
-
-		if diff ~/.$1 $DIR/$1; then
+		if diff ~/.$1 $DOT_DIR/$1; then
 			echo "Skipping $1..."
 			return
 		fi
@@ -34,15 +26,7 @@ dotinstall() {
 	mkdir -p $(dirname ~/$1)
 
 	echo "Linking $1...."
-	ln -sf $DIR/$1 ~/.$1
-}
-
-install_dependencies() {
-	if [ -f /usr/bin/apt-get ]; then
-		sudo /usr/bin/apt-get install coreutils realpath
-	elif [ -f /usr/bin/yum ]; then
-		sudo /usr/bin/yum install coreutils
-	fi
+	cd ~; pwd; ln -sf "${DOT_DIR/$HOME\//}/$1" .$1
 }
 
 initial_dirs() {
@@ -53,10 +37,6 @@ backup_file() {
 	NEWFILE=$1.$(date +%F_%T)
 	echo "Renaming $1 to $NEWFILE..."
 	mv ~/$1 ~/$NEWFILE
-}
-
-setup_vim() {
-	cd $DIR && git submodule init && git submodule update
 }
 
 setup_git() {
@@ -121,7 +101,6 @@ case $1 in
 		dotinstall vimrc
 		dotinstall rpmmacros
 		setup_git
-		setup_vim
 		;;
 esac
 
