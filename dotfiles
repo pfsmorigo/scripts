@@ -13,30 +13,25 @@ else
 	git pull
 fi
 
-dotinstall() {
-	if [ -e ~/.$1 ]; then
-		if diff ~/.$1 $DOT_DIR/$1; then
-			echo "Skipping $1..."
-			return
-		fi
-
-		backup_file $1
-	fi
-
-	mkdir -p $(dirname ~/$1)
-
-	echo "Linking $1...."
-	cd ~; pwd; ln -sf "${DOT_DIR/$HOME\//}/$1" .$1
-}
+DOT_LIST=$(ls $DOT_DIR | grep -v "README.md\|config")
+DOT_CONFIG_LIST=$(ls $DOT_DIR/config)
 
 initial_dirs() {
 	mkdir -p ~/log/screen
 }
 
-backup_file() {
-	NEWFILE=$1.$(date +%F_%T)
-	echo "Renaming $1 to $NEWFILE..."
-	mv ~/$1 ~/$NEWFILE
+install_dotfiles() {
+	cd ~
+	for FILE in $DOT_LIST; do
+		[ -e .$FILE ] && [ ! -h .$FILE ] && mv .$FILE{,\_$(date +%F_%H-%M-%S)}
+
+		echo "Linking $FILE..."
+		ln -sf "${DOT_DIR/$HOME\//}/$FILE" .$FILE
+	done
+}
+
+uninstall_dotfiles() {
+	echo Uninstall...
 }
 
 setup_git() {
@@ -44,7 +39,7 @@ setup_git() {
 	if [ -f "$GIT_FILE" ]; then
 		read -p "$GIT_FILE already exists. Overwrite? (y/n) " RESP
 		if [ "$RESP" = "y" ]; then
-			backup_file $GIT_FILE
+			mv .$GIT_FILE{,\_$(date +%F_%H-%M-%S)}
 		else
 			return
 		fi
@@ -59,6 +54,8 @@ setup_git() {
 	echo -n "Enter your email [$EMAIL]: "
 	read NEWEMAIL
 	[ -n "$NEWEMAIL" ] && EMAIL=$NEWEMAIL
+		rm -f ~/.screenrc.*
+		rm -f ~/.screenrc.*
 
 	echo "[user]" > $GIT_FILE
 	echo "    name = $FULLNAME" >> $GIT_FILE
@@ -66,41 +63,22 @@ setup_git() {
 }
 
 case $1 in
-	deps|dependencies)
-		install_dependencies
+	install|'')
+		initial_dirs
+		install_dotfiles
+		setup_git
+		;;
+
+	uninstall)
+		uninstall_dotfiles
 		;;
 
 	clean)
-		rm -f ~/.XCompose.*
-		rm -f ~/.Xresources.*
-		rm -f ~/.bash_profile.*
-		rm -f ~/.bashrc.*
-		rm -f ~/.gitconfig.*
-		rm -f ~/.gtkrc-2.0.*
-		rm -f ~/.i3.*
-		rm -f ~/.screenrc.*
-		rm -f ~/.taskrc.*
-		rm -f ~/.vim.*
-		rm -f ~/.vimrc.*
 		rm -f ~/.rpmmacros.*
 		;;
 
 	*)
-		initial_dirs
-		dotinstall XCompose
-		dotinstall Xresources
-		dotinstall bash_profile
-		dotinstall bashrc
-		dotinstall gitconfig
-		dotinstall gtkrc-2.0
-		dotinstall i3
-		dotinstall inputrc
-		dotinstall screenrc
-		dotinstall taskrc
-		dotinstall vim
-		dotinstall vimrc
-		dotinstall rpmmacros
-		setup_git
+		echo wat?
 		;;
 esac
 
