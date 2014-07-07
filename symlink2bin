@@ -1,38 +1,49 @@
 #!/bin/bash
 
-while getopts c OPT; do
+usage() {
+	echo ""
+	echo "Usage: $(basename $0) [OPTION]... DESTINY FILES..."
+	echo ""
+	echo "Options:"
+	echo "  -p    prefix of the symlink"
+	echo "  -d    dry-run"
+	echo ""
+}
+
+relative_dir() {
+	COMMON_PART=$1
+	BACK=
+	while [ "${2#$COMMON_PART}" = "${2}" ]; do
+		COMMON_PART=$(dirname $COMMON_PART)
+		BACK="../${BACK}"
+	done
+	echo "${BACK}${2#$COMMON_PART/}"
+}
+
+while getopts p:d OPT; do
 	case $OPT in
-		c) JUST_REMOTE=1 ;;
+		p) PREFIX=$OPTARG ;;
+		d) DRYRUN=1;;
+	    *) usage; exit ;;
 	esac
 done
 shift $((OPTIND-1))
 OPTIND=0
 
-[ -n "$1" ] && SOURCE=$1 || SOURCE=$PWD
-[ -n "$2" ] && DEST=$1 || DEST=~/bin
-[ ! -d "$SOURCE" ] && echo "$SOURCE not found!" && exit 1
+[ -z "$2" ] && echo "Missing parameters!" && usage && exit 1
+[ ! -d "$1" ] && echo "Directory $1 doesn't exist" && exit 2
 
-set -o noglob
+DESTINY=$(cd $1; pwd)
+shift
 
-FIND_PARAM='-type f -executable -not -iwholename '*.git*''
-env | grep -q SSH_CLIENT && FIND_EXTRA='-not -iwholename '*local*''
+for FILE in $*; do
+	FILE_NAME=$(basename $FILE)
+	FILE_PATH=$(cd $(dirname $FILE); pwd)
 
-if [ -d $DEST ]; then
-	cd $DEST
-	FILES=$(ls -l | grep "$SOURCE" | awk '{ print $9 }')
-	[ -n "$FILES" ] && rm $FILES
-else
-	mkdir $DEST
-fi
+	FILE_DEST="$DESTINY/${PREFIX}$FILE_NAME"
+	[ -e $FILE_DEST ] && [ ! -h $FILE_DEST ] && mv $FILE_DEST{,\_$(date +%F_%H-%M-%S)}
 
-[ "$JUST_REMOTE" = "1" ] && exit
-
-cd $DEST
-for FILE in $(find $SOURCE $FIND_PARAM $FIND_EXTRA | sort); do
-	FILE=$(echo $FILE | sed "s,${SOURCE}\/,,g")
-
-	echo "Creating $(basename $FILE) symlink in ${DEST}..."
-	ln -fs ${SOURCE/$HOME/..}/$FILE $(basename $FILE)
+	COMMAND="ln -fs $(relative_dir $DESTINY $FILE_PATH)/$FILE_NAME $FILE_DEST"
+	echo $COMMAND
+	[ -z "$DRYRUN" ] && $COMMAND
 done
-
-set +o noglob

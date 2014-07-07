@@ -1,76 +1,58 @@
 #!/bin/bash
 
-BIN_DIR="$(cd $(dirname $0); pwd)"
-
-# I always checkout the dotfiles repo in the same directory as the script one.
-DOT_DIR="$(cd $BIN_DIR/$(dirname $(readlink $0) | sed 's/scripts/dotfiles/'); pwd)"
-
-if ! test -d $DOT_DIR; then
-	echo "There is no dotfiles directory. Cloning one..."
-	git clone --recursive http://github.com/pfsmorigo/dotfiles.git $DOT_DIR
-else
-	cd $DOT_DIR
-	git pull
-fi
-
-DOT_LIST=$(ls $DOT_DIR | grep -v "README.md\|config")
-DOT_CONFIG_LIST=$(ls $DOT_DIR/config)
-
 initial_dirs() {
-	mkdir -p ~/log/screen
-}
-
-install_dotfiles() {
-	cd ~
-	for FILE in $DOT_LIST; do
-		[ -e .$FILE ] && [ ! -h .$FILE ] && mv .$FILE{,\_$(date +%F_%H-%M-%S)}
-
-		echo "Linking $FILE..."
-		ln -sf "${DOT_DIR/$HOME\//}/$FILE" .$FILE
-	done
-}
-
-uninstall_dotfiles() {
-	echo Uninstall...
+	mkdir -p ~/Logs/screen
 }
 
 setup_git() {
 	GIT_FILE=$HOME/.gitconfig-userinfo
 	if [ -f "$GIT_FILE" ]; then
 		read -p "$GIT_FILE already exists. Overwrite? (y/n) " RESP
-		if [ "$RESP" = "y" ]; then
-			mv .$GIT_FILE{,\_$(date +%F_%H-%M-%S)}
-		else
-			return
-		fi
+		[ "$RESP" = "y" ] && mv .$GIT_FILE{,\_$(date +%F_%H-%M-%S)} || return
 	fi
 
 	FULLNAME=$(getent passwd $LOGNAME | cut -d ":" -f 5)
-	EMAIL="$LOGNAME@gmail.com"
-
 	echo -n "Enter your full name [$FULLNAME]: "
 	read NEWFULLNAME
 	[ -n "$NEWFULLNAME" ] && FULLNAME=$NEWFULLNAME
+
+	EMAIL="$LOGNAME@gmail.com"
 	echo -n "Enter your email [$EMAIL]: "
 	read NEWEMAIL
 	[ -n "$NEWEMAIL" ] && EMAIL=$NEWEMAIL
-		rm -f ~/.screenrc.*
-		rm -f ~/.screenrc.*
 
 	echo "[user]" > $GIT_FILE
 	echo "    name = $FULLNAME" >> $GIT_FILE
 	echo "    email = $EMAIL" >> $GIT_FILE
 }
 
+[ -h $0 ] && EXEC=$(dirname $0)/$(readlink $0) || EXEC=$0
+SCRIPTS_DIR="$(cd $(dirname $EXEC); pwd)"
+
+# I always checkout the dotfiles repo in the same directory as the script one.
+DOTFILES_DIR=${SCRIPTS_DIR/scripts/dotfiles}
+
+if ! test -d $DOTFILES_DIR; then
+	echo "There is no dotfiles directory. Cloning one..."
+	git clone --recursive http://github.com/pfsmorigo/dotfiles.git $DOTFILES_DIR
+else
+	cd $DOTFILES_DIR
+	git pull
+fi
+
+set -f
+FIND_PARAM="-mindepth 1 -maxdepth 1	\
+	-not -name README.md -not -name config -not -name .*"
+DOTFILES_LIST="$(find $DOTFILES_DIR $FIND_PARAM | sed -e "s,$DOTFILES_DIR/,,g")"
+DOTFILES_CONFIG_LIST="$(find $DOTFILES_DIR/config $FIND_PARAM | sed -e "s,$DOTFILES_DIR/,,g")"
+set +f
+
 case $1 in
 	install|'')
 		initial_dirs
-		install_dotfiles
+		symlink2bin -p. $HOME         $DOTFILES_LIST
+		symlink2bin     $HOME/.config $DOTFILES_CONFIG_LIST
 		setup_git
-		;;
-
-	uninstall)
-		uninstall_dotfiles
 		;;
 
 	clean)
@@ -81,4 +63,3 @@ case $1 in
 		echo wat?
 		;;
 esac
-
