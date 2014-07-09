@@ -29,7 +29,7 @@ check_private() {
 }
 
 if ! command -v realpath >/dev/null 2>&1; then
-	echo"You need to install realpath package!"
+	echo "You need to install realpath package!"
 	exit 1
 fi
 
