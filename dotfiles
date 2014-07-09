@@ -1,7 +1,7 @@
 #!/bin/bash
 
 initial_dirs() {
-	mkdir -p ~/Logs/screen
+	mkdir -p ~/Logs/screen ~/.config
 }
 
 setup_git() {
