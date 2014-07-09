@@ -26,11 +26,24 @@ setup_git() {
 	echo "    email = $EMAIL" >> $GIT_FILE
 }
 
-[ -h $0 ] && EXEC=$(dirname $0)/$(readlink $0) || EXEC=$0
+
+EXEC=${BASH_SOURCE[0]}
+[ -h $EXEC ] && EXEC="$(dirname $EXEC)/$(readlink $EXEC)"
+
 SCRIPTS_DIR="$(cd $(dirname $EXEC); pwd)"
 
 # I always checkout the dotfiles repo in the same directory as the script one.
 DOTFILES_DIR=${SCRIPTS_DIR/scripts/dotfiles}
+
+SYMLINK_EXEC=symlink2bin
+if ! command -v $SYMLINK_EXEC >/dev/null 2>&1; then
+	if [ -f $SCRIPTS_DIR/$SYMLINK_EXEC ]; then
+		SYMLINK_EXEC="$SCRIPTS_DIR/$SYMLINK_EXEC"
+	else
+		echo "Symlink executable not found!"
+		exit 1
+	fi
+fi
 
 if ! test -d $DOTFILES_DIR; then
 	echo "There is no dotfiles directory. Cloning one..."
@@ -50,9 +63,9 @@ set +f
 case $1 in
 	install|'')
 		initial_dirs
-		symlink2bin -p. $HOME         $DOTFILES_LIST
-		symlink2bin     $HOME/.config $DOTFILES_CONFIG_LIST
 		setup_git
+		$SYMLINK_EXEC -p. $HOME         $DOTFILES_LIST
+		$SYMLINK_EXEC     $HOME/.config $DOTFILES_CONFIG_LIST
 		;;
 
 	clean)
