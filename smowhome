@@ -1,5 +1,14 @@
 #!/bin/bash
 
+base_dir() {
+	EXEC=${BASH_SOURCE[0]}
+	if [ -h $EXEC ]; then
+		LINK="$(readlink $EXEC)"
+		[ "${LINK:0:1}" = "/" ] && EXEC="$LINK" || EXEC="$(dirname $EXEC)/$LINK"
+	fi
+	echo "$(cd $(dirname $EXEC); pwd)"
+}
+
 initial_dirs() {
 	mkdir -p ~/bin
 }
@@ -33,15 +42,12 @@ if ! command -v realpath >/dev/null 2>&1; then
 	exit 1
 fi
 
-EXEC=${BASH_SOURCE[0]}
-[ -h $EXEC ] && EXEC="$(dirname $EXEC)/$(readlink $EXEC)"
-
-SCRIPTS_DIR="$(cd $(dirname $EXEC); pwd)"
+BASE_DIR="$(base_dir)"
 
 SYMLINK_EXEC=symlink2bin
 if ! command -v $SYMLINK_EXEC >/dev/null 2>&1; then
-	if [ -f $SCRIPTS_DIR/$SYMLINK_EXEC ]; then
-		SYMLINK_EXEC="$SCRIPTS_DIR/$SYMLINK_EXEC"
+	if [ -f $BASE_DIR/$SYMLINK_EXEC ]; then
+		SYMLINK_EXEC="$BASE_DIR/$SYMLINK_EXEC"
 	else
 		echo "Symlink executable not found!"
 		exit 1
@@ -55,9 +61,9 @@ case $1 in
 		;;
 
 	*)
-		$SCRIPTS_DIR/dotfiles
-		$SYMLINK_EXEC ~/bin $(find $SCRIPTS_DIR -maxdepth 1 -mindepth 1 -executable -type f)
-		$SYMLINK_EXEC ~/bin $SCRIPTS_DIR/smartprompt/smartprompt
+		$BASE_DIR/dotfiles
+		$SYMLINK_EXEC ~/bin $(find $BASE_DIR -maxdepth 1 -mindepth 1 -executable -type f)
+		$SYMLINK_EXEC ~/bin $BASE_DIR/smartprompt/smartprompt
 		;;
 esac
 
