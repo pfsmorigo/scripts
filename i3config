@@ -1,0 +1,16 @@
+#!/bin/bash
+
+cd ~/.i3
+cat config-general > config
+
+for OUTPUT in $(xrandr | grep " connected" | grep "mm" | cut -d' ' -f1); do
+	echo "$DISPLAY..."
+	if [ -f config-$OUTPUT ]; then
+		cat config-$OUTPUT >> config
+	else
+		cat config-template >> config
+		sed -i "s/DISPLAYNAME/$OUTPUT/g" config
+	fi
+done
+
+i3-msg restart

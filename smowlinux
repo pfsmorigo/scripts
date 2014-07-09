@@ -3,45 +3,31 @@
 DISTRO=$(head -n1 /etc/issue | cut -d ' ' -f 1)
 PACKAGES=
 
-add_package() {
-	while getopts ":f:d:" OPT; do
-		case "${OPT}" in
-			f) [ "$DISTRO" = "Fedora" ] && PACKAGES="$PACKAGES $OPTARG";;
-			d) [ "$DISTRO" = "Debian" ] && PACKAGES="$PACKAGES $OPTARG";;
-			*) echo "Unknow parameter!" && exit 1 ;;
-		esac
-		#shift 2
-	done
-	shift $((OPTIND-1))
-	OPTIND=0
-
-	PACKAGES="$PACKAGES $1"
-}
-
-distro_package_setup() {
-	add_package acpid                   # for dock detection
-	add_package git-cvs
-	add_package istanbul                # screen capture
-	add_package julius                  # voice recognition
-	add_package julius-voxforge         # voice recognition
-	add_package kpcli                   # keepassx cli tool
-	add_package perl-LWP-Protocol-https # so rt can access https
-	add_package poppler-utils           # extract images from pdf
-	add_package python-keyring          # use keyring in scripts
-	add_package rt                      # request tracker
-	add_package sox                     # audio tools (used by bin/monitor_audio)
-	add_package libproxy-python         # for gsharkdown
-
-	INSTALLER=
+distro_install() {
 	[ "$DISTRO" = "Fedora" ] && INSTALLER="sudo yum install"
 	[ "$DISTRO" = "Debian" ] && INSTALLER="sudo apt-get install"
 
-	$INSTALLER $PACKAGES
+	# common packages
+	PACKAGES+="vim screen mosh git"
 
-	#for PACKAGE in $PACKAGES; do
-			#echo "($PACKAGE)"
-	#done
+	if [ "$DISTRO" = "Fedora" ]; then
+		PACKAGES+="@development-tools git-cvs"
+		PACKAGES+="acpid"                   # for dock detection
+		PACKAGES+="istanbul"                # screen capture
+		PACKAGES+="julius"                  # voice recognition
+		PACKAGES+="julius-voxforge"         # voice recognition
+		PACKAGES+="kpcli"                   # keepassx cli tool
+		PACKAGES+="perl-LWP-Protocol-https" # so rt can access https
+		PACKAGES+="poppler-utils"           # extract images from pdf
+		PACKAGES+="python-keyring"          # use keyring in scripts
+		PACKAGES+="rt"                      # request tracker
+		PACKAGES+="sox"                     # audio tools (used by bin/monitor_audio)
+		PACKAGES+="libproxy-python"         # gsharkdown
+		PACKAGES+="openswan"                # mtsconnect
+	fi
+
+	$INSTALLER $PACKAGES
 }
 
-distro_package_setup
+distro_install
 

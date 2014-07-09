@@ -1,0 +1,40 @@
+#!/bin/bash
+
+if [ "$1" = "gui" ]; then
+	REMOTE_SERVER=$(cat ~/.smowterm | cut -d " " -f 1)
+	ANS=$(zenity --list --text='Pick a server' --column=servers local $REMOTE_SERVER)
+	[[ -n $ANS ]] && $0 $ANS
+	exit 0
+fi
+
+while getopts ":bs" OPTION
+do
+	case $OPTION in
+		b) NAME+="Big" ;;
+		s) NAME+="Small" ;;
+	esac
+	shift $((OPTIND-1))
+done
+
+TARGET=$1
+NAME="URxvt"
+COMMAND=
+
+if [ -n "$TARGET" ]; then
+	TARGET_OPTIONS=$(grep "$TARGET " ~/.smowterm | cut -d' ' -f2- | xargs)
+	NAME+="Remote"
+
+	if [[ "$TARGET_OPTIONS" =~ "mosh" ]]; then
+		COMMAND="mosh --ssh='ssh -X' $TARGET -- "
+	else
+		COMMAND="ssh -tY $TARGET -- "
+	fi
+else
+	TARGET_OPTIONS="screen"
+fi
+
+[[ "$TARGET_OPTIONS" =~ "screen" ]] && COMMAND+="screen -AOxRR $USER"
+
+urxvtc -name $NAME -e sh -c "$COMMAND || sleep 100"
+
+sleep 10
