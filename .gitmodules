@@ -1,6 +1,3 @@
-[submodule "routerinfo"]
-	path = routerinfo
-	url = https://github.com/pfsmorigo/routerinfo.git
 [submodule "smartprompt"]
 	path = smartprompt
 	url = https://github.com/pfsmorigo/smartprompt.git
