@@ -57,7 +57,7 @@ case $1 in
 	*)
 		$SCRIPTS_DIR/dotfiles
 		$SYMLINK_EXEC ~/bin $(find $SCRIPTS_DIR -maxdepth 1 -mindepth 1 -executable -type f)
-		$SYMLINK_EXEC ~/bin $SCRIPTS_DIR/smartprompt
+		$SYMLINK_EXEC ~/bin $SCRIPTS_DIR/smartprompt/smartprompt
 		;;
 esac
 
