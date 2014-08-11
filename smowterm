@@ -35,6 +35,6 @@ fi
 
 [[ "$TARGET_OPTIONS" =~ "screen" ]] && COMMAND+="screen -AOxRR $USER"
 
-urxvtc -name $NAME -e sh -c "$COMMAND || sleep 100"
+urxvtc -name $NAME -e sh -c "export TERM='linux'; $COMMAND; sleep 100"
 
 sleep 10

@@ -1,0 +1,17 @@
+#! /bin/bash
+
+# Sources:
+# http://weechat.org/files/doc/devel/weechat_user.en.html#fifo_plugin
+
+echo 'irc.server.bluenet-znc */nick pfsmorigo_lunch' >~/.weechat/weechat_fifo_*
+#purple-remote "setstatus?status=away&message=I am lunching"
+
+sleep 3
+xautolock -locknow
+
+zenity --question --text "Change status to available?"
+if [ "$?" == "0" ]; then
+	echo 'irc.server.bluenet-znc */nick pfsmorigo' >~/.weechat/weechat_fifo_*
+	#purple-remote "setstatus?status=available&message=I am available"
+fi
+
