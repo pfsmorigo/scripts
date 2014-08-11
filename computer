@@ -7,6 +7,10 @@ upower() {
 	          --print-reply /org/freedesktop/UPower org.freedesktop.UPower.$1
 }
 
+notify() {
+	notify-send -t 3000 "$1"
+}
+
 show_window() {
 	echo "As you wish!"
 	zenity --question --title="$1" --text="Timeout 5s" --timeout=5
@@ -40,6 +44,13 @@ i3() {
 			echo "Unknown command"
 			;;
 	esac
+}
+
+on_off() {
+	[ "$1" = "on" ]  && echo 1
+	[ "$1" = "off" ] && echo 0
+	[ "$1" = "1" ]   && echo on
+	[ "$1" = "0" ]   && echo off
 }
 
 
@@ -103,6 +114,7 @@ wifi() {
 			[[ "$STATE" = "disabled" ]] && wifi on || wifi off
 			;;
 		on|off)
+			notify "wifi $1"
 			nmcli nm wifi $1
 			wifi
 			;;
@@ -114,15 +126,39 @@ wifi() {
 	esac
 }
 
+touchpad() {
+	TOUCH_ID=$(xinput list | grep TouchPad | sed 's/^.*id=//g' | awk '{ print $1 }')
+	[ -z "$TOUCH_ID" ] && notify "no touchpad id found!" && exit 1
+
+	STATE=$(on_off $(xinput list-props $TOUCH_ID | grep "Device Enabled" | cut -f 3))
+
+	case $1 in
+		toggle)
+			[[ "$STATE" = "off" ]] && touchpad on || touchpad off
+			;;
+		on|off)
+			notify "touchpad $1"
+			xinput set-prop $TOUCH_ID "Device Enabled" $(on_off $1)
+			;;
+		"")
+			echo $STATE
+			;;
+		*)
+			echo "don't know what $1 is..." && exit 1
+	esac
+
+}
+
 echo "$(date) | $*" >> /tmp/computer
 
 PROFILE_FILE=/tmp/$USER-profile
 PROFILE=$(cat $PROFILE_FILE 2> /dev/null)
-SUBCOMMANDS="profile suspend hibernate halt reboot irc wifi"
+SUBCOMMANDS="profile suspend hibernate halt reboot irc wifi touchpad"
 
 if [ -z "$1" ]; then
-	echo "profile... $PROFILE"
-	echo "wifi...... $(wifi)"
+	echo "profile...... $PROFILE"
+	echo "wifi......... $(wifi)"
+	echo "touchpad .... $(touchpad)"
 elif [[ $SUBCOMMANDS =~ $1 ]]; then
 	$*
 else
