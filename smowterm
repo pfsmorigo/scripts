@@ -1,8 +1,14 @@
 #!/bin/bash
 
+server_list()
+{
+	HOSTS="$(grep -v "^#" /etc/hosts | awk '{ print $2 }' | sort -u | xargs)"
+	SSH_CONFIG="$(grep "^Host" ~/.ssh/config | awk '{ print $2 }')"
+	echo $HOSTS $SSH_CONFIG | sort -u | xargs
+}
+
 if [ "$1" = "gui" ]; then
-	REMOTE_SERVER=$(cat ~/.smowterm | cut -d " " -f 1)
-	ANS=$(zenity --list --text='Pick a server' --column=servers local $REMOTE_SERVER)
+	ANS=$(zenity --list --text='Pick a server' --column=servers $(server_list))
 	[[ -n $ANS ]] && $0 $ANS
 	exit 0
 fi
@@ -29,12 +35,11 @@ if [ -n "$TARGET" ]; then
 	else
 		COMMAND="ssh -tY $TARGET -- "
 	fi
-else
-	TARGET_OPTIONS="screen"
 fi
 
-[[ "$TARGET_OPTIONS" =~ "screen" ]] && COMMAND+="screen -AOxRR $USER"
+COMMAND+="screen -AOxRR $USER \|\| bash"
 
-urxvtc -name $NAME -e sh -c "export TERM='linux'; $COMMAND; sleep 100"
+urxvtc -name $NAME -e sh -c "$COMMAND; sleep 100"
+#urxvtc -name $NAME -e sh -c "export TERM='linux'; $COMMAND; sleep 100"
 
 sleep 10
