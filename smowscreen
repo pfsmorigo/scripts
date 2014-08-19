@@ -8,7 +8,6 @@ SCREEN_ARRAY=
 COUNT=0
 
 if [ -z "$1" ]; then
-
 	[ -z "$SCREEN_LIST" ] && SCREEN_LIST=$USER
 
 	echo ""
@@ -20,11 +19,13 @@ if [ -z "$1" ]; then
 	echo ""
 
 	read -p "Pick one (x to quit, n for new): " PICK
-	case $PICK in
-		x) exit;;
-		n) read -p "New: " SCREEN_SELECTED;;
-		*) SCREEN_SELECTED=${SCREEN_ARRAY[$PICK]};;
-	esac
+	if [ "$PICK" = "x" ]; then
+		exit
+	elif [[ "$PICK" =~ ^[0-9]+$ ]]; then
+		SCREEN_SELECTED=${SCREEN_ARRAY[$PICK]}
+	else
+		SCREEN_SELECTED=$PICK
+	fi
 else
 	SCREEN_SELECTED=$1
 fi

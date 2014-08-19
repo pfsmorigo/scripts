@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCREEN_CMD="screen -S pfsmorigo -X screen"
+SCREEN_CMD="screen -S $(echo $STY | cut -d. -f2) -X screen"
 
 check() {
 	PROC=$1
