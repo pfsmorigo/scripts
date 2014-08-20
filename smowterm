@@ -1,11 +1,17 @@
 #!/bin/bash
 
-if [ "$1" = "gui" ]; then
-	REMOTE_SERVER=$(cat ~/.smowterm | cut -d " " -f 1)
-	ANS=$(zenity --list --text='Pick a server' --column=servers local $REMOTE_SERVER)
+server_list()
+{
+	HOSTS="$(grep -v "^#" /etc/hosts | awk '{ print $2 }' | sort -u)"
+	SSH_CONFIG="$(grep "^Host" ~/.ssh/config | awk '{ print $2 }' | grep -v '*' )"
+	echo -e "$HOSTS\n$SSH_CONFIG" | sort -u
+}
+
+pick_server() {
+	ANS=$(zenity --list --text='Pick a server' --column=servers $(server_list))
 	[[ -n $ANS ]] && $0 $ANS
 	exit 0
-fi
+}
 
 while getopts ":bs" OPTION
 do
@@ -16,25 +22,22 @@ do
 	shift $((OPTIND-1))
 done
 
-TARGET=$1
+case $1 in
+	gui) pick_server;;
+	*) TARGET=$1;;
+esac
+
 NAME="URxvt"
-COMMAND=
 
 if [ -n "$TARGET" ]; then
 	TARGET_OPTIONS=$(grep "$TARGET " ~/.smowterm | cut -d' ' -f2- | xargs)
 	NAME+="Remote"
-
-	if [[ "$TARGET_OPTIONS" =~ "mosh" ]]; then
-		COMMAND="mosh --ssh='ssh -X' $TARGET -- "
-	else
-		COMMAND="ssh -tY $TARGET -- "
-	fi
-else
-	TARGET_OPTIONS="screen"
+	[[ "$TARGET_OPTIONS" =~ "mosh" ]] && PREFIX="mosh" || PREFIX="ssh"
+	PREFIX+=" $TARGET -- "
 fi
 
-[[ "$TARGET_OPTIONS" =~ "screen" ]] && COMMAND+="screen -AOxRR $USER"
-
-urxvtc -name $NAME -e sh -c "$COMMAND || sleep 100"
+urxvtc -name $NAME -e sh -c \
+	"$PREFIX smowscreen || screen -AOxRR $USER || bash"; sleep 100
+#urxvtc -name $NAME -e sh -c "export TERM='linux'; $PREFIX; sleep 100"
 
 sleep 10

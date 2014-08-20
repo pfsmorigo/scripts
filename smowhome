@@ -61,6 +61,7 @@ case $1 in
 		;;
 
 	*)
+		initial_dirs
 		$BASE_DIR/dotfiles
 		$SYMLINK_EXEC ~/bin $(find $BASE_DIR -maxdepth 1 -mindepth 1 -executable -type f)
 		$SYMLINK_EXEC ~/bin $BASE_DIR/smartprompt/smartprompt

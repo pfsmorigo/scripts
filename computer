@@ -1,0 +1,169 @@
+#!/bin/bash
+
+## Internal Functions ##
+
+upower() {
+	dbus-send --system --dest=org.freedesktop.UPower --type=method_call \
+	          --print-reply /org/freedesktop/UPower org.freedesktop.UPower.$1
+}
+
+notify() {
+	notify-send -t 3000 "$1"
+}
+
+show_window() {
+	echo "As you wish!"
+	zenity --question --title="$1" --text="Timeout 5s" --timeout=5
+}
+
+i3() {
+	case $1 in
+		move)
+			case $2 in
+				workspace)
+					WORKSPACE_NUMS="$3"
+					DISPLAY_NAME=$4
+					CURRENT_WORKSPACE=$(i3-msg -t get_workspaces | \
+						sed 's/focused":true.*$//g' | cut -d'"' -f6)
+
+					for WORKSPACE_NUM in $WORKSPACE_NUMS; do
+						i3-msg -q "workspace $WORKSPACE_NUM"
+						i3-msg -q "move workspace to output $DISPLAY_NAME"
+					done
+
+					i3-msg -q "workspace ${WORKSPACE_NUMS%% *}"
+					i3-msg -q "workspace $CURRENT_WORKSPACE"
+					;;
+				*)
+					echo "Unknown command"
+					;;
+			esac
+			;;
+
+		*)
+			echo "Unknown command"
+			;;
+	esac
+}
+
+on_off() {
+	[ "$1" = "on" ]  && echo 1
+	[ "$1" = "off" ] && echo 0
+	[ "$1" = "1" ]   && echo on
+	[ "$1" = "0" ]   && echo off
+}
+
+
+## External Functions ##
+
+profile() {
+	case $1 in
+		pocos-office)
+			xrandr --output LVDS1 --mode 1440x900  --pos 480x1080 --rotate normal \
+				   --output VGA1  --mode 1920x1080 --pos 0x0      --rotate normal
+			i3 move workspace "6 7 8 9 10" VGA1
+			;;
+
+		pocos-wifi)
+			for DISPLAY in $(xrandr | grep -w connected | cut -d' ' -f1); do
+				[ $DISPLAY != LVDS1 ] && xrandr -d :0 --output $DISPLAY --off
+			done
+			;;
+
+		*)
+			echo "Unknown profile!"
+			exit 1
+			;;
+	esac
+	echo $1 > $PROFILE_FILE
+}
+
+suspend() {
+	upower Suspend
+	#sudo pm-suspend
+}
+
+hibernate() {
+	upower Hibernate
+	#sudo pm-hibernate
+}
+
+halt() {
+	upower Stop
+}
+
+reboot() {
+	upower Restart
+}
+
+irc() {
+	case $1 in
+		connect|reconnect|disconnect)
+			echo "*/$1 -all" > ~/.weechat/weechat_fifo_*
+			;;
+		*)
+			echo "don't know what $1 is..."
+	esac
+}
+
+wifi() {
+	STATE=$(nmcli nm wifi | grep -v WIFI | tr -d ' ')
+
+	case $1 in
+		toggle)
+			[[ "$STATE" = "disabled" ]] && wifi on || wifi off
+			;;
+		on|off)
+			notify "wifi $1"
+			nmcli nm wifi $1
+			wifi
+			;;
+		"")
+			echo $STATE
+			;;
+		*)
+			echo "don't know what $1 is..." && exit 1
+	esac
+}
+
+touchpad() {
+	TOUCH_ID=$(xinput list | grep TouchPad | sed 's/^.*id=//g' | awk '{ print $1 }')
+	[ -z "$TOUCH_ID" ] && notify "no touchpad id found!" && exit 1
+
+	STATE=$(on_off $(xinput list-props $TOUCH_ID | grep "Device Enabled" | cut -f 3))
+
+	case $1 in
+		toggle)
+			[[ "$STATE" = "off" ]] && touchpad on || touchpad off
+			;;
+		on|off)
+			notify "touchpad $1"
+			xinput set-prop $TOUCH_ID "Device Enabled" $(on_off $1)
+			;;
+		"")
+			echo $STATE
+			;;
+		*)
+			echo "don't know what $1 is..." && exit 1
+	esac
+
+}
+
+echo "$(date) | $*" >> /tmp/computer
+
+PROFILE_FILE=/tmp/$USER-profile
+PROFILE=$(cat $PROFILE_FILE 2> /dev/null)
+SUBCOMMANDS="profile suspend hibernate halt reboot irc wifi touchpad"
+
+if [ -z "$1" ]; then
+	echo "profile...... $PROFILE"
+	echo "wifi......... $(wifi)"
+	echo "touchpad .... $(touchpad)"
+elif [[ $SUBCOMMANDS =~ $1 ]]; then
+	$*
+else
+	echo "sub commands: $SUBCOMMANDS"
+	exit 2
+fi
+
+
