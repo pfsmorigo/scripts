@@ -1,11 +1,6 @@
 #!/bin/bash
 
-SCREEN_LS="$(screen -ls)"
-SCREEN_LIST=$(echo "$SCREEN_LS" | grep "tached)$" | awk '{ print $1 }' | cut -d. -f2 | xargs)
-SCREEN_CURRENT=$(echo $STY | cut -d. -f2)
-
-SCREEN_ARRAY=
-COUNT=0
+SCREEN_LIST=$(screen -ls | grep "tached)$" | awk '{ print $1 }' | cut -d. -f2 | xargs)
 
 if [ -z "$1" ]; then
 	[ -z "$SCREEN_LIST" ] && SCREEN_LIST=$USER
@@ -30,8 +25,8 @@ else
 	SCREEN_SELECTED=$1
 fi
 
-if [ "$SCREEN_SELECTED" != "$SCREEN_CURRENT" ]; then
-	screen -AOxRR $SCREEN_SELECTED
+if [ "$SCREEN_SELECTED" = "$(echo $STY | cut -d. -f2)" ]; then
+	echo "Already in $SCREEN_SELECTED"
 else
-	echo "Already in $SCREEN_CURRENT"
+	screen -AOxRR $SCREEN_SELECTED
 fi

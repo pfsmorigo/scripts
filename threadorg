@@ -1,0 +1,21 @@
+#!/bin/bash
+
+[ -z "$1" ] && echo no file! && exit 1
+
+FILE=$1
+
+sed 's/ On/> On/g' $FILE > ${FILE}_tmp
+
+THREAD=">>>>>>>>"
+while [ -n "$THREAD" ]; do
+	echo $THREAD
+	THREAD=${THREAD::-1}
+
+	grep "^${THREAD} " ${FILE}_tmp
+	echo ""
+done
+
+
+
+
+
