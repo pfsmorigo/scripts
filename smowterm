@@ -27,21 +27,28 @@ case $1 in
 	*) TARGET=$1;;
 esac
 
+if [ -n "$2" ]; then
+	SCREEN_NAME=$2
+fi
+
 NAME="URxvt"
 
-if [ -n "$TARGET" ]; then
+# no target means local host
+if [ -z "$TARGET" ]; then
+	COMMAND="smowscreen $SCREEN_NAME"
+else
 	TARGET_OPTIONS=$(grep "$TARGET " ~/.smowterm | cut -d' ' -f2- | xargs)
 	NAME+="Remote"
 	[[ "$TARGET_OPTIONS" =~ "mosh" ]] && COMMAND="mosh" || COMMAND="ssh"
 	COMMAND+=" $TARGET"
 
 	if [[ "$TARGET_OPTIONS" =~ "smowscreen" ]]; then
-		COMMAND+=" -- bash ~/bin/smowscreen"
+
+	if [[ "$TARGET_OPTIONS" =~ "smowscreen" ]]; then
+		COMMAND+=" -- bash ~/bin/smowscreen $SCREEN_NAME"
 	elif [[ "$TARGET_OPTIONS" =~ "screen" ]]; then
 		COMMAND+=" -- screen -AOxRR $USER"
 	fi
-else
-	COMMAND="smowscreen"
 fi
 
 urxvtc -name $NAME -e sh -c "$COMMAND"; sleep 100
