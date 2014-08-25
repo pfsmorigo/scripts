@@ -32,12 +32,19 @@ NAME="URxvt"
 if [ -n "$TARGET" ]; then
 	TARGET_OPTIONS=$(grep "$TARGET " ~/.smowterm | cut -d' ' -f2- | xargs)
 	NAME+="Remote"
-	[[ "$TARGET_OPTIONS" =~ "mosh" ]] && PREFIX="mosh" || PREFIX="ssh"
-	PREFIX+=" $TARGET -- "
+	[[ "$TARGET_OPTIONS" =~ "mosh" ]] && COMMAND="mosh" || COMMAND="ssh"
+	COMMAND+=" $TARGET"
+
+	if [[ "$TARGET_OPTIONS" =~ "smowscreen" ]]; then
+		COMMAND+=" -- bash ~/bin/smowscreen"
+	elif [[ "$TARGET_OPTIONS" =~ "screen" ]]; then
+		COMMAND+=" -- screen -AOxRR $USER"
+	fi
+else
+	COMMAND="smowscreen"
 fi
 
-urxvtc -name $NAME -e sh -c \
-	"$PREFIX smowscreen || screen -AOxRR $USER || bash"; sleep 100
+urxvtc -name $NAME -e sh -c "$COMMAND"; sleep 100
 #urxvtc -name $NAME -e sh -c "export TERM='linux'; $PREFIX; sleep 100"
 
 sleep 10
