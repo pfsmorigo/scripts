@@ -34,15 +34,13 @@ fi
 NAME="URxvt"
 
 # no target means local host
-if [ -z "$TARGET" ]; then
+if [ -z "$TARGET" ] || [ "$TARGET" = "local" ]; then
 	COMMAND="smowscreen $SCREEN_NAME"
 else
 	TARGET_OPTIONS=$(grep "$TARGET " ~/.smowterm | cut -d' ' -f2- | xargs)
 	NAME+="Remote"
 	[[ "$TARGET_OPTIONS" =~ "mosh" ]] && COMMAND="mosh" || COMMAND="ssh"
 	COMMAND+=" $TARGET"
-
-	if [[ "$TARGET_OPTIONS" =~ "smowscreen" ]]; then
 
 	if [[ "$TARGET_OPTIONS" =~ "smowscreen" ]]; then
 		COMMAND+=" -- bash ~/bin/smowscreen $SCREEN_NAME"
