@@ -1,9 +1,9 @@
-#!/bin/bash -x
+#!/bin/bash
 
 server_list()
 {
 	HOSTS="$(grep -v "^#" /etc/hosts | awk '{ print $2 }' | sort -u)"
-	SSH_CONFIG="$(grep "^Host" ~/.ssh/config | awk '{ print $2 }' | grep -v '*' )"
+	SSH_CONFIG="$(grep "^Host " ~/.ssh/config | awk '{ print $2 }' | grep -v '*' )"
 	echo -e "$HOSTS\n$SSH_CONFIG" | sort -u
 }
 
@@ -27,23 +27,24 @@ case $1 in
 	*) TARGET=$1;;
 esac
 
-[ -n "$2" ] && SCREEN_NAME=$2 || SCREEN_NAME=$USER
+[ -n "$2" ] && SCREEN_NAME=$2
 
 NAME="URxvt"
 OPTION1="bash ~/bin/smowscreen $SCREEN_NAME"
 OPTION2="screen -AOxRR $SCREEN_NAME"
 OPTION3="bash"
-COMMAND="$OPTION1 || $OPTION2 || $OPTION3"
 
 if [ -n "$TARGET" ] && [ "$TARGET" != "local" ]; then
 	NAME+="Remote"
 	SSH="ssh -tY"
 
-	TARGET_OPTIONS=$(grep "^$TARGET " ~/.smowterm | cut -d' ' -f2- | xargs)
+	#TARGET_OPTIONS=$(grep "^$TARGET " ~/.smowterm | cut -d' ' -f2- | xargs)
 	[[ "$TARGET_OPTIONS" =~ "mosh" ]] && SSH="mosh --ssh=\"$SSH\""
 
-	COMMAND="$SSH $TARGET -- \"$COMMAND"\"
+	COMMAND="$SSH $TARGET -- "
 fi
+
+COMMAND+=" $OPTION1 || $OPTION2 || $OPTION3"
 
 urxvtc -name $NAME -e sh -c "$COMMAND; sleep 100"; sleep 100
 #urxvtc -name $NAME -e sh -c "export TERM='linux'; $PREFIX; sleep 100"
