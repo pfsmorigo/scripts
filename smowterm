@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 server_list()
 {
@@ -27,29 +27,25 @@ case $1 in
 	*) TARGET=$1;;
 esac
 
-if [ -n "$2" ]; then
-	SCREEN_NAME=$2
-fi
+[ -n "$2" ] && SCREEN_NAME=$2 || SCREEN_NAME=$USER
 
 NAME="URxvt"
+OPTION1="bash ~/bin/smowscreen $SCREEN_NAME"
+OPTION2="screen -AOxRR $SCREEN_NAME"
+OPTION3="bash"
+COMMAND="$OPTION1 || $OPTION2 || $OPTION3"
 
-# no target means local host
-if [ -z "$TARGET" ] || [ "$TARGET" = "local" ]; then
-	COMMAND="smowscreen $SCREEN_NAME"
-else
-	TARGET_OPTIONS=$(grep "$TARGET " ~/.smowterm | cut -d' ' -f2- | xargs)
+if [ -n "$TARGET" ] && [ "$TARGET" != "local" ]; then
 	NAME+="Remote"
-	[[ "$TARGET_OPTIONS" =~ "mosh" ]] && COMMAND="mosh" || COMMAND="ssh"
-	COMMAND+=" $TARGET"
+	SSH="ssh -tY"
 
-	if [[ "$TARGET_OPTIONS" =~ "smowscreen" ]]; then
-		COMMAND+=" -- bash ~/bin/smowscreen $SCREEN_NAME"
-	elif [[ "$TARGET_OPTIONS" =~ "screen" ]]; then
-		COMMAND+=" -- screen -AOxRR $USER"
-	fi
+	TARGET_OPTIONS=$(grep "^$TARGET " ~/.smowterm | cut -d' ' -f2- | xargs)
+	[[ "$TARGET_OPTIONS" =~ "mosh" ]] && SSH="mosh --ssh=\"$SSH\""
+
+	COMMAND="$SSH $TARGET -- \"$COMMAND"\"
 fi
 
-urxvtc -name $NAME -e sh -c "$COMMAND"; sleep 100
+urxvtc -name $NAME -e sh -c "$COMMAND; sleep 100"; sleep 100
 #urxvtc -name $NAME -e sh -c "export TERM='linux'; $PREFIX; sleep 100"
 
 sleep 10
