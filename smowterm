@@ -8,7 +8,7 @@ server_list()
 }
 
 pick_server() {
-	ANS=$(zenity --list --text='Pick a server' --column=servers $(server_list))
+	ANS=$(zenity --list --text='Pick a server' --column=servers local $(server_list))
 	[[ -n $ANS ]] && $0 $ANS
 	exit 0
 }
