@@ -13,6 +13,40 @@ pick_server() {
 	exit 0
 }
 
+connect() {
+	SERVER=$1
+	SCREEN_NAME=$2
+
+	if [ "$SERVER" != "local" ]; then
+		SSH="ssh -tY"
+
+		SERVER_OPTIONS=$(grep "^$SERVER " ~/.smowterm | cut -d' ' -f2- | xargs)
+		[[ "$SERVER_OPTIONS" =~ "mosh" ]] && SSH="mosh"
+
+		PREFIX="$SSH $SERVER --"
+	fi
+
+	run_command $PREFIX bash ~/bin/smowscreen $SCREEN_NAME
+
+	if [ $? != 0 ]; then
+		[ -z "$SCREEN_NAME" ] && SCREEN_NAME=$USER
+		run_command $PREFIX screen -AOxRR $SCREEN_NAME
+	fi
+
+	if [ $? != 0 ]; then
+		run_command $PREFIX
+	fi
+
+	sleep 100
+	exit 0
+}
+
+run_command() {
+	echo -e "\n\033[0;34m [ $* ] \033[0m\n"
+	$*
+	return $?
+}
+
 while getopts ":bs" OPTION
 do
 	case $OPTION in
@@ -22,31 +56,21 @@ do
 	shift $((OPTIND-1))
 done
 
+NAME="URxvt"
+
 case $1 in
 	gui) pick_server;;
-	*) TARGET=$1;;
+	connect) connect $2 $3;;
+	'') SERVER="local";;
+	*)  SERVER="$1"; NAME+="Remote";;
 esac
 
-[ -n "$2" ] && SCREEN_NAME=$2
+SCREEN_NAME=$2
 
-NAME="URxvt"
-OPTION1="bash ~/bin/smowscreen $SCREEN_NAME"
-OPTION2="screen -AOxRR $SCREEN_NAME"
-OPTION3="bash"
+set -x
+urxvtc -name $NAME -e sh -c "$0 connect $SERVER $SCREEN_NAME"
 
-if [ -n "$TARGET" ] && [ "$TARGET" != "local" ]; then
-	NAME+="Remote"
-	SSH="ssh -tY"
-
-	#TARGET_OPTIONS=$(grep "^$TARGET " ~/.smowterm | cut -d' ' -f2- | xargs)
-	[[ "$TARGET_OPTIONS" =~ "mosh" ]] && SSH="mosh --ssh=\"$SSH\""
-
-	COMMAND="$SSH $TARGET -- "
-fi
-
-COMMAND+=" $OPTION1 || $OPTION2 || $OPTION3"
-
-urxvtc -name $NAME -e sh -c "$COMMAND; sleep 100"; sleep 100
+#urxvtc -name $NAME -e sh -c "$COMMAND; sleep 100"; sleep 100
 #urxvtc -name $NAME -e sh -c "export TERM='linux'; $PREFIX; sleep 100"
 
 sleep 10
