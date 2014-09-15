@@ -1,0 +1,121 @@
+#!/bin/bash
+
+precheck() {
+	for DEPENDENCY in recode; do
+		if ! command -v $DEPENDENCY >/dev/null 2>&1; then
+			echo "You need to install $DEPENDENCY!"
+			exit 1
+		fi
+	done
+	mkdir -p $SMOWMUTT_DIR
+}
+
+bts_report() {
+	if [ $# -eq 4 ]; then
+		echo ""
+		echo "  Use: $(basename $0) <package> <version> <title> <patch>"
+		echo ""
+		exit 1
+	fi
+
+	PACKAGE=$1
+	VERSION=$2
+	TITLE=$3
+	PATCH=$4
+
+	BODY=$SMOWMUTT_DIR/$PACKAGE
+	cat > $BODY <<-EOF
+	Package: src:$PACKAGE
+	Version: $VERSION
+	Severity: normal
+	Tags: patch
+	User: debian-powerpc@lists.debian.org
+	Usertags: ppc64el
+
+	Dear Maintainer,
+
+
+	[1] https://wiki.debian.org/ppc64el
+
+	Thanks,
+	EOF
+
+	TO=submit@bugs.debian.org
+	CC=brenohl@br.ibm.com
+	BCC=pfsmorigo@gmail.com
+	SUBJECT="$PACKAGE: $TITLE"
+
+	echo mutt $TO ${CC:+-c $CC} ${BCC:+-b $BCC} ${PATCH:+-a $PATCH} -s "$SUBJECT" -i $BODY
+	exit 0
+}
+
+bts_reply() {
+	[ -z "$1" ] && echo Need a number! && exit 1
+
+	BUGNUM=$1
+	BUGFILE=$SMOWMUTT_DIR/bug_${BUGNUM}.html
+
+	if [ ! -f $BUGFILE ]; then
+		curl https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=$BUGNUM -o $BUGFILE
+	fi
+
+	echo ""
+	OLDIFS=$IFS
+	IFS=$'\n'
+	for MESSAGE in $(grep "<a name=\"msg" $BUGFILE); do
+		MESSAGE_NUM=$(echo $MESSAGE | sed 's/.*">Message #//g' | cut -d'<' -f1)
+		MESSAGE_MAILTO=$(echo $MESSAGE \
+		                 | sed 's/.*a href=\"mailto://g;s/>reply<.*//g' \
+						 | recode html..ascii)
+
+		COUNT=$(( $COUNT + 1 ))
+		MESSAGE_ARRAY[$COUNT]=$MESSAGE_MAILTO
+		printf " %2s) %s\n" $COUNT $MESSAGE_NUM
+
+	done
+	IFS=$OLDIFS
+	echo ""
+	read -p "Pick one (x to quit): " PICK
+	if [ "$PICK" = "x" ]; then
+		exit 0
+	else
+		MESSAGE_SELECTED=${MESSAGE_ARRAY[$PICK]}
+	fi
+
+	mutt mailto:"$MESSAGE_SELECTED"
+
+	exit 0
+}
+
+bts_subscribe() {
+	[ -z "$1" ] && echo Need a number! && exit 1
+	BUGNUM=$1
+	mutt -s "no comments" -b pfsmorigo@gmail.com ${BUGNUM}-subscribe@bugs.debian.org
+	exit 0
+}
+
+bts_unsubscribe() {
+	[ -z "$1" ] && echo Need a number! && exit 1
+	BUGNUM=$1
+	echo mutt -s "no comments" -b pfsmorigo@gmail.com ${BUGNUM}-unsubscribe@bugs.debian.org
+	exit 0
+}
+
+SMOWMUTT_DIR=/tmp/smowmutt
+
+
+precheck
+
+case $1 in
+	bts)
+		case $2 in
+			report)      bts_report $3;;
+			reply)       bts_reply $3;;
+			subscribe)   bts_subscribe $3;;
+			unsubscribe) bts_unsubscribe $3;;
+		esac
+		;;
+esac
+
+echo "What?"
+exit 1

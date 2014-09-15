@@ -1,0 +1,66 @@
+#!/bin/bash
+
+ROOT=/dev/sda
+
+identify() {
+	FILE="$1"
+	FILE_EXT="${FILE##*.}"
+
+	if [ -f $FILE ]; then
+		if [[ $FILE == vmlinu* ]]; then
+			echo "-kernel $FILE -append root=$ROOT"
+		else
+			case $FILE_EXT in
+				img|raw|qcow2) echo "-drive file=$FILE"	;;
+				iso)           echo "-cdrom $FILE -boot order=d";;
+				*)             echo "$FILE not identified!"; exit 1;;
+			esac
+		fi
+	else
+		echo "$FILE not found!"
+		exit 1
+	fi
+}
+
+SERIAL=
+
+while getopts shpr: OPT; do
+	case $OPT in
+		s) SERIAL="-nodefaults -monitor stdio -serial pty";;
+		h) HUGEPAGES="-mem-path /dev/hugepages";;
+		p) PLAN9="-fsdev local,id=shared_dir,path=/home/pfsmorigo,security_model=none -device virtio-9p-pci,fsdev=shared_dir,mount_tag=host_dir";;
+		r) ROOT=$OPTARG ;;
+	esac
+done
+shift $((OPTIND-1))
+OPTIND=0
+
+[ -f .smowqemu ] && ATTR=$(cat .smowqemu)
+[ "$#" -eq 0 ] && [ -n "$ATTR" ] && $0 $ATTR && exit
+
+[ -z "$(echo $1 | sed 's/[0-9]//g')" ] && VMID=$1 && shift
+
+[ -z "$VMID" ] && echo "Need to specify a ID!" && exit 1
+MAC="4C:45:42:45:$(printf '%02d:%02d' $(grep -m1 $USER /etc/hosts | cut -d. -f3) $VMID)"
+
+QEMU_CMD="qemu-system-ppc64 \
+	-enable-kvm \
+	-M pseries \
+	-smp 4,cores=2,threads=4 \
+	-m 4G \
+	-nographic \
+	-device spapr-vscsi \
+	-device spapr-vlan,netdev=net0,mac=$MAC \
+	-netdev bridge,br=br0,id=net0 \
+	$SERIAL $HUGEPAGES $PLAN9"
+
+for ARG in $*; do
+	QEMU_CMD+=" $(identify $ARG)"
+done
+
+QEMU_CMD="$(echo "$QEMU_CMD"| xargs)"
+
+echo -e "\033k($VMID) $(basename $PWD)\033\\"
+
+echo "$QEMU_CMD"
+$QEMU_CMD

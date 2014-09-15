@@ -42,7 +42,7 @@ connect() {
 }
 
 run_command() {
-	echo -e "\n\033[0;34m [ $* ] \033[0m\n"
+	echo -e "\n\033[0;33m[ $* ]\033[0m\n"
 	$*
 	return $?
 }
