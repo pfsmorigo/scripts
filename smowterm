@@ -67,6 +67,10 @@ esac
 
 SCREEN_NAME=$2
 
+if ! ps -ef | grep uraxvtd | grep -v grep 2>&1 > /dev/null; then
+	urxvtd -q -f -o
+fi
+
 set -x
 urxvtc -name $NAME -e sh -c "$0 connect $SERVER $SCREEN_NAME"
 
