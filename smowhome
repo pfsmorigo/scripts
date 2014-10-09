@@ -1,5 +1,7 @@
 #!/bin/bash
 
+BIN_DIR="$HOME/.local/bin"
+
 base_dir() {
 	EXEC=${BASH_SOURCE[0]}
 	if [ -h $EXEC ]; then
@@ -10,7 +12,7 @@ base_dir() {
 }
 
 initial_dirs() {
-	mkdir -p ~/bin
+	mkdir -p $BIN_DIR
 }
 
 backup() {
@@ -43,7 +45,9 @@ if ! command -v realpath >/dev/null 2>&1; then
 fi
 
 BASE_DIR="$(base_dir)"
-SCRIPTS_LOCAL_DIR="$BASE_DIR/../scripts-local"
+SCRIPT_DIRS="$BASE_DIR $BASE_DIR/smartprompt $BASE_DIR/../scripts-local $HOME/ibm/bin"
+
+echo $BASE_DIR
 
 SYMLINK_EXEC=symlink2bin
 if ! command -v $SYMLINK_EXEC >/dev/null 2>&1; then
@@ -63,11 +67,16 @@ case $1 in
 
 	*)
 		initial_dirs
+
+		# Run dotfiles script
 		$BASE_DIR/dotfiles
-		$SYMLINK_EXEC ~/bin $(find $BASE_DIR -maxdepth 1 -mindepth 1 -executable -type f)
-		$SYMLINK_EXEC ~/bin $BASE_DIR/smartprompt/smartprompt
-		[ -d "$SCRIPTS_LOCAL_DIR" ] && \
-			$SYMLINK_EXEC ~/bin $(find $SCRIPTS_LOCAL_DIR -maxdepth 1 -mindepth 1 -executable -type f)
+
+		for DIR in $SCRIPT_DIRS; do
+			echo "Creating symlinks for $DIR directory..."
+			echo "-------------------------------------------------------------"
+			$SYMLINK_EXEC $BIN_DIR $(find $DIR -maxdepth 1 -mindepth 1 -executable -type f)
+			echo ""
+		done
 		;;
 esac
 
