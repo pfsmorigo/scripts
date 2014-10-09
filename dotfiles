@@ -10,7 +10,7 @@ base_dir() {
 }
 
 initial_dirs() {
-	mkdir -p ~/Logs/screen ~/.config
+	mkdir -p ~/logs/screen ~/.config
 }
 
 setup_git() {
