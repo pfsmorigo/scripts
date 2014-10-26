@@ -11,7 +11,7 @@ precheck() {
 }
 
 bts_report() {
-	if [ $# -eq 4 ]; then
+	if [ $# -ne 4 ]; then
 		echo ""
 		echo "  Use: $(basename $0) <package> <version> <title> <patch>"
 		echo ""
@@ -45,7 +45,7 @@ bts_report() {
 	BCC=pfsmorigo@gmail.com
 	SUBJECT="$PACKAGE: $TITLE"
 
-	echo mutt $TO ${CC:+-c $CC} ${BCC:+-b $BCC} ${PATCH:+-a $PATCH} -s "$SUBJECT" -i $BODY
+	mutt $TO ${CC:+-c $CC} ${BCC:+-b $BCC} ${PATCH:+-a $PATCH} -s "$SUBJECT" -i $BODY
 	exit 0
 }
 
@@ -109,10 +109,10 @@ precheck
 case $1 in
 	bts)
 		case $2 in
-			report)      bts_report $3;;
-			reply)       bts_reply $3;;
-			subscribe)   bts_subscribe $3;;
-			unsubscribe) bts_unsubscribe $3;;
+			report)      bts_report $3 $4 "$5" $6;;
+			reply)       bts_reply $*;;
+			subscribe)   bts_subscribe $*;;
+			unsubscribe) bts_unsubscribe $*;;
 		esac
 		;;
 esac

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+WS_NUM=$1
+WS_NAME=$2
+
+[ -z "$WS_NUM" ] && echo Missing workspace number! && exit 1
+[ -z "$WS_NAME" ] && echo Missing workspace name! && exit 2
+
+WS_FULLNAME="$WS_NUM: $WS_NAME"
+
+i3-msg "rename workspace $WS_NUM to "$WS_FULLNAME""
+i3-msg "bindsym Mod4+$WS_NUM workspace "$WS_FULLNAME""
+

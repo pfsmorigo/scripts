@@ -23,11 +23,13 @@ identify() {
 }
 
 SERIAL=
+DISPLAY="-nographic -monitor sty"
 
-while getopts shpr: OPT; do
+while getopts shdpr: OPT; do
 	case $OPT in
-		s) SERIAL="-nodefaults -monitor stdio -serial pty";;
+		s) SERIAL="-serial pty";;
 		h) HUGEPAGES="-mem-path /dev/hugepages";;
+		d) DISPLAY="-vga std -vnc :12";;
 		p) PLAN9="-fsdev local,id=shared_dir,path=/home/pfsmorigo,security_model=none -device virtio-9p-pci,fsdev=shared_dir,mount_tag=host_dir";;
 		r) ROOT=$OPTARG ;;
 	esac
@@ -48,11 +50,10 @@ QEMU_CMD="qemu-system-ppc64 \
 	-M pseries \
 	-smp 4,cores=2,threads=4 \
 	-m 4G \
-	-nographic \
 	-device spapr-vscsi \
 	-device spapr-vlan,netdev=net0,mac=$MAC \
 	-netdev bridge,br=br0,id=net0 \
-	$SERIAL $HUGEPAGES $PLAN9"
+	$DISPLAY $SERIAL $HUGEPAGES $PLAN9"
 
 for ARG in $*; do
 	QEMU_CMD+=" $(identify $ARG)"

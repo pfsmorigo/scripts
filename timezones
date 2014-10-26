@@ -1,0 +1,55 @@
+#!/bin/bash
+#timezone info at /usr/share/zoneinfo
+
+[ "$1" = "gui" ] && GUI=1
+
+set_color() {
+	if [ $1 -lt 8 ]; then
+		COLOR=32
+	elif [ $1 -ge 18 ]; then
+		COLOR=34
+	else
+		COLOR=33
+	fi
+	[ -z "$GUI" ] && echo -n "\033[0;${COLOR}m"
+	echo -n "$2"
+	[ -z "$GUI" ] && echo -n "\033[0m"
+}
+
+read -d '' LIST <<EOF
+America/New_York,diane
+Asia/Calcutta,latha
+Australia/Canberra,anton benh
+Brazil/East,pfsmorigo
+EST,
+Europe/London,cjwatson
+Europe/Paris,thierry_l
+Europe/Zurich,phcoder
+US/Central,baude hamzy
+US/Eastern,
+US/Pacific,
+EOF
+
+OLDIFS=$IFS
+IFS=$'\n'
+for ITEM in $LIST; do
+	CURR_TIME=$(TZ=$(echo $ITEM | cut -d, -f1) date +"%H:%M,%Z")
+	HOUR=$(echo $CURR_TIME | cut -d: -f1)
+	TIMEZONE_LIST+="$(set_color $HOUR "$CURR_TIME,$ITEM")\n"
+done
+IFS=$OLDIFS
+
+if [ -z "$GUI" ]; then
+	echo ""
+	echo -e "$TIMEZONE_LIST" | column -t -s, | sort
+	echo ""
+else
+	echo -e $TIMEZONE_LIST | sort | zenity --list --column "timezone"
+	#echo -e $TIMEZONE_LIST
+	#echo -e $TIMEZONE_LIST | sort | zenity --list --separator=',' \
+												  #--column "Time" \
+												  #--column "TZ" \
+												  #--column "Region" \
+												  #--column "People"
+fi
+

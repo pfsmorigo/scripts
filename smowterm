@@ -8,7 +8,7 @@ server_list()
 }
 
 pick_server() {
-	ANS=$(zenity --list --text='Pick a server' --column=servers local $(server_list))
+	ANS=$(zenity --list --text='Pick a server' --column=servers local $(server_list) | cut -d'|' -f1)
 	[[ -n $ANS ]] && $0 $ANS
 	exit 0
 }
@@ -47,21 +47,12 @@ run_command() {
 	return $?
 }
 
-while getopts ":bs" OPTION
-do
-	case $OPTION in
-		b) NAME+="Big" ;;
-		s) NAME+="Small" ;;
-	esac
-	shift $((OPTIND-1))
-done
-
 NAME="URxvt"
 
 case $1 in
 	gui) pick_server;;
 	connect) connect $2 $3;;
-	'') SERVER="local";;
+	local|'') SERVER="local";;
 	*)  SERVER="$1"; NAME+="Remote";;
 esac
 

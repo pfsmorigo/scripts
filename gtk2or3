@@ -1,0 +1,16 @@
+#!/bin/bash
+
+EXECUTABLE=$(whereis $1 | cut -d: -f2 | cut -d' ' -f2)
+
+if [ -n "$EXECUTABLE" ]; then
+	LDD_RESULT="$(ldd $EXECUTABLE)"
+
+	case $(echo "$LDD_RESULT" | grep libgtk | awk '{ print $1 }') in
+		libgtk-3.so.0) echo 3 ;;
+		libgtk-x11-2.0.so.0) echo 2 ;;
+		*) echo unknow! ;;
+	esac
+else
+	echo "$1 not found!"
+	exit 1
+fi
