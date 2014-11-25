@@ -9,6 +9,8 @@ identify() {
 	if [ -f $FILE ]; then
 		if [[ $FILE == vmlinu* ]]; then
 			echo "-kernel $FILE -append root=$ROOT"
+		elif [[ $FILE == initr* ]]; then
+			echo "-initrd $FILE"
 		else
 			case $FILE_EXT in
 				img|raw|qcow2) echo "-drive file=$FILE"	;;
@@ -22,16 +24,16 @@ identify() {
 	fi
 }
 
-SERIAL=
-DISPLAY="-nographic -monitor sty"
+OUTPUT="-nographic -serial stdio"
 
-while getopts shdpr: OPT; do
+while getopts sdhpr:z OPT; do
 	case $OPT in
-		s) SERIAL="-serial pty";;
+		s) OUTPUT="-nographic -serial pty -monitor stdio";;
+		d) OUTPUT="-vga std -vnc :33";;
 		h) HUGEPAGES="-mem-path /dev/hugepages";;
-		d) DISPLAY="-vga std -vnc :12";;
 		p) PLAN9="-fsdev local,id=shared_dir,path=/home/pfsmorigo,security_model=none -device virtio-9p-pci,fsdev=shared_dir,mount_tag=host_dir";;
 		r) ROOT=$OPTARG ;;
+		z) DRY_RUN=1 ;;
 	esac
 done
 shift $((OPTIND-1))
@@ -42,26 +44,20 @@ OPTIND=0
 
 [ -z "$(echo $1 | sed 's/[0-9]//g')" ] && VMID=$1 && shift
 
-[ -z "$VMID" ] && echo "Need to specify a ID!" && exit 1
-MAC="4C:45:42:45:$(printf '%02d:%02d' $(grep -m1 $USER /etc/hosts | cut -d. -f3) $VMID)"
+if [ -n "$VMID" ]; then
+	MAC="4C:45:42:45:$(printf '%02d:%02d' $(grep -m1 $USER /etc/hosts | cut -d. -f3) $VMID)"
+	NETWORK="-device spapr-vscsi -device spapr-vlan,netdev=net0,mac=$MAC -netdev bridge,br=br0,id=net0"
+fi
 
 QEMU_CMD="qemu-system-ppc64 \
-	-enable-kvm \
-	-M pseries \
-	-smp 4,cores=2,threads=4 \
-	-m 4G \
-	-device spapr-vscsi \
-	-device spapr-vlan,netdev=net0,mac=$MAC \
-	-netdev bridge,br=br0,id=net0 \
-	$DISPLAY $SERIAL $HUGEPAGES $PLAN9"
+	-enable-kvm -M pseries -smp 4,cores=2,threads=4 -m 4G -nodefaults \
+	$OUTPUT $NETWORK $HUGEPAGES $PLAN9"
 
 for ARG in $*; do
 	QEMU_CMD+=" $(identify $ARG)"
 done
 
 QEMU_CMD="$(echo "$QEMU_CMD"| xargs)"
-
 echo -e "\033k($VMID) $(basename $PWD)\033\\"
-
 echo "$QEMU_CMD"
-$QEMU_CMD
+[ "$DRY_RUN" != "1" ] && $QEMU_CMD
