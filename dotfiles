@@ -53,16 +53,13 @@ fi
 if ! test -d $DOTFILES_DIR; then
 	echo "There is no dotfiles directory. Cloning one..."
 	git clone --recursive http://github.com/pfsmorigo/dotfiles.git $DOTFILES_DIR
-else
-	cd $DOTFILES_DIR
-	git pull
 fi
 
 set -f
-FIND_PARAM="-mindepth 1 -maxdepth 1	\
+FIND_PARAM="-mindepth 1 -maxdepth 1 \
 	-not -name README.md -not -name config -not -name .*"
-DOTFILES_LIST="$(find $DOTFILES_DIR $FIND_PARAM | sed -e "s,$DOTFILES_DIR/,,g")"
-DOTFILES_CONFIG_LIST="$(find $DOTFILES_DIR/config $FIND_PARAM | sed -e "s,$DOTFILES_DIR/,,g")"
+DOTFILES_LIST="$(find $DOTFILES_DIR $FIND_PARAM)"
+DOTFILES_CONFIG_LIST="$(find $DOTFILES_DIR/config $FIND_PARAM)"
 set +f
 
 case $1 in
