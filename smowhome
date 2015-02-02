@@ -12,7 +12,7 @@ base_dir() {
 }
 
 initial_dirs() {
-	mkdir -p $BIN_DIR
+	mkdir -p $BIN_DIR ~/.local/share/newsbeuter/ ~/.cache/mutt
 }
 
 backup() {
@@ -72,10 +72,12 @@ case $1 in
 		$BASE_DIR/dotfiles
 
 		for DIR in $SCRIPT_DIRS; do
-			echo "Creating symlinks for $DIR directory..."
-			echo "-------------------------------------------------------------"
-			$SYMLINK_EXEC $BIN_DIR $(find $DIR -maxdepth 1 -mindepth 1 -executable -type f)
-			echo ""
+			if [ -d $DIR ]; then
+				echo "Creating symlinks for $DIR directory..."
+				echo "-------------------------------------------------------------"
+				$SYMLINK_EXEC $BIN_DIR $(find $DIR -maxdepth 1 -mindepth 1 -executable -type f)
+				echo ""
+			fi
 		done
 		;;
 esac
