@@ -1,0 +1,3 @@
+#!/bin/bash
+export WINEPREFIX=$HOME/.config/picasa
+wine "/home/pfsmorigo/.config/picasa/drive_c/Program Files (x86)/Google/Picasa3/Picasa3.exe"
