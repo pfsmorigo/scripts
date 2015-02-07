@@ -14,7 +14,7 @@ initial_dirs() {
 }
 
 setup_git() {
-	GIT_FILE=$HOME/.gitconfig-userinfo
+	GIT_FILE=$HOME/.gitconfig-local
 	if [ -f "$GIT_FILE" ]; then
 		read -p "$GIT_FILE already exists. Overwrite? (y/n) " RESP
 		[ "$RESP" = "y" ] && mv .$GIT_FILE{,\_$(date +%F_%H-%M-%S)} || return
