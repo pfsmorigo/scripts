@@ -1,0 +1,16 @@
+#!/bin/bash
+
+FULL_TEXT=
+SHORT_TEXT=
+COLOR=
+
+UPDATE_COUNT=$(yum check-update | grep "updates$" | wc -l)
+
+if [ "$UPDATE_COUNT" != "0" ]; then
+   FULL_TEXT="$UPDATE_COUNT updates"
+   COLOR="#ffff00"
+fi
+
+echo "$FULL_TEXT"
+echo "$SHORT_TEXT"
+echo "$COLOR"

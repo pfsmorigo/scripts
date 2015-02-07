@@ -1,0 +1,27 @@
+#!/bin/bash
+
+BITCOIN_ADDR=$(keyring get bitcoin $USER)
+[ -z "$BITCOIN_ADDR" ] && exit 1
+
+get_value() {
+	VALUE=$(echo "$1" | grep $2 | cut -d: -f2 | sed 's/......$//')
+	VALUE_MBTC=$(echo "scale=4; $VALUE / 1000" | bc)
+	echo $VALUE_MBTC
+}
+
+# Format:
+# {"ticker":{"high":913.00000000,"low":900.00000000,"vol":1.28565954,"last":905.00000000,"buy":886.99924000,"sell":904.98999000,"date":1414634847}}
+
+URL=https://www.mercadobitcoin.com.br/api/ticker/
+MYWALLET_URL=https://blockchain.info/q/addressbalance/$BITCOIN_ADDR
+VALUES="$(curl -s $URL | sed 's/{"ticker"://' | tr , '\n')"
+
+BALANCE=$(echo "scale=2; $(curl -s $MYWALLET_URL) /100000" | bc)
+HIGH=$(get_value "$VALUES" high)
+LOW=$(get_value "$VALUES" low)
+LAST=$(get_value "$VALUES" last)
+BUY=$(get_value "$VALUES" buy)
+SELL=$(get_value "$VALUES" sell)
+BALANCE_IN_REAL="R$ $(echo "scale=2; $BALANCE * $LAST" | bc)"
+
+echo "$BALANCE ($BALANCE_IN_REAL) | HIGH $HIGH | LOW $LOW | LAST $LAST | BUY $BUY | SELL $SELL"
