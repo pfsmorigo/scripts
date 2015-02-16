@@ -1,8 +1,6 @@
 #!/bin/bash
 
 TEMPERATURE=$(acpi -t | awk '{ print $4 }' | cut -d. -f1)
-
-COLOR="#ffffff"
 [ "$TEMPERATURE" -gt 80 ] && COLOR="#ffff00"
 [ "$TEMPERATURE" -gt 95 ] && COLOR="#ff0000"
 
