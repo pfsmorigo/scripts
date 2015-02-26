@@ -2,14 +2,14 @@
 
 import urllib2
 import json
+import sys
 #from pprint import pprint
 
 response = urllib2.urlopen('http://developers.agenciaideias.com.br/cotacoes/json')
 data = json.load(response)
 #pprint(data)
 
-bovespa = data['bovespa']['cotacao']+" ("+data['bovespa']['variacao']+")"
-dolar = data['dolar']['cotacao']+" ("+data['dolar']['variacao']+")"
-euro = data['euro']['cotacao']+" ("+data['euro']['variacao']+")"
-
-print "Bovespa: %s, US$ %s, EURO %s" % (bovespa, dolar, euro)
+if len(sys.argv) == 1:
+    print 'need: dolar, euro or bovespa'
+else:
+    print data[sys.argv[1]]['cotacao']+' ('+data[sys.argv[1]]['variacao']+')'

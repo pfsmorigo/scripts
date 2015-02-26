@@ -16,7 +16,7 @@ URL=https://www.mercadobitcoin.com.br/api/ticker/
 MYWALLET_URL=https://blockchain.info/q/addressbalance/$BITCOIN_ADDR
 VALUES="$(curl -s $URL | sed 's/{"ticker"://' | tr , '\n')"
 
-BALANCE=$(echo "scale=8; $(curl -s $MYWALLET_URL) /100000000" | bc | sed 's/[0]*$//g' )
+BALANCE=$(echo "scale=8; $(curl -s $MYWALLET_URL) /100000000" | bc | sed 's/[0]*$//g;s/^./0./g' )
 HIGH=$(get_value "$VALUES" high)
 LOW=$(get_value "$VALUES" low)
 BUY=$(get_value "$VALUES" buy)

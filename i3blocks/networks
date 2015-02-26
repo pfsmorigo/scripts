@@ -27,8 +27,8 @@ for IF in $(ip -o -4 a); do
 		wlp3s0)      ICON= ;; # wireless
 		*)           ICON= ;; # others
 	esac
-	FULL_TEXT+="$ICON $IP$(complement $NAME)   "
-	SHORT_TEXT+="$ICON $IP   "
+	FULL_TEXT+="$IP$(complement $NAME)   "
+	SHORT_TEXT+="$IP   "
 done
 IFS=$OLDIFS
 
