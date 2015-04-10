@@ -1,0 +1,170 @@
+#!/usr/bin/env python
+
+"""
+pyupdatesd: A simple yum update checker.
+
+This script will watch for available yum updates and show a Gtk2 tray icon and
+notification pop-up when updates become available.
+
+This is intended for desktop environments like XFCE that don't have a native
+PackageKit update watcher.
+
+Set this script to run on session startup, and it will check for updates every
+15 minutes (by default; this is configurable in the source code).
+
+This software is open domain and may be freely modified and distributed.
+
+Requires: pygtk2
+
+Usage: pyupdatesd [--display :0.0 --help --debug --testing]
+
+--Kirsle
+http://sh.kirsle.net
+"""
+
+################################################################################
+# Configuration Section Begins Here                                            #
+################################################################################
+
+c = dict(
+    # The title to be shown on the pop-up and the icon tooltip.
+    title = "Updates Available",
+
+    # The message to be shown in the pop-up.
+    message = "There are updates available to install.",
+
+    # Icon to use in the system tray and pop-up.
+    icon = "/usr/share/icons/gnome/32x32/status/software-update-available.png",
+
+    # Frequency to check for available updates.
+    interval = 900, # 15 minutes
+
+    # Command to run to check for available updates, and the expected status
+    # code that indicates updates are available.
+    yumcheck = "/usr/bin/yum check-update",    
+
+    # Path to notify-send (set to None if you don't want notifications)
+    notify = "/usr/bin/notify-send",
+
+    # Command to run for your graphical updater (i.e. yumex, gpk-update-viewer)
+    yumgui = "/usr/bin/yumex --update-only",
+)
+
+################################################################################
+# Configuration Section Ends Here                                              #
+################################################################################
+
+import gtk
+import gobject
+import pynotify
+
+import getopt
+import sys
+import os
+import commands
+import subprocess
+from time import time
+
+# Command-line options.
+try:
+    options, remainder = getopt.getopt(sys.argv[1:], 'hdt', [
+        'debug',
+        'help',
+        'testing',
+        'display='
+    ])
+except:
+    print "Unrecognized options given, try " + sys.argv[0] + " --help"
+    exit(1)
+
+debug   = False
+testing = False
+def say(*message):
+    if debug:
+        print ' '.join(map(lambda x: str(x), message))
+
+def usage():
+    print "Usage: " + sys.argv[0] + " [--display :0.0 --help --debug --testing]"
+    print "Use --testing to force the script to show the notification icon."
+    exit(1)
+
+# Parse the options
+for opt in options:
+    if opt[0] == '--debug':
+        debug = True
+        say("Debug mode activated")
+    elif opt[0] == '--display' or opt[0] == '-d':
+        os.environ["DISPLAY"] = opt[1]
+        say("Set environment $DISPLAY to", opt[1])
+    elif opt[0] == '--testing' or opt[0] == '-t':
+        testing = True
+        debug   = True
+        say("Testing the notification applet")
+    elif opt[0] == '--help' or opt[0] == '-h':
+        usage()
+
+def do_updates():
+    """Show your graphical update manager."""
+    subprocess.call(c['yumgui'], shell=True)
+
+def onClick(widget):
+    """Event handler for the tray icon being clicked."""
+    widget.set_visible(False)
+    gobject.timeout_add(1, do_updates)
+
+def show_notify():
+    subprocess.call([c['notify'],
+        '-a', __name__,
+        '-i', c['icon'],
+        c['message'],
+    ])
+
+tray = gtk.StatusIcon()
+tray.set_from_file(c['icon'])
+tray.set_title(c['title'])
+tray.set_tooltip(c['title'])
+tray.set_visible(False)
+tray.connect('activate', onClick)
+
+next_check = int(time()) # First check is immediately on startup
+say("First check:", next_check)
+def main_loop():
+    # Time to check?
+    global next_check
+    if int(time()) >= next_check:
+        status, output = commands.getstatusoutput(c['yumcheck'])
+            
+        status = status >> 8
+
+        say("Executed command:", c['yumcheck'])
+
+        say("Result status:", status)
+        say("Command output:")
+        say(output)
+
+        if testing:
+            say("Test mode: force the result to show available updates")
+            status = 100
+
+        # Updates?
+        if status == 100:
+            say("Result status indicates updates are available!")
+            if tray.get_visible() == False:
+                say("Show the notification pop-up")
+
+                # Only show notification the first time.
+                show_notify()
+            tray.set_visible(True)
+        elif tray.get_visible() == True and status == 0:
+            # Updates have disappeared behind our back!
+            tray.set_visible(False)
+
+        next_check = int(time()) + c['interval']
+
+    gobject.timeout_add(1000, main_loop)
+
+gobject.timeout_add(1000, main_loop)
+
+gtk.main()
+
+# vim:expandtab
