@@ -21,6 +21,6 @@ HIGH=$(get_value "$VALUES" high)
 LOW=$(get_value "$VALUES" low)
 BUY=$(get_value "$VALUES" buy)
 SELL=$(get_value "$VALUES" sell)
-BALANCE_IN_REAL="R$ $(echo "scale=2; ($BALANCE * $SELL)/1" | bc)"
+BALANCE_IN_REAL="R\$$(echo "scale=2; ($BALANCE * $SELL)/1" | bc)"
 
 echo "$BALANCE ($BALANCE_IN_REAL) | H $HIGH | L $LOW | B $BUY | S $SELL"

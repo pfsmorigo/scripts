@@ -20,7 +20,7 @@ for IF in $(ip -o -4 a); do
 	IP=$(echo $IF | awk '{ print $4 }' | cut -d/ -f1)
 
 	case $NAME in
-		lo|virbr*)   continue ;;
+		lo|virbr*|docker*) continue ;;
 		em*)         ICON= ;; # ethernet
 		enp0s26u1u2) ICON= ;; # usb
 		tun*)        ICON= ;; # tunnel

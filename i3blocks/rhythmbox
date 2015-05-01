@@ -1,0 +1,26 @@
+#!/bin/bash
+
+trim() {
+	[ ${#1} -gt $MAXSIZE ] && echo "${1:0:$MAXSIZE}…" || echo "$1"
+}
+
+MAXSIZE=20
+
+if [ -n "$(pgrep rhythmbox)" ]; then
+	DATA=$(rhythmbox-client --no-start --print-playing-format "%ta|%tt|%at|%ay")
+	IFS='|'
+	DATA_ARRAY=($DATA)
+	OUTPUT=
+
+	ARTIST=${DATA_ARRAY[0]}
+	TITLE=${DATA_ARRAY[1]}
+	ALBUM=${DATA_ARRAY[2]}
+	YEAR=${DATA_ARRAY[3]}
+
+	[ -n "$ARTIST" ] && OUTPUT+="$(trim $ARTIST)"
+	[ -n "$TITLE" ] && OUTPUT+=" - $(trim $TITLE)"
+	[ -n "$ALBUM" ] && OUTPUT+=" - $(trim $ALBUM)"
+	[ -n "$YEAR" ] && OUTPUT+=" ($(trim $YEAR))"
+	echo "$OUTPUT"
+fi
+

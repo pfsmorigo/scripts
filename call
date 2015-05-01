@@ -1,0 +1,4 @@
+#!/bin/bash
+
+NUMBER=$(keyring get $1 $USER)
+[ -n "$NUMBER" ] && skype --callto $NUMBER
