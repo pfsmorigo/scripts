@@ -1,0 +1,2 @@
+#!/bin/bash
+GTK_THEME=DeLorean-Dark /usr/bin/rhythmbox

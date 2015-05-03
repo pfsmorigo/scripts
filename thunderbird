@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export LC_TIME=en_DK
+[ "$LC_ALL" != "$LC_TIME" ] && unset LC_ALL
+GTK_THEME=DeLorean-Dark /usr/bin/thunderbird "$@"
