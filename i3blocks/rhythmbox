@@ -5,12 +5,18 @@ trim() {
 }
 
 MAXSIZE=20
+RHYTMBOXCMD="rhythmbox-client --no-start"
 
 if [ -n "$(pgrep rhythmbox)" ]; then
-	DATA=$(rhythmbox-client --no-start --print-playing-format "%ta|%tt|%at|%ay")
+	case $BLOCK_BUTTON in
+		3) $RHYTMBOXCMD --play-pause ;;  # click: play/pause
+		4) $RHYTMBOXCMD --next       ;;  # scroll up: next
+		5) $RHYTMBOXCMD --previous   ;;  # scroll down: previous
+	esac
+
+	DATA=$($RHYTMBOXCMD --print-playing-format "%ta|%tt|%at|%ay")
 	IFS='|'
 	DATA_ARRAY=($DATA)
-	OUTPUT=
 
 	ARTIST=${DATA_ARRAY[0]}
 	TITLE=${DATA_ARRAY[1]}
