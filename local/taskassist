@@ -1,0 +1,91 @@
+#!/bin/bash -e
+
+PROJECT_DIR=$HOME/projects
+PROJECT_DIR_ARCHIVE=$PROJECT_DIR/.done
+
+log() {
+	PROJECT=$1
+	shift
+	LOG_TEXT="$*"
+	echo "taskassist: $PROJECT $LOG_TEXT"
+	echo "$(date +"%F %T") $LOG_TEXT" >> $PROJECT_DIR/$PROJECT/.taskassist
+}
+
+is_a_number() {
+	[[ "$1" =~ ^[0-9]+$ ]] && return 0 || return 1
+}
+
+project_dir() {
+	PROJECT_LIST=$(task projects | tail -n +5 | head -n -2 | cut -d' ' -f1 | xargs)
+
+	mkdir -p $PROJECT_DIR $PROJECT_DIR_ARCHIVE
+	cd $PROJECT_DIR
+
+	# check if a done project was opened again
+	for PROJECT in $PROJECT_LIST; do
+		if [ -d $PROJECT_DIR_ARCHIVE/$PROJECT ]; then
+			mv $PROJECT_DIR_ARCHIVE/$PROJECT $PROJECT_DIR
+			log $PROJECT reopened
+		fi
+	done
+
+	# archive done projects
+	for DIR in *; do
+		if [[ ! $PROJECT_LIST =~ $DIR ]]; then
+			if [ -n "$(find $DIR -mindepth 1)" ]; then
+				log $DIR closed
+				mv $PROJECT_DIR/$DIR $PROJECT_DIR_ARCHIVE
+			else
+				echo "taskassist: $DIR removed (empty)"
+				rmdir $DIR
+			fi
+		fi
+	done
+
+	# create dir for "new" projects
+	mkdir -p $PROJECT_LIST
+}
+
+create() {
+	case $1 in
+		bts)
+			[ -z "$2" ] && echo Need a source! && exit 1
+			SUFFIX="pro:$2 +ibm +debian +bts"
+
+			echo task add build $2 in ppc64el $SUFFIX
+			echo task add format $2 patch $SUFFIX
+			echo task add submit $2 patch in bts $SUFFIX
+			echo task add check if $2 patches are accepted $SUFFIX
+
+
+
+			;;
+		*)
+			echo "Don't know what to do!"
+			;;
+	esac
+}
+
+pomo() {
+	TASK_INFO="$(task $TASK_NUM info)"
+	TASK_DESC=$(echo "$TASK_INFO" | grep ^Description | cut -d' ' -f2- | xargs)
+	TASK_TAGS=$(echo "$TASK_INFO" | grep ^Tags | sed 's/Tags         //g;s/ / +/g' | xargs)
+
+	echo [task add $TASK_DESC \(pomodoro\) $TASK_TAGS +pomo]
+}
+
+TASK_NUM=
+if is_a_number $1; then
+	TASK_NUM=$1
+	shift
+	if ! task $TASK_NUM > /dev/null 2>&1; then
+		echo Invalid task number!
+		exit 1
+	fi
+fi
+
+case $1 in
+	create|pomo) $*;;
+	*) project_dir;;
+esac
+

@@ -1,0 +1,242 @@
+#!/bin/bash
+
+## Internal Functions ##
+
+upower() {
+	dbus-send --system --dest=org.freedesktop.UPower --type=method_call \
+	          --print-reply /org/freedesktop/UPower org.freedesktop.UPower.$1
+}
+
+notify() {
+	notify-send -t 3000 "$1"
+}
+
+show_window() {
+	echo "As you wish!"
+	zenity --question --title="$1" --text="Timeout 5s" --timeout=5
+}
+
+i3() {
+	case $1 in
+		move)
+			case $2 in
+				workspace)
+					WORKSPACE_NUMS="$3"
+					DISPLAY_NAME=$4
+					CURRENT_WORKSPACE=$(i3-msg -t get_workspaces | \
+						sed 's/focused":true.*$//g' | cut -d'"' -f6)
+
+					for WORKSPACE_NUM in $WORKSPACE_NUMS; do
+						i3-msg -q "workspace $WORKSPACE_NUM"
+						i3-msg -q "move workspace to output $DISPLAY_NAME"
+					done
+
+					i3-msg -q "workspace ${WORKSPACE_NUMS%% *}"
+					i3-msg -q "workspace $CURRENT_WORKSPACE"
+					;;
+				*)
+					echo "Unknown command"
+					;;
+			esac
+			;;
+
+		*)
+			echo "Unknown command"
+			;;
+	esac
+}
+
+on_off() {
+	[ "$1" = "on" ]  && echo 1
+	[ "$1" = "off" ] && echo 0
+	[ "$1" = "1" ]   && echo on
+	[ "$1" = "0" ]   && echo off
+}
+
+
+## External Functions ##
+
+suspend() {
+	lock && systemctl suspend
+	#upower Suspend
+	#sudo pm-suspend
+}
+
+hibernate() {
+	lock && systemctl hibernate
+	#upower Hibernate
+	#sudo pm-hibernate
+}
+
+halt() {
+	systemctl poweroff
+	#upower Stop
+}
+
+reboot() {
+	systemctl reboot
+	#upower Restart
+}
+
+lock() {
+    # Add a small delay to prevent suspend races
+    # https://bugs.launchpad.net/ubuntu/+source/unity-2d/+bug/830348
+    i3lock -c 000000 && sleep 1
+}
+
+irc() {
+	case $1 in
+		connect|reconnect|disconnect)
+			echo "*/$1 -all" > ~/.weechat/weechat_fifo_*
+			;;
+		*)
+			echo "don't know what $1 is..."
+	esac
+}
+
+wifi() {
+	STATE=$(nmcli nm wifi | grep -v WIFI | tr -d ' ')
+
+	case $1 in
+		toggle)
+			[[ "$STATE" = "disabled" ]] && wifi on || wifi off
+			;;
+		on|off)
+			notify "wifi $1"
+			nmcli nm wifi $1
+			wifi
+			;;
+		"")
+			echo $STATE
+			;;
+		*)
+			echo "don't know what $1 is..." && exit 1
+	esac
+}
+
+touchpad() {
+	TOUCH_ID=$(xinput list | grep TouchPad | sed 's/^.*id=//g' | awk '{ print $1 }')
+	[ -z "$TOUCH_ID" ] && notify "no touchpad id found!" && exit 1
+
+	STATE=$(on_off $(xinput list-props $TOUCH_ID | grep "Device Enabled" | cut -f 3))
+
+	case $1 in
+		toggle)
+			[[ "$STATE" = "off" ]] && touchpad on || touchpad off
+			;;
+		on|off)
+			notify "touchpad $1"
+			xinput set-prop $TOUCH_ID "Device Enabled" $(on_off $1)
+			;;
+		"")
+			echo $STATE
+			;;
+		*)
+			echo "don't know what $1 is..." && exit 1
+	esac
+
+}
+
+sound() {
+	[ -z "$2" ] && echo Need parameters! && exit 1
+
+	CONTROL=$1
+	COMMAND=$2
+
+	case $COMMAND in
+		up)
+			amixer -qM set $CONTROL 5%+
+			;;
+
+		down)
+			amixer -qM set $CONTROL 5%-
+			;;
+
+		mute)
+			amixer -qM set $CONTROL toggle
+			;;
+
+		show)
+			AMIXER=$(amixer -M get $CONTROL | tail -n1)
+			if [[ $AMIXER =~ off ]]; then
+				echo MUTE
+			else
+				echo $AMIXER | cut '-d]' -f1 | cut '-d[' -f2
+			fi
+			;;
+
+		*)
+			echo "don't know what $1 is..." && exit 1
+	esac
+	I3BLOCKS=$(pgrep i3blocks)
+	[ -n "$I3BLOCKS" ] && kill -44 $I3BLOCKS
+}
+
+display() {
+	SECOND_DISPLAY=$(xrandr | grep ' connected' | grep -v LVDS1 | cut -d' ' -f1)
+	if [ -n "$SECOND_DISPLAY" ]; then
+		DUAL="Dual Screen"
+		ONLY_PRI="Only Primary"
+		ONLY_SEC="Only Secundary"
+
+		export MAIN_DIALOG='
+		<window title="Display" resizable="false">
+			<hbox>
+				<button image-position="top">
+					<input file>/usr/share/icons/Adwaita/256x256/status/network-idle.png</input>
+					<label>'$DUAL'</label>
+				</button>
+				<button image-position="top">
+					<input file>/usr/share/icons/Adwaita/256x256/status/network-receive.png</input>
+					<label>'$ONLY_PRI'</label>
+				</button>
+				<button image-position="top">
+					<input file>/usr/share/icons/Adwaita/256x256/status/network-transmit.png</input>
+					<label>'$ONLY_SEC'</label>
+				</button>
+			</hbox>
+		</window>'
+		I=$IFS; IFS=""
+		for STATEMENT in  $(gtkdialog --center --program=MAIN_DIALOG); do
+			eval $STATEMENT
+		done
+		IFS=$I
+		case $EXIT in
+			$DUAL)
+				xrandr -d :0 \
+					--output LVDS1 --mode 1600x900 --pos 1250x1080 \
+					--output $SECOND_DISPLAY --mode 1920x1080 --pos 0x0
+				sleep 1
+				DISPLAY=:0 i3 move workspace "1 2 3 4 5" LVDS1
+				DISPLAY=:0 i3 move workspace "6 7 8 9 10" $SECOND_DISPLAY
+				;;
+			$ONLY_PRI)
+				xrandr -d :0 --auto
+				xrandr --output $SECOND_DISPLAY --off
+				;;
+			$ONLY_SEC)
+				xrandr -d :0 --auto
+				xrandr --output LVDS1 --off
+				;;
+			*) return;;
+		esac
+	else
+		xrandr --output LVDS1 --on
+		xrandr -d :0 --auto
+	fi
+	i3config
+}
+
+echo "$(date) | $*" >> /tmp/computer
+
+SUBCOMMANDS="suspend hibernate halt reboot irc wifi touchpad sound lock display"
+
+if [ -z "$1" ]; then
+	echo "wifi......... $(wifi)"
+	echo "touchpad .... $(touchpad)"
+elif [[ $SUBCOMMANDS =~ $1 ]]; then
+	$*
+else
+	echo "sub commands: $SUBCOMMANDS"
+	exit 2
+fi

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+while true; do
+
+	case "$(dropbox status)" in
+		"Dropbox isn't running!")
+			#notify "Dropbox isn't running. Starting Dropbox..."
+			dropbox start
+			;;
+
+		"Connecting...")
+			# Check if the connection is working
+			if ( ping -c 1 -w 5 google.com &>/dev/null ); then
+				notify "Dropbox is stucked. Restarting Dropbox..."
+				dropbox stop
+				dropbox start
+			fi
+			;;
+
+		*)
+			#notify "Dropbox is running."
+			;;
+	esac
+
+	sleep 60
+
+done
+

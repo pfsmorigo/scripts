@@ -1,0 +1,8 @@
+#!/bin/bash
+
+[ "$1" = "madrid" ] && export WINEPREFIX=/mnt/disk/madrid/wine
+
+export WINEDEBUG=-all
+TZ=America/New_York \
+	nice -n 19 \
+	wine "/home/pfsmorigo/.wine/drive_c/Program Files (x86)/Steam/Steam.exe" -no-dwrite
