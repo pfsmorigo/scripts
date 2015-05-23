@@ -1,5 +1,14 @@
 #!/bin/bash
 
-[ -n "$2" ] && LIMIT=$2 || LIMIT=1000
+LIMIT=1000
+
+while getopts l: OPT; do
+	case $OPT in
+		l) LIMIT=$OPTARG ;;
+		*) exit ;;
+	esac
+done
+shift $((OPTIND-1))
+OPTIND=0
 
 echo -n "$*" | sed -e 's/[^[:alnum:]]/_/g' | tr -s '_' | tr A-Z a-z | cut -c-$LIMIT

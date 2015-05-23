@@ -1,0 +1,16 @@
+#!/bin/bash
+
+case $1 in
+	owncloud|oc)
+		docker run \
+			-v ~/owncloud:/usr/share/webapps/owncloud/data \
+			--name owncloud \
+			-p 80:80 \
+			-p 443:443 \
+			-d l3iggs/owncloud
+		;;
+
+	*)
+		echo "wat?"
+		;;
+esac

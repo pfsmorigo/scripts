@@ -1,0 +1,19 @@
+#!/bin/bash
+cd ~/.dropbox-dist || ( echo "There is no dropbox dist dir!" && exit 2 )
+
+for IMAGE in $(find -name *.png | grep hicolor); do
+	echo "$IMAGE"
+
+	if [ "$1" = "revert" ]; then
+		[ -f $IMAGE.original ] && mv ${IMAGE}{.original,}
+		continue
+	fi
+
+	[ ! -f $IMAGE.original ] && cp ${IMAGE}{,.original}
+	convert ${IMAGE}.original -background black -flatten -gravity center -extent 22x22 $IMAGE
+done
+
+if [ "$1" = "restart" ]; then
+	dropbox stop
+	dropbox start
+fi

@@ -1,4 +1,10 @@
 #!/bin/bash
 
-NUMBER=$(keyring get $1 $USER)
-[ -n "$NUMBER" ] && skype --callto $NUMBER
+NUMBER=$(keyring get call_$1 $USER)
+[ -z "$NUMBER" ] && echo "Contact not found!" && exit 1
+
+if [ -z "$(pgrep -x skype)" ]; then
+	skype &
+	sleep 4
+fi
+skype --callto $NUMBER

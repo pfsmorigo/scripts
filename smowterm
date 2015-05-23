@@ -18,15 +18,11 @@ connect() {
 	SCREEN_NAME=$2
 
 	if [ "$SERVER" != "local" ]; then
-		SSH="ssh -tY"
-
-		SERVER_OPTIONS=$(grep "^$SERVER " ~/.smowterm | cut -d' ' -f2- | xargs)
-		[[ "$SERVER_OPTIONS" =~ "mosh" ]] && SSH="mosh"
-
+		grep -q ^${SERVER}$ .ssh/mosh && SSH="mosh" || SSH="ssh -tY"
 		PREFIX="$SSH $SERVER --"
 	fi
 
-	run_command $PREFIX bash ~/bin/smowscreen $SCREEN_NAME
+	run_command $PREFIX bash .local/bin/smowscreen $SCREEN_NAME
 
 	if [ $? != 0 ]; then
 		[ -z "$SCREEN_NAME" ] && SCREEN_NAME=$USER

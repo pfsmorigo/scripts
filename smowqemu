@@ -24,15 +24,16 @@ identify() {
 	fi
 }
 
-OUTPUT="-nographic -serial stdio"
+OUTPUT="-nographic -serial stdio -nodefaults"
 
-while getopts sdhpr:z OPT; do
+while getopts sdhpn:r:z OPT; do
 	case $OPT in
 		s) OUTPUT="-nographic -serial pty -monitor stdio";;
 		d) OUTPUT="-vga std -vnc :33";;
 		h) HUGEPAGES="-mem-path /dev/hugepages";;
-		p) PLAN9="-fsdev local,id=shared_dir,path=/home/pfsmorigo,security_model=none -device virtio-9p-pci,fsdev=shared_dir,mount_tag=host_dir";;
+		p) PLAN9="-fsdev local,id=shared_dir,path=$HOME,security_model=none -device virtio-9p-pci,fsdev=shared_dir,mount_tag=host_dir";;
 		r) ROOT=$OPTARG ;;
+		n) NETBOOT="-boot order=n -net nic -net user,tftp=$PWD,bootfile=${OPTARG}" ;
 		z) DRY_RUN=1 ;;
 	esac
 done
@@ -50,8 +51,8 @@ if [ -n "$VMID" ]; then
 fi
 
 QEMU_CMD="qemu-system-ppc64 \
-	-enable-kvm -M pseries -smp 4,cores=2,threads=4 -m 4G -nodefaults \
-	$OUTPUT $NETWORK $HUGEPAGES $PLAN9"
+	-enable-kvm -M pseries -smp 4,cores=2,threads=4 -m 4G \
+	$OUTPUT $NETWORK $HUGEPAGES $PLAN9 $NETBOOT"
 
 for ARG in $*; do
 	QEMU_CMD+=" $(identify $ARG)"

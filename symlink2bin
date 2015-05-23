@@ -39,9 +39,15 @@ shift
 for FILE in $*; do
 	FILE_NAME=$(basename $FILE)
 	FILE_PATH=$(cd $(dirname $FILE); pwd)
-
 	FILE_DEST="$DESTINY/${PREFIX}$FILE_NAME"
-	[ -e $FILE_DEST ] && [ ! -h $FILE_DEST ] && mv $FILE_DEST{,\_$(date +%F_%H-%M-%S)}
+
+	if [ -z "$DRYRUN" ] && [ -e $FILE_DEST ]; then
+		if [ -h $FILE_DEST ]; then
+			rm $FILE_DEST
+		else
+			mv $FILE_DEST{,\_$(date +%F_%H-%M-%S)}
+		fi
+	fi
 
 	COMMAND="ln -fs $(relative_dir $DESTINY $FILE_PATH)/$FILE_NAME $FILE_DEST"
 	echo $COMMAND
