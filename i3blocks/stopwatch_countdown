@@ -1,0 +1,114 @@
+#!/bin/bash
+# Copyright (C) 2015 Paulo Flabiano Smorigo <pfsmorigo@gmail.com>
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+##
+## Stopwatch and countdown timer
+## =====================================================================
+##
+## How do I use it?
+##
+## Right click to start/pause and scroll to increase or decrease. If you
+## start with zero (00:00) it be in stopwatch mode (S), otherwise you'll
+## be in countdown mode (C).
+##
+## How it's designed?
+##
+## There are three persistent values:
+##    - mode (VALUE[0]): S means stopwatch and C means countdown;
+##    - counter (VALUE[1]): saved time in seconds;
+##    - epoch (VALUE[2]): start epoch for stopwatch or target epoch
+##      for countdown. Value 0 means paused/stopped.
+##
+
+change() {
+	case $1 in
+		's')
+			# if it's off
+			if [ ${VALUE[2]} == 0 ]; then
+				case ${VALUE[0]} in
+					S) VALUE[2]=$(expr $NOW - ${VALUE[1]}) ;;
+					C) VALUE[2]=$(date -d "${VALUE[1]} sec" +%s) ;;
+				esac
+			else
+				VALUE[2]=0
+			fi
+			;;
+
+		'+'|'-')
+			# update the counter
+			let "VALUE[1]=${VALUE[1]}${1}${TIME_FRACTION}"
+
+			# change mode depending on the counter value
+			[ ${VALUE[1]} -le 0 ] && VALUE[0]=S || VALUE[0]=C
+
+			# stop the clock
+			VALUE[2]=0
+			;;
+	esac
+	save
+}
+
+save() {
+	# stop the clock if it reach the target
+	[ ${VALUE[1]} -lt 0 ] && VALUE[1]=0 && VALUE[2]=0
+
+	# store the current state
+	echo "${VALUE[0]},${VALUE[1]},${VALUE[2]}" > $VALUE_FILE
+
+	# send signal
+	I3BLOCKS=$(pgrep i3blocks)
+	[ -n "$I3BLOCKS" ] && kill -47 $I3BLOCKS # signal base is: 34
+}
+
+VALUE_FILE=/tmp/i3blocks_timer
+TIME_FRACTION=300
+TIME_FORMAT="%H:%M:%S"
+NOW=$(date +%s)
+
+# load values from the file if exists
+[ -f $VALUE_FILE ] && IFS=$',' VALUE=($(<$VALUE_FILE))
+
+# sanity check or reset it if necessary
+[[ "${VALUE[0]}" =~ ^(C|S)$ ]] || VALUE[0]=C
+for NUM in 1 2; do
+	[[ ${VALUE[$NUM]} =~ ^-?[0-9]+$ ]] || VALUE[$NUM]=0
+done
+
+# update counter if is on
+if [ ${VALUE[2]} -gt 0 ]; then
+	case ${VALUE[0]} in
+		S) let "VALUE[1]=$NOW-${VALUE[2]}" ;;
+		C) let "VALUE[1]=${VALUE[2]}-$NOW" ;;
+	esac
+	save
+fi
+
+# event handler
+case $BLOCK_BUTTON in
+	3) change 's' ;; # right click
+	4) change '+' ;; # scroll up
+	5) change '-' ;; # scroll down
+esac
+
+# print
+echo "${VALUE[0]} $(date -u -d @${VALUE[1]} +$TIME_FORMAT)"
+echo ""
+if [ ${VALUE[2]} -eq 0 ]; then
+	echo "#ffffff"
+else
+	[ ${VALUE[0]} == 'C' ] && [ ${VALUE[1]} -eq 0 ] && exit 33
+	echo "#00ff00"
+fi
