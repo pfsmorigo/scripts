@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Copyright (C) 2015 Paulo Flabiano Smorigo <pfsmorigo@gmail.com>
 
 # This program is free software: you can redistribute it and/or modify
@@ -14,30 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-##
-## Stopwatch and countdown v1.0
-## =====================================================================
-##
-## How do I use it?
-##
-##
-## Right click to start the clock. If the clock is 00:00 you will be in
-## stopwatch mode (S). Use your scroll wheel to increase (and decrease)
-## the clock and use it as a countdown timer (C). Right click when your
-## counter is on will pause it.
-##
-## How it's designed?
-##
-## There are three persistent values:
-##    - MODE: S means stopwatch and C means countdown;
-##    - COUNTER: Saved time in seconds;
-##    - EPOCH: Start epoch for stopwatch or target epoch for countdown.
-##             Value 0 means stopped.
-##
 
-STORE_FILE='/tmp/i3blocks_stopwatch_countdown'
-TIME_FRACTION=300
-TIME_FORMAT="%H:%M:%S"
+# Stopwatch and countdown v1.0
+
+# Right click to start the clock. If the clock is 00:00 you will be in
+# stopwatch mode (S). Use your scroll wheel to increase (and decrease)
+# the clock and use it as a countdown timer (C). Right click when your
+# counter is on will pause it.
+
+TIME_FRACTION=${1:-300}
+TIME_FORMAT=${2:-%H:%M:%S}
+
+STORE_FILE=/tmp/i3blocks_stopwatch_countdown
 NOW=$(date +%s)
 
 # load values from the file if exists
@@ -62,10 +51,10 @@ case $BLOCK_BUTTON in
 		;;
 
 	4|5) # scroll up or scroll down
-		[ $BLOCK_BUTTON = 4 ] && OP='+' || OP='-'
+		[ $BLOCK_BUTTON = 4 ] && OP=+ || OP=-
 
 		# update the counter
-		let "COUNTER=${COUNTER}${OP}${TIME_FRACTION}"
+		let "COUNTER = $COUNTER $OP $TIME_FRACTION"
 
 		# change mode depending on the counter value
 		[ $COUNTER -le 0 ] && MODE=S || MODE=C
@@ -78,13 +67,13 @@ esac
 # update counter if is on
 if [ $EPOCH -gt 0 ]; then
 	case $MODE in
-		S) let "COUNTER=$NOW-$EPOCH" ;;
-		C) let "COUNTER=$EPOCH-$NOW" ;;
+		S) let "COUNTER = $NOW - $EPOCH" ;;
+		C) let "COUNTER = $EPOCH - $NOW" ;;
 	esac
 fi
 
-# stop the clock if it reach the target
-[ $COUNTER -lt 0 ] && COUNTER=0 && EPOCH=0
+# stop the clock if it reaches the target
+[ $COUNTER -lt 0 ] && COUNTER=0
 
 # store the current state
 echo "$MODE,$COUNTER,$EPOCH" > $STORE_FILE
@@ -92,5 +81,5 @@ echo "$MODE,$COUNTER,$EPOCH" > $STORE_FILE
 # print
 echo "$MODE $(date -u -d @$COUNTER +$TIME_FORMAT)"
 echo ""
-[ $MODE == 'C' ] && [ $COUNTER -eq 0 ] && exit 33
-[ $EPOCH -eq 0 ] && echo "#ffffff" ||  echo "#00ff00"
+[ $MODE == C ] && [ $COUNTER -eq 0 ] && [ $EPOCH -ne 0 ] && exit 33
+[ $EPOCH -eq 0 ] && echo "#ffffff" || echo "#00ff00"
