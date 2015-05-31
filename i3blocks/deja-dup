@@ -9,12 +9,12 @@ esac
 BACKUP_DIR=$(dconf read /org/gnome/deja-dup/file/path)
 LAST_BACKUP=$(date +%s --date=$(dconf read /org/gnome/deja-dup/last-backup | tr -d \'))
 
-let "DIFF= $(date +"%s") - $LAST_BACKUP"
+let "DIFF= $(date +%s) - $LAST_BACKUP"
 let "DAYS=$DIFF / 86400"
 let "HOURS=($DIFF - $DAYS * 86400) / 3600"
 
 if [ "$DAYS" -gt 0 ]; then
    	echo "${DAYS}d ${HOURS}h"
-	echo ""
+	echo "> ${DAYS}d"
 	[ "$DAYS" -ge 2 ] && ( [ "$DAYS" -ge 5 ] && echo "#FF0000" || echo "#FFFF00" ) || echo "#FFFFFF"
 fi
