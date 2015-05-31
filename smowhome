@@ -12,7 +12,15 @@ base_dir() {
 }
 
 initial_dirs() {
-	mkdir -p $BIN_DIR ~/.local/share/newsbeuter/ ~/.cache/mutt
+	mkdir -p $BIN_DIR ~/projects ~/media ~/.local/share/newsbeuter ~/.cache/mutt
+	[ -d ~/Desktop   ] && mv ~/{D,d}esktop
+	[ -d ~/Documents ] && mv ~/{D,d}ocuments
+	[ -d ~/Downloads ] && mv ~/{D,d}ownloads
+	[ -d ~/Public    ] && mv ~/{P,p}ublic
+	[ -d ~/Templates ] && mv ~/{T,t}emplates
+	[ -d ~/Music     ] && mv ~/Music    ~/media/music
+	[ -d ~/Pictures  ] && mv ~/Pictures ~/media/pictures
+	[ -d ~/Videos    ] && mv ~/Videos   ~/media/videos
 }
 
 backup() {
@@ -48,7 +56,6 @@ BASE_DIR="$(base_dir)"
 SCRIPT_DIRS="$BASE_DIR $BASE_DIR/smartprompt $BASE_DIR/local $BASE_DIR/wrappers $BASE_DIR/3rdparty $HOME/ibm/scripts"
 
 echo $BASE_DIR
-
 SYMLINK_EXEC=symlink2bin
 if ! command -v $SYMLINK_EXEC >/dev/null 2>&1; then
 	if [ -f $BASE_DIR/$SYMLINK_EXEC ]; then
