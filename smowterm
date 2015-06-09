@@ -1,67 +1,28 @@
 #!/bin/bash
 
-server_list()
-{
+NAME=URxvt
+SERVER=$1
+COMMAND='echo Hostname: $HOSTNAME;'
+COMMAND+='smowscreen;'
+COMMAND+='test $? -eq 127 && screen -AOxRR main;'
+COMMAND+='test $? -eq 127 && bash;'
+COMMAND+='test $? -ne 1 && sleep 10'
+
+if [ "$1" = "gui" ]; then
 	HOSTS="$(grep -v "^#" /etc/hosts | awk '{ print $2 }' | sort -u)"
 	SSH_CONFIG="$(grep "^Host " ~/.ssh/config | awk '{ print $2 }' | grep -v '*' )"
-	echo -e "$HOSTS\n$SSH_CONFIG" | sort -u
-}
-
-pick_server() {
-	ANS=$(zenity --list --text='Pick a server' --column=servers local $(server_list) | cut -d'|' -f1)
-	[[ -n $ANS ]] && $0 $ANS
-	exit 0
-}
-
-connect() {
-	SERVER=$1
-	SCREEN_NAME=$2
-
-	if [ "$SERVER" != "local" ]; then
-		grep -q ^${SERVER}$ .ssh/mosh && SSH="mosh" || SSH="ssh -tY"
-		PREFIX="$SSH $SERVER --"
-	fi
-
-	run_command $PREFIX bash .local/bin/smowscreen $SCREEN_NAME
-
-	if [ $? != 0 ]; then
-		[ -z "$SCREEN_NAME" ] && SCREEN_NAME=$USER
-		run_command $PREFIX screen -AOxRR $SCREEN_NAME
-	fi
-
-	if [ $? != 0 ]; then
-		run_command $PREFIX
-	fi
-
-	sleep 100
-	exit 0
-}
-
-run_command() {
-	echo -e "\n\033[0;33m[ $* ]\033[0m\n"
-	$*
-	return $?
-}
-
-NAME="URxvt"
-
-case $1 in
-	gui) pick_server;;
-	connect) connect $2 $3;;
-	local|'') SERVER="local";;
-	*)  SERVER="$1"; NAME+="Remote";;
-esac
-
-SCREEN_NAME=$2
-
-if ! ps -ef | grep uraxvtd | grep -v grep 2>&1 > /dev/null; then
-	urxvtd -q -f -o
+	LIST=$(echo -e "$HOSTS $SSH_CONFIG" | sort -u)
+	ANS=$(zenity --list --text='Pick a server' --column=servers local $LIST)
+	[[ -n $ANS ]] && SERVER=$ANS || exit 1
 fi
 
-set -x
-urxvtc -name $NAME -e sh -c "$0 connect $SERVER $SCREEN_NAME"
+if [ -n "$SERVER" ] && [ "$SERVER" != "local" ]; then
+	NAME+="Remote"
+	grep -q ^${SERVER}$ .ssh/mosh && SSH="mosh" || SSH="ssh -tY"
+	COMMAND="$SSH $SERVER '$COMMAND'; echo exit code: $?; sleep 10"
+fi
 
-#urxvtc -name $NAME -e sh -c "$COMMAND; sleep 100"; sleep 100
+pgrep urxvtd > /dev/null || urxvtd --fork --opendisplay > /tmp/urxvtd.log 2>&1
+set -xf
+urxvtc -name $NAME -e sh -c "$COMMAND"
 #urxvtc -name $NAME -e sh -c "export TERM='linux'; $PREFIX; sleep 100"
-
-sleep 10
