@@ -1,13 +1,32 @@
 #!/bin/bash
 
+run_cmd() {
+	echo $*
+	$*
+}
+
 case $1 in
 	owncloud|oc)
-		docker run \
+		run_cmd docker run \
 			-v ~/owncloud:/usr/share/webapps/owncloud/data \
 			--name owncloud \
 			-p 80:80 \
 			-p 443:443 \
 			-d l3iggs/owncloud
+		;;
+
+	steam)
+		run_cmd docker rm steam
+		run_cmd docker run --name=steam \
+			-v /tmp/.X11-unix:/tmp/.X11-unix \
+			-v /dev/shm:/dev/shm \
+			-v /run/user/${UID}/pulse:/run/user/${UID}/pulse \
+			-v /etc/machine-id:/etc/machine-id \
+			-v ${HOME}/.cache/steam:/home/steam \
+			-e DISPLAY=${DISPLAY} \
+			-ti steamos /bin/bash
+			#-t -i tianon/steam /bin/bash
+			#tianon/steam
 		;;
 
 	*)
