@@ -2,10 +2,10 @@
 
 NAME=URxvt
 SERVER=$1
-COMMAND='echo Hostname: $HOSTNAME;'
-COMMAND+='smowscreen;'
-COMMAND+='test $? -eq 127 && screen -AOxRR main;'
-COMMAND+='test $? -eq 127 && bash;'
+COMMAND='echo Hostname: $HOSTNAME; '
+COMMAND+='~/.local/bin/smowscreen; '
+COMMAND+='test $? -eq 127 && screen -AOxRR $USER; '
+COMMAND+='test $? -eq 127 && bash; '
 COMMAND+='test $? -ne 1 && sleep 10'
 
 if [ "$1" = "gui" ]; then
@@ -18,8 +18,8 @@ fi
 
 if [ -n "$SERVER" ] && [ "$SERVER" != "local" ]; then
 	NAME+="Remote"
-	grep -q ^${SERVER}$ .ssh/mosh && SSH="mosh" || SSH="ssh -tY"
-	COMMAND="$SSH $SERVER '$COMMAND'; echo exit code: $?; sleep 10"
+	grep -q ^${SERVER}$ ~/.ssh/mosh && SSH="mosh" || SSH="ssh -tY"
+	COMMAND="$SSH $SERVER -- bash -c '$COMMAND'; echo exit code: $?; sleep 10"
 fi
 
 pgrep urxvtd > /dev/null || urxvtd --fork --opendisplay > /tmp/urxvtd.log 2>&1
