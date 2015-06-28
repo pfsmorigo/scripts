@@ -207,8 +207,8 @@ display() {
 					--output LVDS1 --mode 1600x900 --pos 1250x1080 \
 					--output $SECOND_DISPLAY --mode 1920x1080 --pos 0x0
 				sleep 1
-				DISPLAY=:0 i3 move workspace "1 2 3 4 5" LVDS1
-				DISPLAY=:0 i3 move workspace "6 7 8 9 10" $SECOND_DISPLAY
+				DISPLAY=:0 i3 move workspace "I II III IV V" LVDS1
+				DISPLAY=:0 i3 move workspace "VI VII VIII IX X" $SECOND_DISPLAY
 				;;
 			$ONLY_PRI)
 				xrandr -d :0 --auto
