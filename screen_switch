@@ -1,0 +1,33 @@
+#!/bin/bash
+
+COUNT=0
+
+SCREEN_LIST=$(screen -list | sed '1d;N;$!P;$!D;$d' | sed 's/\t//')
+[ -z "$(echo $SCREEN_LIST | xargs)" ] && SCREEN_LIST="$USER (new)"
+
+echo ""
+OLDIFS=$IFS
+IFS=$'\n'
+for SCREEN in $SCREEN_LIST; do
+	COUNT=$(( $COUNT + 1 ))
+	SCREEN_ARRAY[$COUNT]=$SCREEN
+	printf "%5s)\t%s\n" $COUNT $SCREEN
+done
+IFS=$OLDIFS
+echo ""
+
+read -p "Pick one or type a new name: " PICK
+[ -z "$PICK" ] && PICK=1
+if [[ "$PICK" =~ ^[0-9]+$ ]]; then
+	if [ $PICK -ge 1 -a $PICK -le $COUNT ]; then
+		SCREEN_SELECTED=$(echo ${SCREEN_ARRAY[$PICK]} | cut -d' ' -f1)
+	else
+		echo "Out of the range!"
+		exit 2
+	fi
+else
+	SCREEN_SELECTED=$PICK
+fi
+
+[ "$SCREEN_SELECTED" = "$STY" ] && echo "Already in $SCREEN_SELECTED" && exit 3
+screen -AOxRR $SCREEN_SELECTED
