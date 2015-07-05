@@ -1,7 +1,7 @@
 #!/bin/bash
 #timezone info at /usr/share/zoneinfo
 
-[ "$1" = "gui" ] && GUI=1
+CONFIG_FILE="$HOME/.config/timezones"
 
 set_color() {
 	if [ $1 -lt 8 ]; then
@@ -11,24 +11,29 @@ set_color() {
 	else
 		COLOR=33
 	fi
-	[ -z "$GUI" ] && echo -n "\033[0;${COLOR}m"
+	echo -n "\033[0;${COLOR}m"
 	echo -n "$2"
-	[ -z "$GUI" ] && echo -n "\033[0m"
+	echo -n "\033[0m"
 }
 
-read -d '' LIST <<EOF
-America/New_York,diane
-Asia/Calcutta,latha
-Australia/Canberra,anton benh
-Brazil/East,pfsmorigo
-EST,
-Europe/London,cjwatson
-Europe/Paris,thierry_l
-Europe/Zurich,phcoder
-US/Central,baude hamzy
-US/Eastern,
-US/Pacific,
-EOF
+[ -f $CONFIG_FILE ] && LIST=$(cat $CONFIG_FILE)
+
+if [ -z "$(echo $LIST | xargs)" ]; then
+	read -d '' LIST <<-EOF
+	America/New_York,
+	Asia/Calcutta,
+	Australia/Canberra,
+	Brazil/East,
+	EST,
+	Europe/London,
+	Europe/Paris,
+	Europe/Zurich,
+	GMT,
+	US/Central,
+	US/Eastern,
+	US/Pacific,
+	EOF
+fi
 
 OLDIFS=$IFS
 IFS=$'\n'
@@ -39,17 +44,6 @@ for ITEM in $LIST; do
 done
 IFS=$OLDIFS
 
-if [ -z "$GUI" ]; then
-	echo ""
-	echo -e "$TIMEZONE_LIST" | column -t -s, | sort
-	echo ""
-else
-	echo -e $TIMEZONE_LIST | sort | zenity --list --column "timezone"
-	#echo -e $TIMEZONE_LIST
-	#echo -e $TIMEZONE_LIST | sort | zenity --list --separator=',' \
-												  #--column "Time" \
-												  #--column "TZ" \
-												  #--column "Region" \
-												  #--column "People"
-fi
-
+echo ""
+echo -e "$TIMEZONE_LIST" | column -t -s, | sort
+echo ""
