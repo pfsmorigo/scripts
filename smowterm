@@ -4,7 +4,7 @@ NAME=URxvt
 SERVER=$1
 COMMAND='echo Hostname: $HOSTNAME; '
 COMMAND+='~/.local/bin/screen_switch; '
-COMMAND+='test $? -eq 127 && screen -AOxRR $USER; '
+COMMAND+='test $? -eq 127 && screen -AOxRR '$USER'; '
 COMMAND+='test $? -eq 127 && bash; '
 COMMAND+='test $? -ne 1 && sleep 10'
 
