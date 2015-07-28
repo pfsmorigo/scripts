@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cat /proc/$1 | sed 's/.*: //g' | sed -ne '$!H;/^$/{x;s/\n/ /g;G;p;d;}' | column -t
