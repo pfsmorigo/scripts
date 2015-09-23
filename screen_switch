@@ -1,8 +1,7 @@
 #!/bin/bash
 
 COUNT=0
-
-SCREEN_LIST=$(screen -list | sed '1d;N;$!P;$!D;$d' | sed 's/\t//')
+SCREEN_LIST=$(screen -list | grep "tached)$" | sed 's/\t//')
 [ -z "$(echo $SCREEN_LIST | xargs)" ] && SCREEN_LIST="$USER (new)"
 
 echo ""
