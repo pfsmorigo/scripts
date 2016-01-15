@@ -28,6 +28,13 @@ while [ 1 ]; do
 			exit 0
 			;;
 
+		te)
+			xte 'key q'
+			sleep 0.2
+			xte 'key e'
+			sleep 0.2
+			;;
+
 		*)
 			notify-send "automatic what?"
 			exit 1

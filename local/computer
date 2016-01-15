@@ -204,11 +204,12 @@ display() {
 		case $EXIT in
 			$DUAL)
 				xrandr -d :0 \
-					--output LVDS1 --mode 1600x900 --pos 1250x1080 \
+					--output LVDS1 --mode 1600x900 --pos 146x1080 \
 					--output $SECOND_DISPLAY --mode 1920x1080 --pos 0x0
+					#--output LVDS1 --mode 1600x900 --pos 1250x1080 \
 				sleep 1
-				DISPLAY=:0 i3 move workspace "I II III IV V" LVDS1
-				DISPLAY=:0 i3 move workspace "VI VII VIII IX X" $SECOND_DISPLAY
+				DISPLAY=:0 i3 move workspace "1:I 2:II 3:III 4:IV 5:V" LVDS1
+				DISPLAY=:0 i3 move workspace "6:VI 7:VII 8:VIII 9:IX 10:X" $SECOND_DISPLAY
 				;;
 			$ONLY_PRI)
 				xrandr -d :0 --auto

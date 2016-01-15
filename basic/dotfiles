@@ -9,10 +9,6 @@ base_dir() {
 	echo "$(cd $(dirname $EXEC); pwd)"
 }
 
-initial_dirs() {
-	mkdir -p ~/logs/screen ~/.config
-}
-
 setup_git() {
 	GIT_FILE=$HOME/.config/git/local
 	if [ -f "$GIT_FILE" ]; then
@@ -39,42 +35,9 @@ BASE_DIR="$(base_dir)"
 
 # I always checkout the dotfiles repo in the same directory as the script one.
 DOTFILES_DIR=${BASE_DIR/scripts/dotfiles}
-
-SYMLINK_EXEC=symlink2bin
-if ! command -v $SYMLINK_EXEC >/dev/null 2>&1; then
-	if [ -f $BASE_DIR/$SYMLINK_EXEC ]; then
-		SYMLINK_EXEC="$BASE_DIR/$SYMLINK_EXEC"
-	else
-		echo "Symlink executable not found!"
-		exit 1
-	fi
-fi
-
 if ! test -d $DOTFILES_DIR; then
 	echo "There is no dotfiles directory. Cloning one..."
 	git clone --recursive http://github.com/pfsmorigo/dotfiles.git $DOTFILES_DIR
 fi
 
-set -f
-FIND_PARAM="-mindepth 1 -maxdepth 1 \
-	-not -name README.md -not -name config -not -name .*"
-DOTFILES_LIST="$(find $DOTFILES_DIR $FIND_PARAM)"
-DOTFILES_CONFIG_LIST="$(find $DOTFILES_DIR/config $FIND_PARAM)"
-set +f
-
-case $1 in
-	install|'')
-		initial_dirs
-		setup_git
-		$SYMLINK_EXEC -p. $HOME         $DOTFILES_LIST
-		$SYMLINK_EXEC     $HOME/.config $DOTFILES_CONFIG_LIST
-		;;
-
-	clean)
-		rm -f ~/.rpmmacros.*
-		;;
-
-	*)
-		echo wat?
-		;;
-esac
+setup_git

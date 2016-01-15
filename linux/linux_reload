@@ -1,0 +1,9 @@
+#!/bin/bash
+
+KERNEL=$(ls -1 /boot/vmlinu*-$(uname -r))
+INITRD=$(ls -1 /boot/initr*-$(uname -r).*)
+CMDLINE="$(cat /proc/cmdline)"
+
+set -x
+kexec -l $KERNEL --initrd=$INITRD --command-line=\"$CMDLINE\" && \
+	kexec -e

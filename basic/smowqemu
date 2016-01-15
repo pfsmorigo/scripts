@@ -1,0 +1,54 @@
+#!/bin/bash
+
+ROOT=/dev/sda
+OUTPUT="-nodefaults -nographic -serial stdio"
+BOOT_ORDER=
+
+while getopts sdghpn:r:z OPT; do
+	case $OPT in
+		s) OUTPUT="-nodefaults -nographic -serial pty -monitor stdio";;
+		d) OUTPUT="-vga std -vnc :33";;
+		g) OUTPUT="-gdb tcp::1234 -S -nodefaults -nographic -serial pty -monitor stdio";;
+		h) HUGEPAGES="-mem-path /dev/hugepages";;
+		p) PLAN9="-fsdev local,id=shared_dir,path=/home/pfsmorigo,security_model=none -device virtio-9p-pci,fsdev=shared_dir,mount_tag=host_dir";;
+	    n) NETBOOT="-net nic -net user,tftp=$PWD,bootfile=${OPTARG}"; BOOT_ORDER+=n ;;
+		r) ROOT=$OPTARG ;;
+		z) DRY_RUN=1 ;;
+	esac
+done
+shift $((OPTIND-1))
+OPTIND=0
+
+# if first parameter is a number, use it as the VM id
+[ -z "$(echo $1 | sed 's/[0-9]//g')" ] && VMID=$1 && shift
+
+if [ -n "$VMID" ]; then
+	MAC="4C:45:42:45:$(printf '%02d:%02d' $(grep -m1 $USER /etc/hosts | cut -d. -f3) $VMID)"
+	NETWORK="-device spapr-vscsi -device spapr-vlan,netdev=net0,mac=$MAC -netdev bridge,br=br0,id=net0"
+fi
+
+QEMU_CMD="qemu-system-$(uname -m) -enable-kvm -m 2G $OUTPUT $NETWORK $HUGEPAGES $PLAN9 $NETBOOT"
+
+for FILE in $*; do
+	[ ! -f $FILE ] && echo "$FILE not found!" && exit 2
+
+	case $FILE in
+		*vmlinu*)
+			QEMU_CMD+=" -kernel $FILE -append \"root=$ROOT\" rw";;
+		*initr*)
+			QEMU_CMD+=" -initrd $FILE";;
+		*.img|*.raw|*.qcow2)
+			QEMU_CMD+=" -drive file=$FILE"; [[ $BOOT_ORDER =~ .*c.* ]] || BOOT_ORDER+=c ;;
+		*.iso)
+			QEMU_CMD+=" -cdrom $FILE"; [[ $BOOT_ORDER =~ .*d.* ]] || BOOT_ORDER+=d ;;
+		*)
+			echo "$FILE not identified!"; exit 1;;
+	esac
+done
+
+[ -n "$BOOT_ORDER" ] && QEMU_CMD+=" -boot order=$BOOT_ORDER"
+
+QEMU_CMD="$(echo "$QEMU_CMD"| xargs)"
+echo -e "\033k($VMID) $(basename $PWD)\033\\"
+echo "$QEMU_CMD"
+[ "$DRY_RUN" != "1" ] && $QEMU_CMD
