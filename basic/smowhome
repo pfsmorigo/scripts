@@ -19,10 +19,16 @@ check_dep() {
 	fi
 }
 
-setup() {
-	check_dep stow
+setup_initial_dirs() {
+	echo "Setup inital dirs..."
+	mkdir -p \
+		$BIN_DIR \
+		$HOME/.cache/mutt \
+		$HOME/.config/git \
+		$HOME/.local/share/newsbeuter \
+		$HOME/media \
+		$HOME/projects
 
-	mkdir -p $BIN_DIR ~/projects ~/media ~/.local/share/newsbeuter ~/.cache/mutt
 	[ -d ~/Desktop   ] && mv ~/{D,d}esktop
 	[ -d ~/Documents ] && mv ~/{D,d}ocuments
 	[ -d ~/Downloads ] && mv ~/{D,d}ownloads
@@ -31,18 +37,47 @@ setup() {
 	[ -d ~/Music     ] && mv ~/Music    ~/media/music
 	[ -d ~/Pictures  ] && mv ~/Pictures ~/media/pictures
 	[ -d ~/Videos    ] && mv ~/Videos   ~/media/videos
+}
+
+setup_git() {
+	echo "Setup git..."
+	GIT_FILE=$HOME/.config/git/local
+	if [ ! -f "$GIT_FILE" ]; then
+		FULLNAME=$(getent passwd $LOGNAME | cut -d ":" -f 5)
+		echo -n "Enter your full name [$FULLNAME]: "
+		read NEWFULLNAME
+		[ -n "$NEWFULLNAME" ] && FULLNAME=$NEWFULLNAME
+
+		EMAIL="$LOGNAME@gmail.com"
+		echo -n "Enter your email [$EMAIL]: "
+		read NEWEMAIL
+		[ -n "$NEWEMAIL" ] && EMAIL=$NEWEMAIL
+
+		cat > $GIT_FILE <<-EOL
+		[user]
+		name = $FULLNAME
+		email = $EMAIL
+
+		[sendemail]
+		bcc = $EMAIL
+		EOL
+	fi
 
 	for REPO in $REPOS; do
 		[ ! -d $HOME/$REPO ] && git clone --recursive $REPO_URL/$REPO
 	done
+}
 
-	cd $HOME/scripts
-	stow -t $BIN_DIR basic smartprompt
+setup_stow() {
+	echo "Setup stow..."
+	check_dep stow
 
-	mv $HOME/.bashrc{,_original}
+	cd $HOME/scripts && stow -t $BIN_DIR basic smartprompt
 
-	cd $HOME/dotfiles
-	stow bash git screen vim
+	# If bashrc exists (and not a symlink) back up it
+	[ -h $HOME/.bashrc ] || mv $HOME/.bashrc{,_original}
+
+	cd $HOME/dotfiles && stow bash git screen vim
 }
 
 backup() {
@@ -69,11 +104,8 @@ check_private() {
 	fi
 }
 
-case $1 in
-	setup)
-		setup
-		;;
-esac
-
+setup_initial_dirs
+setup_git
+setup_stow
 
 echo -e "\nDone.\n"
