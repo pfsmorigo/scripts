@@ -1,17 +1,27 @@
 #!/bin/bash
 
 BIN_DIR="$HOME/.local/bin"
+REPO_URL="http://github.com/pfsmorigo"
+REPOS="scripts dotfiles"
 
-base_dir() {
-	EXEC=${BASH_SOURCE[0]}
-	if [ -h $EXEC ]; then
-		LINK="$(readlink $EXEC)"
-		[ "${LINK:0:1}" = "/" ] && EXEC="$LINK" || EXEC="$(dirname $EXEC)/$LINK"
+check_dep() {
+	if [ ! -x "$(command -v $1)" ]; then
+		if [ -f /etc/redhat-release ]; then
+			local COMMAND="dnf"
+		elif [ -f /etc/debian_version ]; then
+			local COMMAND="apt-get"
+		else
+			echo "No distro support!"
+			exit 2
+		fi
+
+		sudo $COMMAND install $1
 	fi
-	echo "$(cd $(dirname $EXEC); pwd)"
 }
 
-initial_dirs() {
+setup() {
+	check_dep stow
+
 	mkdir -p $BIN_DIR ~/projects ~/media ~/.local/share/newsbeuter ~/.cache/mutt
 	[ -d ~/Desktop   ] && mv ~/{D,d}esktop
 	[ -d ~/Documents ] && mv ~/{D,d}ocuments
@@ -21,6 +31,18 @@ initial_dirs() {
 	[ -d ~/Music     ] && mv ~/Music    ~/media/music
 	[ -d ~/Pictures  ] && mv ~/Pictures ~/media/pictures
 	[ -d ~/Videos    ] && mv ~/Videos   ~/media/videos
+
+	for REPO in $REPOS; do
+		[ ! -d $HOME/$REPO ] && git clone --recursive $REPO_URL/$REPO
+	done
+
+	cd $HOME/scripts
+	stow -t $BIN_DIR basic smartprompt
+
+	mv $HOME/.bashrc{,_original}
+
+	cd $HOME/dotfiles
+	stow bash git screen vim
 }
 
 backup() {
@@ -47,46 +69,11 @@ check_private() {
 	fi
 }
 
-if ! command -v realpath >/dev/null 2>&1; then
-	echo "You need to install realpath package!"
-	exit 1
-fi
-
-BASE_DIR="$(base_dir)"
-SCRIPT_DIRS="$BASE_DIR $BASE_DIR/smartprompt $BASE_DIR/local $BASE_DIR/wrappers $BASE_DIR/3rdparty $HOME/ibm/scripts"
-
-echo $BASE_DIR
-SYMLINK_EXEC=symlink2bin
-if ! command -v $SYMLINK_EXEC >/dev/null 2>&1; then
-	if [ -f $BASE_DIR/$SYMLINK_EXEC ]; then
-		SYMLINK_EXEC="$BASE_DIR/$SYMLINK_EXEC"
-	else
-		echo "Symlink executable not found!"
-		exit 1
-	fi
-fi
-
 case $1 in
-
-	backup)
-		backup
-		;;
-
-	*)
-		initial_dirs
-
-		# Run dotfiles script
-		$BASE_DIR/dotfiles
-
-		for DIR in $SCRIPT_DIRS; do
-			if [ -d $DIR ]; then
-				echo "Creating symlinks for $DIR directory..."
-				echo "-------------------------------------------------------------"
-				$SYMLINK_EXEC $BIN_DIR $(find $DIR -maxdepth 1 -mindepth 1 -executable -type f)
-				echo ""
-			fi
-		done
+	setup)
+		setup
 		;;
 esac
+
 
 echo -e "\nDone.\n"
