@@ -33,7 +33,7 @@ setup_core_packages() {
 
 	[ -n "$TO_INSTALL" ] && \
 		echo "Installing $TO_INSTALL..." && \
-		sudo $COMMAND install $TO_INSTALL
+		sudo $INSTALL_CMD install $TO_INSTALL
 }
 
 setup_initial_dirs() {
