@@ -91,7 +91,8 @@ setup_stow() {
 	cd $HOME/scripts && stow -t $BIN_DIR basic smartprompt
 
 	# If bashrc exists (and not a symlink) back up it
-	[ -h $HOME/.bashrc ] || mv $HOME/.bashrc{,_original}
+	[ -h $HOME/.bashrc ] || mv $HOME/.bashrc{,X}
+	[ -h $HOME/.bash_profile ] || mv $HOME/.bash_profile{,X}
 
 	cd $HOME/dotfiles && stow bash git screen vim
 }
