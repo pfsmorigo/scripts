@@ -4,19 +4,36 @@ BIN_DIR="$HOME/.local/bin"
 REPO_URL="http://github.com/pfsmorigo"
 REPOS="scripts dotfiles"
 
-check_dep() {
-	if [ ! -x "$(command -v $1)" ]; then
-		if [ -f /etc/redhat-release ]; then
-			local COMMAND="dnf"
-		elif [ -f /etc/debian_version ]; then
-			local COMMAND="apt-get"
-		else
-			echo "No distro support!"
-			exit 2
-		fi
+setup_core_packages() {
+	local PACKAGES="git screen stow telnet wget"
+	local PACKAGES_DEBIAN="vim"
+	local PACKAGES_REDHAT="vim-enhanced"
+	local TO_INSTALL=
 
-		sudo $COMMAND install $1
+	if [ -f /etc/redhat-release ]; then
+		local INSTALL_CMD="yum"
+		local LIST__PKG_CMD="rpm -qa"
+		PACKAGE+=" $PACKAGES_REDHAT"
+
+	elif [ -f /etc/debian_version ]; then
+		local INSTALL_CMD="apt-get"
+		local LIST_PKG_CMD="dpkg -l"
+		PACKAGE+=" $PACKAGES_DEBIAN"
+	else
+		echo "No distro support!"
+		exit 2
 	fi
+
+	for PACKAGE in $PACKAGES; do
+		echo "Check if $PACKAGE is installed..."
+		if [ ! $($LIST__PKG_CMD | grep "^${PACKAGE}-[0-9]") ]; then
+			TO_INSTALL+=" $PACKAGE"
+		fi
+	done
+
+	[ -n "$TO_INSTALL" ] && \
+		echo "Installing $TO_INSTALL..." && \
+		sudo $COMMAND install $TO_INSTALL
 }
 
 setup_initial_dirs() {
@@ -70,7 +87,6 @@ setup_git() {
 
 setup_stow() {
 	echo "Setup stow..."
-	check_dep stow
 
 	cd $HOME/scripts && stow -t $BIN_DIR basic smartprompt
 
@@ -104,6 +120,7 @@ check_private() {
 	fi
 }
 
+setup_core_packages
 setup_initial_dirs
 setup_git
 setup_stow
