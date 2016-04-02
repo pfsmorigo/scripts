@@ -1,0 +1,12 @@
+#!/bin/bash
+
+pkill conky
+sleep 1
+
+CONKY=/usr/bin/conky
+CONFIG_FILE=/home/pfsmorigo/.config/conky/default
+
+$CONKY -c $CONFIG_FILE -a top_right -x 40 -y 60 -d
+
+#bash -c "sleep 30; conky -c conky1 -a top_right -x 7 -y 70 -d"
+#bash -c "sleep 30; conky -c conky2 -a top_left -x 150 -y 550 -d"
