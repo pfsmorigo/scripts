@@ -5,35 +5,43 @@ REPO_URL="http://github.com/pfsmorigo"
 REPOS="scripts dotfiles"
 
 setup_core_packages() {
+	local DISTRO=$(grep -T "^ID=" /etc/*-release | cut -d= -f2 | tr -d '"')
+	local NUMBER=$(grep -T "^VERSION_ID=" /etc/*-release | cut -d= -f2 | tr -d '"')
+
 	local PACKAGES="git screen stow telnet wget"
 	local PACKAGES_DEBIAN="vim"
 	local PACKAGES_REDHAT="vim-enhanced"
-	local TO_INSTALL=
+	local INSTALL_EXEC=
+	local INSTALLED=
 
-	if [ -f /etc/redhat-release ]; then
-		local INSTALL_CMD="yum"
-		local LIST__PKG_CMD="rpm -qa"
-		PACKAGE+=" $PACKAGES_REDHAT"
+	case $DISTRO in
+		rhel|fedora)
+			INSTALL_EXEC=yum
+			[ $DISTRO == 'fedora' ] && [ $NUMBER -gt 22 ] && INSTALL_EXEC=dnf
+			INSTALLED="$(rpm -qa --qf '%{NAME} ')"
+			PACKAGES="$PACKAGES $PACKAGES_REDHAT"
+			;;
 
-	elif [ -f /etc/debian_version ]; then
-		local INSTALL_CMD="apt-get"
-		local LIST_PKG_CMD="dpkg -l"
-		PACKAGE+=" $PACKAGES_DEBIAN"
-	else
-		echo "No distro support!"
-		exit 2
-	fi
+		ubuntu|debian)
+			INSTALL_EXEC=apt
+			INSTALLED="$(dpkg-query -f '${binary:Package} ' -W)"
+			PACKAGES="$PACKAGES $PACKAGES_DEBIAN"
+			;;
+
+		*)
+			echo "Unknown distro!"
+			exit 1
+			;;
+	esac
 
 	for PACKAGE in $PACKAGES; do
-		echo "Check if $PACKAGE is installed..."
-		if [ ! $($LIST__PKG_CMD | grep "^${PACKAGE}-[0-9]") ]; then
-			TO_INSTALL+=" $PACKAGE"
-		fi
+		[[ ! "$INSTALLED" == *"$PACKAGE"* ]] && TO_INSTALL+="$PACKAGE "
 	done
 
-	[ -n "$TO_INSTALL" ] && \
-		echo "Installing $TO_INSTALL..." && \
-		sudo $INSTALL_CMD install $TO_INSTALL
+	if [ -n "$TO_INSTALL" ]; then
+		echo "Need to install: $TO_INSTALL"
+		sudo $INSTALL_EXEC install $TO_INSTALL
+	fi
 }
 
 setup_initial_dirs() {
