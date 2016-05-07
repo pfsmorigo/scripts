@@ -1,0 +1,6 @@
+#!/bin/bash
+
+FILE=$(find $HOME/media/backgrounds/use -type l | shuf -n 1)
+
+/usr/bin/feh --bg-scale $FILE
+

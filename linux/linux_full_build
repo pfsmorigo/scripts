@@ -2,5 +2,5 @@
 
 CPUS=$(grep -c ^process /proc/cpuinfo)
 
-time (make -j$CPUS modules vmlinux 2>&1 | tee /tmp/linux_make && \
+time (make -j$CPUS all 2>&1 | tee /tmp/linux_make && \
 	sudo make modules_install install 2>&1 | tee /tmp/linux_make_install)

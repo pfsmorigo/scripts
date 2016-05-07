@@ -1,0 +1,24 @@
+#!/bin/bash
+
+case $1 in
+	gmusic)
+		WINID=$(xdotool search --name 'Google Chrome' | head -n 1)
+		WINID_HEX=$(printf "0x%x" $WINID)
+		CHROME_TITLE=$(xwininfo -id $WINID_HEX | grep 'Google Play Music' | awk -F'"' '{ print $2 }')
+		[ -z "$CHROME_TITLE" ] && echo "No Google Play Music..." && exit 1
+		RAW_ARTIST=$(echo "$CHROME_TITLE" | cut -d'-' -f2 | xargs)
+		RAW_TITLE=$(echo "$CHROME_TITLE" | cut -d'-' -f1 | xargs)
+		;;
+
+	*)
+		RAW_ARTIST=$1
+		RAW_TITLE=$2
+		;;
+esac
+
+ARTIST=$(perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$RAW_ARTIST")
+TITLE=$(perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$RAW_TITLE")
+
+echo -e "\n$RAW_ARTIST\n$RAW_TITLE\n"
+curl -s "http://makeitpersonal.co/lyrics?artist=$ARTIST&title=$TITLE"
+echo ""

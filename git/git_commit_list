@@ -1,0 +1,10 @@
+#!/bin/bash
+
+LIST=$*
+COUNTER=0
+
+for COMMIT in $LIST; do
+	FILENAME=p$(printf "%02d" $COUNTER)_$COMMIT.patch
+	git format-patch -1 $COMMIT --stdout > $FILENAME
+	let COUNTER=COUNTER+1
+done
