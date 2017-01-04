@@ -1,0 +1,96 @@
+#!/bin/bash
+
+add2list() {
+	[ -z "$LIST" ] && LIST="$*" || LIST+=" OR $*"
+}
+
+LIST=""
+
+case $1 in
+	ads)
+		add2list "(FROM:service@conectcar.com AND -SUBJECT:recarga)"
+		add2list "FROM:(email@empresas.dell.com OR email@home.dell.com)"
+		add2list "FROM:*@insideapple.apple.com OR FROM:discover@new.itunes.com"
+		add2list "FROM:Lenovo@enews.lenovo.com"
+		add2list "FROM:compracerta@whr.com.br"
+		add2list "FROM:comunicacao@clientesvivo.com.br"
+		add2list "FROM:comunicado@montecarlo.com.br"
+		add2list "FROM:donotreply@mail.dolce-gusto.com"
+		add2list "FROM:email.campaign@sg.booking.com"
+		add2list "FROM:email@ricardoeletro.com.br"
+		add2list "FROM:emailcenter@novidades.magazineluiza.com.br"
+		add2list "FROM:info@e.mercadolivre.com.br"
+		add2list "FROM:nao-resposta@mastercard-email.com"
+		add2list "FROM:news@mkt.americanas.com"
+		add2list "FROM:noreply@getpocket.com"
+		add2list "FROM:noreply@vivino.com"
+		add2list "FROM:offers@e.godaddy.com"
+		add2list "FROM:oportunidades@ultrafarma.com.br"
+		add2list "FROM:paypal@mail.paypal.com.br"
+		add2list "FROM:vivara@news.vivara.com.br"
+		add2list "LIST:07487d1456302a286cf9c4ccc.678209.list-id.mcsv.net" # TED
+		add2list "LIST:fa32acc7a873c8ae79cceb5a0.243017.list-id.mcsv.net" # Recanto
+		add2list "LIST:v3arcosdourados" # McDonalds
+		;;
+
+	social)
+		add2list "FROM:*@facebookmail.com"
+		add2list "FROM:*@klout.com"
+		add2list "FROM:*@linkedin.com"
+		add2list "FROM:*@plus.google.com"
+		add2list "FROM:*@twitter.com"
+		add2list "FROM:aboutme@about.me"
+		add2list "FROM:follow@postmaster.scribd.com"
+		add2list "FROM:members@e.tripadvisor.com"
+		add2list "FROM:no-reply@endomondo.com"
+		add2list "FROM:noreply@e.digg.com"
+		add2list "FROM:noreply@foursquare.com"
+		add2list "FROM:noreply@youtube.com"
+		;;
+
+	shopping)
+		add2list "FROM:*@mercadobitcoin.com.br"
+		add2list "FROM:appleid@apple.com"
+		add2list "FROM:appleid@id.apple.com"
+		add2list "FROM:do_not_reply@itunes.com"
+		add2list "FROM:ebay@ebay.com"
+		add2list "FROM:googleplay-noreply@google.com"
+		add2list "FROM:sales@dealextreme.com"
+		add2list "FROM:service@conectcar.com AND SUBJECT:recarga)"
+		;;
+
+	bank)
+		add2list "FROM:*@itau-unibanco.com.br"
+		add2list "FROM:*@nubank.com.br"
+		add2list "FROM:*@santander.com.br"
+		add2list "FROM:AmericanExpress@welcome.aexp.com"
+		;;
+
+	bills)
+		add2list "(FROM:live-tim@timbrasil.com.br AND SUBJECT:(Sua fatura LIVE TIM já Está disponível no portal Minha Conta))"
+		add2list "FROM:adm@remaxflow.com.br"
+		add2list "FROM:contadigitalvivo@vivo.com.br"
+		add2list "FROM:faturaporemail@servico.aeseletropaulo.com.br"
+		add2list "FROM:suafatura@comgas.com.br"
+		;;
+
+	jobs)
+		add2list "FROM:(monster@email.recjobs.monster.com OR jagent@route.monster.com OR monster@email.content.monster.com)"
+		;;
+
+	old_junk)
+		add2list "LABEL:advertisement"
+		add2list "LABEL:alert"
+		add2list "LABEL:collective-buying"
+		add2list "LABEL:social-networks"
+		LIST="($LIST) AND BEFORE:$(date +%F --date='-1 year')"
+		;;
+
+	*)
+		echo "wat?"
+		exit 1
+		;;
+esac
+
+echo $LIST
+echo $LIST | xsel -ib
