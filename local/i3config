@@ -10,7 +10,7 @@ for OUTPUT in $(xrandr | grep ' connected' | grep 'mm' | cut -d' ' -f1); do
 
 	case $COUNTER in
 		"0") cat config-primary >> config ;;
-		"1") cat config-secundary >> config ;;
+		"1") cat config-secondary >> config ;;
 	esac
 
 	sed -i "s/DISPLAYNAME/$OUTPUT/g" config
