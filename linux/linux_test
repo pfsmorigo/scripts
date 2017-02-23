@@ -1,0 +1,17 @@
+#!/bin/bash
+
+case $1 in
+	vmx)
+		echo "module vios +p" > /sys/kernel/debug/dynamic_debug/control
+		echo "module vmx_crypto +p" > /sys/kernel/debug/dynamic_debug/control
+		echo "7" > /proc/sys/kernel/printk
+
+		rmmod vmx_crypto > /dev/null 2>&1
+		modprobe vmx_crypto
+
+		cat /proc/crypto | sed 's/.*: //g' | sed -ne '$!H;/^$/{x;s/\n/ /g;G;p;d;}' | grep vmx | column -t
+
+		modprobe tcrypt mode=10
+		;;
+esac
+
