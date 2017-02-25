@@ -12,13 +12,14 @@ shelltags() {
 	PS1=
 
 	# check and set parameters
-	while getopts teslfa OPT; do
+	while getopts teslfm OPT; do
 		case $OPT in
 			t) PS1+="$(shelltags_tag 'time')";;
 			e) PS1+="$(shelltags_tag 'error' $EXITSTATUS)";;
 			s) PS1+="$(shelltags_tag 'screen')";;
 			l) PS1+="$(shelltags_tag 'load')";;
 			f) PS1+="$(shelltags_tag 'freespace')";;
+			m) PS1+="$(shelltags_tag 'temperature')";;
 		esac
 	done
 	shift $((OPTIND-1))
@@ -26,7 +27,6 @@ shelltags() {
 
 	local ACPIINFO="$(acpi -V 2> /dev/null)"
 
-	#PS1+="\u@\w> "
 	PS1+=$PS1_ORIGINAL
 }
 
@@ -34,6 +34,14 @@ shelltags_tag() {
 	local COLOR=
 	local OUTPUT=
 
+	# checks
+	case $1 in
+		temperature)
+			[ -z "$(whereis acpi | cut -d: -f2-)" ] && return
+			;;
+	esac
+
+	# execute tag
 	case $1 in
 		time)   COLOR=cyan;  OUTPUT="\A" ;;
 		error)  COLOR=red;   [ "$2" != 0 ] && OUTPUT=$2 ;;
@@ -65,6 +73,12 @@ shelltags_tag() {
 					OUTPUT=${FREE_SPACE}B
 				fi
 			fi
+			;;
+
+		temperature)
+			COLOR=magenta
+			OUTPUT=$(acpi -t | cut -d' ' -f4- | sed 's/\.. degrees /°/')
+			[ "$(echo $OUTPUT | cut -d° -f1)" -lt 70 ] && OUTPUT=
 			;;
 	esac
 
