@@ -12,7 +12,7 @@ shelltags() {
 	PS1=
 
 	# check and set parameters
-	while getopts teslfm OPT; do
+	while getopts teslfmb OPT; do
 		case $OPT in
 			t) PS1+="$(shelltags_tag 'time')";;
 			e) PS1+="$(shelltags_tag 'error' $EXITSTATUS)";;
@@ -20,6 +20,7 @@ shelltags() {
 			l) PS1+="$(shelltags_tag 'load')";;
 			f) PS1+="$(shelltags_tag 'freespace')";;
 			m) PS1+="$(shelltags_tag 'temperature')";;
+			b) PS1+="$(shelltags_tag 'battery')";;
 		esac
 	done
 	shift $((OPTIND-1))
@@ -36,7 +37,7 @@ shelltags_tag() {
 
 	# checks
 	case $1 in
-		temperature)
+		temperature|battery)
 			[ -z "$(whereis acpi | cut -d: -f2-)" ] && return
 			;;
 	esac
@@ -79,6 +80,14 @@ shelltags_tag() {
 			COLOR=magenta
 			OUTPUT=$(acpi -t | cut -d' ' -f4- | sed 's/\.. degrees /°/')
 			[ "$(echo $OUTPUT | cut -d° -f1)" -lt 70 ] && OUTPUT=
+			;;
+
+		battery)
+			COLOR=magenta
+			# support for multiple batteries (like T460)
+			local TOTAL=$(acpi -b | cut -d' ' -f4 | xargs | tr , + | tr -d % | tr -d ' ' | bc)
+			[ -n "$TOTAL" -a "$TOTAL" -lt "90" ] && \
+				OUTPUT=$(acpi -b | cut -d' ' -f4 | xargs | tr -d ,)
 			;;
 	esac
 
