@@ -1,0 +1,326 @@
+#!/bin/bash
+
+export PROMPT_COMMAND="smartprompt $*"
+
+SMARTPROMPT_USE_COLOR=yes
+SMARTPROMPT_USE_FULLDIR=no
+SMARTPROMPT_USE_NEWLINE=no
+
+SMARTPROMPT_TIME_SHOW=yes
+SMARTPROMPT_TIME_COLOR=cyan
+
+SMARTPROMPT_ERROR_SHOW=yes
+SMARTPROMPT_ERROR_COLOR=red
+
+SMARTPROMPT_VCS_SHOW=yes
+SMARTPROMPT_VCS_COLOR=blue
+
+SMARTPROMPT_LOAD_SHOW=yes
+SMARTPROMPT_LOAD_COLOR=magenta
+
+SMARTPROMPT_TEMPERATURE_SHOW=yes
+SMARTPROMPT_TEMPERATURE_COLOR=magenta
+SMARTPROMPT_TEMPERATURE_THRESHOLD=70
+
+SMARTPROMPT_BATTERY_SHOW=yes
+SMARTPROMPT_BATTERY_COLOR=magenta
+SMARTPROMPT_BATTERY_THRESHOLD=15
+
+SMARTPROMPT_FREESPACE_SHOW=yes
+SMARTPROMPT_FREESPACE_COLOR=magenta
+SMARTPROMPT_FREESPACE_THRESHOLD=1048576
+
+SMARTPROMPT_SCREEN_SHOW=yes
+SMARTPROMPT_SCREEN_COLOR=green
+SMARTPROMPT_SCREEN_TITLE=yes
+
+SMARTPROMPT_SHOW=
+SMARTPROMPT_EXITSTATUS=
+SMARTPROMPT_ACPIINFO=
+SMARTPROMPT_ORIGINALPS1=
+
+
+__print() {
+	local TEXT="$1"
+
+	if [ $SMARTPROMPT_USE_COLOR = no ]; then
+		[ "$2" = "tag" ] && echo -n "[$TEXT] " || echo -n "$TEXT"
+		return
+	fi
+
+	local COLOR=
+	local STYLE=
+
+	case $3 in
+		black)   COLOR=0;;
+		red)     COLOR=1;;
+		green)   COLOR=2;;
+		yellow)  COLOR=3;;
+		blue)    COLOR=4;;
+		magenta) COLOR=5;;
+		cyan)    COLOR=6;;
+		white|*) COLOR=7;;
+	esac
+
+	case $4 in
+		default)   STYLE=0;;
+		bold)      STYLE=1;;
+		underline) STYLE=4;;
+		inverse)   STYPE=7;;
+		strikeout) STYLE=9;;
+		*) [ "$2" = "tag" ] && STYLE=1 || STYLE=0;;
+	esac
+
+	local UNSET_COLOR="\[\033[0m\]"
+	local FOREGROUND_CODE="\[\033[${STYLE};$(( $COLOR + 30 ))m\]"
+
+	if [ "$2" = "tag" ]; then
+		local BACKGROUND_CODE="\[\033[$(( $COLOR + 40 ))m\]"
+		local WHITE_COLOR="\[\033[${STYLE};37m\]"
+
+		echo -n $BACKGROUND_CODE
+		echo -n $FOREGROUND_CODE
+		echo -n "["
+		echo -n $WHITE_COLOR
+		echo -n "$TEXT"
+		echo -n $FOREGROUND_CODE
+		echo -n "]"
+		echo -n $UNSET_COLOR
+		echo -n " "
+	else
+		echo -n $FOREGROUND_CODE
+		echo -n "$TEXT"
+		echo -n $UNSET_COLOR
+	fi
+}
+
+__show() {
+	if [[ $SMARTPROMPT_SHOW =~ $1 ]] || [[ $SMARTPROMPT_SHOW = all ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+__tag_time() {
+	if [ $SMARTPROMPT_TIME_SHOW = yes ]; then
+		local TIME="\A"
+		__print "$TIME" tag $SMARTPROMPT_TIME_COLOR
+	fi
+}
+
+__tag_error() {
+	if [ $SMARTPROMPT_ERROR_SHOW = yes ]; then
+		if [ $SMARTPROMPT_EXITSTATUS -gt 0 ] || $(__show error); then
+			__print $SMARTPROMPT_EXITSTATUS tag $SMARTPROMPT_ERROR_COLOR
+		fi
+	fi
+}
+
+__tag_vcs() {
+	if [ $SMARTPROMPT_VCS_SHOW = yes ]; then
+		local OUTPUT=
+		local GIT=$(git status --short --branch 2> /dev/null | grep '^##')
+		local GITSTATE=
+
+		if [ -n "$GIT" ]; then
+			OUTPUT=$(echo $GIT | cut -d' ' -f2 | sed 's/\.\.\..*$//g')
+			GITSTATE=$(echo $GIT | awk 'NR>1{print $1}' RS=[ FS=])
+			GITSTATE=${GITSTATE/behind /-}
+			GITSTATE=${GITSTATE/ahead /+}
+			GITSTATE=${GITSTATE/,/}
+			[ -n "$GITSTATE" ] && OUTPUT+=" $GITSTATE"
+			GITSTASH=$(git stash list 2> /dev/null | wc -l)
+			[ "$GITSTASH" != 0 ] && OUTPUT+=" {$GITSTASH}"
+
+		elif $(__show vcs); then
+			OUTPUT="no vcs"
+		fi
+
+		if [ -n "$OUTPUT" ]; then
+			__print "$OUTPUT" tag $SMARTPROMPT_VCS_COLOR
+		fi
+	fi
+}
+
+__tag_load() {
+	if [ $SMARTPROMPT_LOAD_SHOW = yes ]; then
+		local PROCESSOR=$(grep -c ^processor /proc/cpuinfo)
+		local CURLOAD=$(cat /proc/loadavg | awk '{ print $1 }')
+
+		if $(echo | awk 'END { exit ( !( '"$CURLOAD > $PROCESSOR"')); }') || $(__show load); then
+			__print "$CURLOAD" tag $SMARTPROMPT_LOAD_COLOR
+		fi
+	fi
+}
+
+__tag_temperature() {
+	if [ $SMARTPROMPT_TEMPERATURE_SHOW = yes ]; then
+		local OUTPUT=$(echo "$SMARTPROMPT_ACPIINFO" | \
+			grep -m 1 Thermal | awk '{ print $4 }' | cut -d. -f1)
+
+		if [ -n "$OUTPUT" ] || $(__show temp); then
+			if [ -z "$OUTPUT" ]; then
+				OUTPUT="no temp"
+			elif [ $OUTPUT -gt $SMARTPROMPT_TEMPERATURE_THRESHOLD ] || $(__show temp); then
+				OUTPUT+="°C"
+			else
+				return
+			fi
+			__print "$OUTPUT" tag $SMARTPROMPT_TEMPERATURE_COLOR
+		fi
+	fi
+}
+
+__tag_battery() {
+	if [ $SMARTPROMPT_BATTERY_SHOW = yes ]; then
+		local OUTPUT=$(echo "$SMARTPROMPT_ACPIINFO" | \
+			grep -m 1 Battery | awk '{ print $4 }' | sed 's/[^0-9]*//g')
+
+		if [ -n "$OUTPUT" ] || $(__show battery); then
+			if [ -z "$OUTPUT" ]; then
+				OUTPUT="no battery"
+			elif [ $OUTPUT -lt $SMARTPROMPT_BATTERY_THRESHOLD ] || $(__show battery); then
+				OUTPUT+="%"
+			else
+				return
+			fi
+			__print "$OUTPUT" tag $SMARTPROMPT_BATTERY_COLOR
+		fi
+	fi
+}
+
+__tag_freespace() {
+	if [ $SMARTPROMPT_FREESPACE_SHOW = yes ]; then
+		# check if there is a table. (chroot doesn't)
+		if df > /dev/null 2>&1; then
+			local FREE_SPACE=$(stat -f --printf="%a * %s / 1024\n" / | bc)
+			local OUTPUT=
+			if [ $FREE_SPACE -lt $SMARTPROMPT_FREESPACE_THRESHOLD ] || $(__show free); then
+
+				if   [ $(( $FREE_SPACE/(1024*1024) )) != 0 ]; then
+					OUTPUT="$(bc <<< "scale=1;$FREE_SPACE/(1024*1024)")GB"
+				elif [ $(( $FREE_SPACE/(1024) )) != 0 ]; then
+					OUTPUT="$(bc <<< "scale=1;$FREE_SPACE/(1024)")MB"
+				else
+					OUTPUT="${FREE_SPACE}KB"
+				fi
+				__print "$OUTPUT" tag $SMARTPROMPT_FREESPACE_COLOR
+			fi
+		fi
+	fi
+}
+
+__tag_screen() {
+	if [ $SMARTPROMPT_SCREEN_SHOW = yes ]; then
+		local OUTPUT=
+		OUTPUT="$(echo $STY | cut -d. -f2)"
+
+		if [ -n "$OUTPUT" ] || $(__show screen); then
+			__print "$OUTPUT" tag $SMARTPROMPT_SCREEN_COLOR
+		fi
+	fi
+}
+
+__define_env() {
+	#if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
+		#echo "chroot"
+	if grep -q 'emulated by qemu' /proc/cpuinfo; then
+		echo "qemu"
+	elif env | grep -q 'SSH_CLIENT'; then
+		echo "ssh"
+	else
+		echo "local"
+	fi
+}
+
+__prompt() {
+    local WHO="\u"
+    local WHERE="\h"
+	local HISTORYNUM="\!"
+	local COMMANDNUM="\#"
+	local PHYSICAL_DIR=$(pwd -P)
+	local CURRENT_DIR=
+	local COLOR=
+
+	if [ $SMARTPROMPT_USE_FULLDIR = yes ]; then
+		CURRENT_DIR="\w"
+	else
+		CURRENT_DIR="\W"
+	fi
+
+	case $(__define_env) in
+		local)
+			[ $USER = root ] && COLOR=red || COLOR=yellow
+			;;
+
+		ssh)
+			COLOR=green
+			;;
+
+		qemu)
+			COLOR=magenta
+			;;
+
+		chroot)
+			COLOR=blue
+			;;
+	esac
+
+	__print "[$WHO@$WHERE $CURRENT_DIR]" prompt $COLOR bold
+
+	if [ "$(pwd)" != "$PHYSICAL_DIR" ]; then
+		__print " (${PHYSICAL_DIR/$HOME/~})" prompt $COLOR
+	fi
+
+	[ $SMARTPROMPT_USE_NEWLINE = yes ] && echo ""
+	echo -n "\$ "
+}
+
+smartprompt() {
+	SMARTPROMPT_EXITSTATUS="$?" # need to be the first
+	SMARTPROMPT_ACPIINFO="$(acpi -V 2> /dev/null)"
+
+	[ -z "$SMARTPROMPT_ORIGINALPS1" ] && SMARTPROMPT_ORIGINALPS1=$PS1
+
+	# clear variable
+	PS1=
+
+	while getopts tcnFfs: OPT; do
+		case $OPT in
+			t) SMARTPROMPT_SCREEN_TITLE=no;;
+			c) SMARTPROMPT_USE_COLOR=no;;
+			n) SMARTPROMPT_USE_NEWLINE=yes;;
+			F) SMARTPROMPT_USE_FULLDIR=yes;;
+			f) SMARTPROMPT_USE_FULLDIR=no;;
+			s) SMARTPROMPT_SHOW=$OPTARG;;
+			*) PS1+="(ERROR)";;
+		esac
+	done
+	shift $((OPTIND-1))
+	OPTIND=0
+
+	if [ $SMARTPROMPT_SCREEN_TITLE = yes ]; then
+		case "$TERM" in
+			screen*) PS1+='\[\033k\033\\\]'
+		esac
+	fi
+
+	PS1+="$(__tag_time)"
+	PS1+="$(__tag_screen)"
+	PS1+="$(__tag_error)"
+	PS1+="$(__tag_vcs)"
+	PS1+="$(__tag_load)"
+	PS1+="$(__tag_temperature)"
+	PS1+="$(__tag_battery)"
+	PS1+="$(__tag_freespace)"
+
+	case $1 in
+		"")       PS1+="$(__prompt)";;
+		original) PS1+=$SMARTPROMPT_ORIGINALPS1;;
+		redhat)	  PS1+="[\u@\h \W]\$ ";;
+		debian)   PS1+="${debian_chroot:+($debian_chroot)}\u@\h:\w\$ ";;
+		dos)      PS1+="C:$PWD> ";;
+	    *)        PS1+="(ERROR) ";;
+	esac
+}

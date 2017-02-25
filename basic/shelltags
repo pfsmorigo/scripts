@@ -7,94 +7,79 @@ shelltags() {
 	# update with new attributes
 	export PROMPT_COMMAND="shelltags $*"
 
-	if [ "$1" != "tag" ]; then
-		local ACPIINFO="$(acpi -V 2> /dev/null)"
+	# save original prompt if necessary and clean it
+	[ -z "$PS1_ORIGINAL" ] && PS1_ORIGINAL=$PS1
+	PS1=
 
-		# clear variable
-		PS1=
+	# check and set parameters
+	while getopts teslfa OPT; do
+		case $OPT in
+			t) PS1+="$(shelltags_tag 'time')";;
+			e) PS1+="$(shelltags_tag 'error' $EXITSTATUS)";;
+			s) PS1+="$(shelltags_tag 'screen')";;
+			l) PS1+="$(shelltags_tag 'load')";;
+			f) PS1+="$(shelltags_tag 'freespace')";;
+		esac
+	done
+	shift $((OPTIND-1))
+	OPTIND=0
 
-		while getopts teslfa OPT; do
-			case $OPT in
-				t) PS1+="$(shelltags tag 'time')";;
-				e) PS1+="$(shelltags tag 'error' $EXITSTATUS)";;
-				s) PS1+="$(shelltags tag 'screen')";;
-				l) PS1+="$(shelltags tag 'load')";;
-				f) PS1+="$(shelltags tag 'freespace')";;
-				a) shelltags -teslf; return ;;
-			esac
-		done
-		shift $((OPTIND-1))
-		OPTIND=0
+	local ACPIINFO="$(acpi -V 2> /dev/null)"
 
-		PS1+="\u@\w> "
-	else
-		local VALUE=$3
-		local COLOR=
-		local OUTPUT=
+	#PS1+="\u@\w> "
+	PS1+=$PS1_ORIGINAL
+}
 
-		case $2 in
-			time)
-				COLOR=cyan
-				OUTPUT="\A"
-				;;
+shelltags_tag() {
+	local COLOR=
+	local OUTPUT=
 
-			error)
-				COLOR=red
-				OUTPUT="$VALUE"
-				;;
+	case $1 in
+		time)   COLOR=cyan;  OUTPUT="\A" ;;
+		error)  COLOR=red;   OUTPUT="$2" ;;
+		screen) COLOR=green; OUTPUT="$(echo $STY | cut -d. -f2)" ;;
 
-			screen)
-				COLOR=green
-				OUTPUT="$(echo $STY | cut -d. -f2)"
-				;;
+		load)
+			COLOR=magenta
+			local PROCESSOR=$(grep -c ^processor /proc/cpuinfo)
+			local CURLOAD=$(cat /proc/loadavg | awk '{ print $1 }')
+			OUTPUT="$CURLOAD"
+			;;
 
-			load)
-				COLOR=magenta
-				local PROCESSOR=$(grep -c ^processor /proc/cpuinfo)
-				local CURLOAD=$(cat /proc/loadavg | awk '{ print $1 }')
-				OUTPUT="$CURLOAD"
-				;;
-
-			freespace)
-				COLOR=magenta
-				if df > /dev/null 2>&1; then
-					local FREE_SPACE=$(stat -f --printf="%a * %s / 1024\n" / | bc)
-					if   [ $(( $FREE_SPACE/(1024*1024) )) != 0 ]; then
-						OUTPUT="$(bc <<< "scale=1;$FREE_SPACE/(1024*1024)")GB"
-					elif [ $(( $FREE_SPACE/(1024) )) != 0 ]; then
-						OUTPUT="$(bc <<< "scale=1;$FREE_SPACE/(1024)")MB"
-					else
-						OUTPUT="${FREE_SPACE}KB"
-					fi
+		freespace)
+			COLOR=magenta
+			if df > /dev/null 2>&1; then
+				local FREE_SPACE=$(stat -f --printf="%a * %s / 1024\n" / | bc)
+				if   [ $(( $FREE_SPACE/(1024*1024) )) != 0 ]; then
+					OUTPUT="$(bc <<< "scale=1;$FREE_SPACE/(1024*1024)")GB"
+				elif [ $(( $FREE_SPACE/(1024) )) != 0 ]; then
+					OUTPUT="$(bc <<< "scale=1;$FREE_SPACE/(1024)")MB"
+				else
+					OUTPUT="${FREE_SPACE}KB"
 				fi
-				;;
-		esac
+			fi
+			;;
+	esac
 
-		[ -z "$OUTPUT" ] && return
+	[ -z "$OUTPUT" ] && return
 
-		case $COLOR in
-			black)   COLOR=0;;
-			red)     COLOR=1;;
-			green)   COLOR=2;;
-			yellow)  COLOR=3;;
-			blue)    COLOR=4;;
-			magenta) COLOR=5;;
-			cyan)    COLOR=6;;
-			white|*) COLOR=7;;
-		esac
+	case $COLOR in
+		black)   COLOR=0;;
+		red)     COLOR=1;;
+		green)   COLOR=2;;
+		yellow)  COLOR=3;;
+		blue)    COLOR=4;;
+		magenta) COLOR=5;;
+		cyan)    COLOR=6;;
+		white|*) COLOR=7;;
+	esac
 
-		#local BG="\033[$(( $COLOR + 40 ))m"
-		#local FG="\033[1;$(( $COLOR + 30 ))m"
-		#local WH="\033[1;37m"
-		#local UN="\033[0m"
+	local BG="\[\033[$(( $COLOR + 40 ))m\]"
+	local FG="\[\033[1;$(( $COLOR + 30 ))m\]"
+	local WH="\[\033[1;37m\]"
+	local UN="\[\033[0m\]"
 
-		local BG="\[\033[$(( $COLOR + 40 ))m\]"
-		local FG="\[\033[1;$(( $COLOR + 30 ))m\]"
-		local WH="\[\033[1;37m\]"
-		local UN="\[\033[0m\]"
-
-		echo -en "${BG}${FG}[${WH}${OUTPUT}${FG}]${UN} "
-	fi
+	echo -en "${BG}${FG}[${WH}${OUTPUT}${FG}]${UN} "
 }
 
 export PROMPT_COMMAND="shelltags $*"
