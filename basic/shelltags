@@ -83,11 +83,10 @@ shelltags_tag() {
 			;;
 
 		battery)
+			# support for multiple batteries (like Lenovo T460)
 			COLOR=magenta
-			# support for multiple batteries (like T460)
-			local TOTAL=$(acpi -b | cut -d' ' -f4 | xargs | tr , + | tr -d % | tr -d ' ' | bc)
-			[ -n "$TOTAL" -a "$TOTAL" -lt "90" ] && \
-				OUTPUT=$(acpi -b | cut -d' ' -f4 | xargs | tr -d ,)
+			OUTPUT=$(acpi -b | cut -d' ' -f4 | xargs | tr -d ,)
+			[ "$(echo $OUTPUT | tr -d % | tr ' ' + | bc)" -ge "50" ] && OUTPUT=
 			;;
 	esac
 
