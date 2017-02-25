@@ -67,7 +67,7 @@ shelltags_tag() {
 				if [ $FREE_SPACE > 1073741824 ]; then
 					OUTPUT=$(( $FREE_SPACE / ( 1024**3 )))GB
 				elif [ $FREE_SPACE > 1048576 ]; then
-				   	OUTPUT=$(( $FREE_SPACE / ( 1024**2 )))MB
+					OUTPUT=$(( $FREE_SPACE / ( 1024**2 )))MB
 				elif [ $FREE_SPACE > 1024 ]; then
 					OUTPUT=$(( $FREE_SPACE / ( 1024**1 )))KB
 				else
