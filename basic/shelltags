@@ -36,26 +36,33 @@ shelltags_tag() {
 
 	case $1 in
 		time)   COLOR=cyan;  OUTPUT="\A" ;;
-		error)  COLOR=red;   OUTPUT="$2" ;;
-		screen) COLOR=green; OUTPUT="$(echo $STY | cut -d. -f2)" ;;
+		error)  COLOR=red;   [ "$2" != 0 ] && OUTPUT=$2 ;;
+		screen) COLOR=green; OUTPUT=$(echo $STY | cut -d. -f2) ;;
 
 		load)
 			COLOR=magenta
 			local PROCESSOR=$(grep -c ^processor /proc/cpuinfo)
-			local CURLOAD=$(cat /proc/loadavg | awk '{ print $1 }')
-			OUTPUT="$CURLOAD"
+			local CURLOAD=$(cat /proc/loadavg | cut -d' ' -f1)
+			local CURLOAD_INT=$(cat /proc/loadavg | cut -d'.' -f1)
+			[ "$CURLOAD_INT" -ge "$PROCESSOR" ] && OUTPUT="$CURLOAD"
 			;;
 
 		freespace)
 			COLOR=magenta
 			if df > /dev/null 2>&1; then
-				local FREE_SPACE=$(stat -f --printf="%a * %s / 1024\n" / | bc)
-				if   [ $(( $FREE_SPACE/(1024*1024) )) != 0 ]; then
-					OUTPUT="$(bc <<< "scale=1;$FREE_SPACE/(1024*1024)")GB"
-				elif [ $(( $FREE_SPACE/(1024) )) != 0 ]; then
-					OUTPUT="$(bc <<< "scale=1;$FREE_SPACE/(1024)")MB"
+				local FREE_SPACE=$(stat -f --printf="%a * %s\n" $PWD | bc)
+				local CRITICAL=$(stat -f --printf="%b * %s * 0.1\n" $PWD | bc)
+				local CRITICAL_INT=$(echo $CRITICAL | cut -d. -f1)
+				[ "$FREE_SPACE" -gt "$CRITICAL_INT" ] && return
+
+				if [ $FREE_SPACE > 1073741824 ]; then
+					OUTPUT=$(( $FREE_SPACE / ( 1024**3 )))GB
+				elif [ $FREE_SPACE > 1048576 ]; then
+				   	OUTPUT=$(( $FREE_SPACE / ( 1024**2 )))MB
+				elif [ $FREE_SPACE > 1024 ]; then
+					OUTPUT=$(( $FREE_SPACE / ( 1024**1 )))KB
 				else
-					OUTPUT="${FREE_SPACE}KB"
+					OUTPUT=${FREE_SPACE}B
 				fi
 			fi
 			;;
