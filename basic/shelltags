@@ -12,11 +12,12 @@ shelltags() {
 	PS1=
 
 	# check and set parameters
-	while getopts teslfmb OPT; do
+	while getopts tesglfmb OPT; do
 		case $OPT in
 			t) PS1+="$(shelltags_tag 'time')";;
 			e) PS1+="$(shelltags_tag 'error' $EXITSTATUS)";;
 			s) PS1+="$(shelltags_tag 'screen')";;
+			g) PS1+="$(shelltags_tag 'git')";;
 			l) PS1+="$(shelltags_tag 'load')";;
 			f) PS1+="$(shelltags_tag 'freespace')";;
 			m) PS1+="$(shelltags_tag 'temperature')";;
@@ -87,6 +88,22 @@ shelltags_tag() {
 			COLOR=magenta
 			OUTPUT=$(acpi -b | cut -d' ' -f4 | xargs | tr -d ,)
 			[ "$(echo $OUTPUT | tr -d % | tr ' ' + | bc)" -ge "50" ] && OUTPUT=
+			;;
+
+		git)
+			local GIT=$(git status --short --branch 2> /dev/null | grep '^##')
+			local GITSTATE=
+			if [ -n "$GIT" ]; then
+				COLOR=blue
+				OUTPUT=$(echo $GIT | cut -d' ' -f2 | sed 's/\.\.\..*$//g')
+				GITSTATE=$(echo $GIT | awk 'NR>1{print $1}' RS=[ FS=])
+				GITSTATE=${GITSTATE/behind /-}
+				GITSTATE=${GITSTATE/ahead /+}
+				GITSTATE=${GITSTATE/,/}
+				[ -n "$GITSTATE" ] && OUTPUT+=" $GITSTATE"
+				GITSTASH=$(git stash list 2> /dev/null | wc -l)
+				[ "$GITSTASH" != 0 ] && OUTPUT+=" {$GITSTASH}"
+			fi
 			;;
 	esac
 
