@@ -60,8 +60,8 @@ shelltags_tag() {
 		freespace)
 			COLOR=magenta
 			if df > /dev/null 2>&1; then
-				local FREE_SPACE=$(stat -f --printf="%a * %s\n" $PWD | bc)
-				local CRITICAL=$(stat -f --printf="%b * %s * 0.1\n" $PWD | bc)
+				local FREE_SPACE=$(stat -f --printf="%a * %s\n" "$PWD" | bc)
+				local CRITICAL=$(stat -f --printf="%b * %s * 0.1\n" "$PWD" | bc)
 				local CRITICAL_INT=$(echo $CRITICAL | cut -d. -f1)
 				[ "$FREE_SPACE" -gt "$CRITICAL_INT" ] && return
 
