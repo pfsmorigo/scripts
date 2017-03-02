@@ -1,0 +1,6 @@
+#!/bin/bash
+
+[ ! -f "$1" ] && echo "No file found" && exit 1
+
+cp $1 /tmp/convert.json
+python -m json.tool /tmp/convert.json > $1
