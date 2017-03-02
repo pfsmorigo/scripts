@@ -1,0 +1,24 @@
+#!/bin/bash
+
+CLEAN="\033[42m[   CLEAN   ]\033[0m"
+NDPSH="\033[43m[ NEED PUSH ]\033[0m"
+DIRTY="\033[41m[   DIRTY   ]\033[0m"
+
+OLDIFS=$IFS
+IFS=$'\n'
+for LINE in $(find $PWD -name .git); do
+	WORKCOPY="${LINE%/.git}"
+	cd $WORKCOPY
+	CHANGES=$(git diff --shortstat)
+	UNTRACKED=$(git status --porcelain)
+	NEEDPUSH=$(git status --short --branch | awk 'NR>1{print $1}' RS=[ FS=] | grep ahead)
+
+	if [ -z "$CHANGES" ] && [ -z "$UNTRACKED" ]; then
+		echo -e "$CLEAN $WORKCOPY"
+	elif [ -n "$NEEDPUSH" ]; then
+		echo -e "$NDPSH $WORKCOPY"
+	else
+		echo -e "$DIRTY $WORKCOPY"
+	fi
+done
+IFS=$OLDIFS

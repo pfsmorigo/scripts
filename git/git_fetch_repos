@@ -1,0 +1,5 @@
+#!/bin/bash -x
+
+for PROJECT in go grub linux openssl; do
+	cd ~/projects/$PROJECT && git fetch --all
+done

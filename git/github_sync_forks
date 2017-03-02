@@ -1,42 +1,42 @@
 #!/bin/bash
 
 PROJECT_DIR="$HOME/projects"
-REPOS="i3 i3blocks rxvt-unicode rofi ingress-intel-total-conversion" #  powerpc-utils znc i3status ingress-intel-timelapse installation-guide linux"
-USING_STASH=0
+REPOS="i3 i3blocks rxvt-unicode rofi"
+[ -n "$*" ] && REPOS="$*"
 
 for REPO in $REPOS; do
 	# Just skip if local repo is not found
 	cd $PROJECT_DIR/$REPO > /dev/null 2>&1 || continue
 
-	CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-	HEAD_BRANCH="$(git branch -r | grep HEAD | cut -d'/' -f3)"
+	BRANCH="master"
 
-	TITLE="$(echo -n "$REPO ($HEAD_BRANCH)")"
+	TITLE="$(echo -n "$REPO ($BRANCH)")"
 	echo -n "$(printf "%-40s" "$TITLE" | tr ' ' '.'): "
 
-	if [[ -n "$(git status -s)" ]]; then
-		USING_STASH=1
-		git stash save -a -q "$(basename $0)"
-	else
-		USING_STASH=0
-	fi
-
+	# Check if remove repo is set
 	if [[ -z "$(git remote | grep upstream)" ]]; then
-		echo "No upstream remote found."
+		echo "No upstream remote found"
 		continue
 	fi
 
-	git fetch -q upstream
-	[ "$CURRENT_BRANCH" != "$HEAD_BRANCH" ] && git checkout -q $HEAD_BRANCH
-	git merge -q upstream/$HEAD_BRANCH
-
-	if [ -n "$(git log HEAD..origin/$HEAD_BRANCH --oneline)" ]; then
-		echo "Pushing..."
-		git push
+	# Check if it's clean
+	if [[ -n "$(git status -s)" ]]; then
+		echo "Dirty"
+		continue
 	else
-		echo "Updated."
+		if ! git checkout $BRANCH > /dev/null 2>&1; then
+			echo "Failed to switch branch"
+			continue
+		fi
 	fi
 
-	[ "$CURRENT_BRANCH" != "$HEAD_BRANCH" ] && git checkout -q $CURRENT_BRANCH
-	[ "$USING_STASH" -eq 1 ] && git stash pop -q
+	git fetch -q upstream
+	git merge -q upstream/$BRANCH
+
+	if [ -n "$(git log HEAD..origin/$BRANCH --oneline)" ]; then
+		echo "New content"
+		git push
+	else
+		echo "Up to date"
+	fi
 done
