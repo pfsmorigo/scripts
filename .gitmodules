@@ -1,4 +1,0 @@
-[submodule "smartprompt"]
-	path = smartprompt
-	url = https://github.com/pfsmorigo/smartprompt.git
-	branch = master
