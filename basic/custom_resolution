@@ -1,0 +1,16 @@
+#!/bin/bash
+
+case $1 in
+	1) WIDTH=1920; HEIGHT=1056 ;;
+	2) WIDTH=1334; HEIGHT=700 ;;
+	*) WIDTH=$1;   HEIGHT=$2 ;;
+esac
+
+CVT_OUTPUT=$(cvt $WIDTH $HEIGHT 60)
+EXTRA=$(echo "$CVT_OUTPUT" | grep Modeline | cut -d" " -f3-)
+MODE="${WIDTH}x${HEIGHT}_60.00"
+
+set -x
+sudo xrandr --newmode $MODE $EXTRA
+sudo xrandr --addmode Virtual-0 $MODE
+sudo xrandr -s $MODE
