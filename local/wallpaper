@@ -1,6 +1,13 @@
 #!/bin/bash
 
-FILE=$(find $HOME/media/backgrounds/use -type l | shuf -n 1)
+SAVEFILE=/tmp/wallpaper
+
+if [ "$1" = "same" ] && [ -f "$SAVEFILE" ]; then
+	FILE=$(cat $SAVEFILE)
+else
+	FILE=$(find $HOME/media/backgrounds/use -type l | shuf -n 1)
+	echo $FILE > $SAVEFILE
+fi
 
 /usr/bin/feh --bg-scale $FILE
 
