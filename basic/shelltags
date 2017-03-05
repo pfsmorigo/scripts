@@ -1,11 +1,10 @@
 #!/bin/bash
 
+export PROMPT_COMMAND="shelltags $*"
+
 shelltags() {
 	# needs to be the very first thing
 	local EXITSTATUS="$?"
-
-	# update with new attributes
-	export PROMPT_COMMAND="shelltags $*"
 
 	# save original prompt if necessary and clean it
 	[ -z "$PS1_ORIGINAL" ] && PS1_ORIGINAL=$PS1
@@ -27,9 +26,10 @@ shelltags() {
 	shift $((OPTIND-1))
 	OPTIND=0
 
-	local ACPIINFO="$(acpi -V 2> /dev/null)"
-
 	PS1+=$PS1_ORIGINAL
+
+	# If not screen, set a title for the terminal
+	[ -z "$STY" ] && echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD/$HOME/~}\007"
 }
 
 shelltags_tag() {
@@ -127,5 +127,3 @@ shelltags_tag() {
 
 	echo -en "${BG}${FG}[${WH}${OUTPUT}${FG}]${UN} "
 }
-
-export PROMPT_COMMAND="shelltags $*"
