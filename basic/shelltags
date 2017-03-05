@@ -29,7 +29,11 @@ shelltags() {
 	PS1+=$PS1_ORIGINAL
 
 	# If not screen, set a title for the terminal
-	[ -z "$STY" ] && echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD/$HOME/~}\007"
+	if [ -z "$STY" ]; then
+		KERNEL=$(uname -r)
+		LOAD=$(awk '{ print $1 }' /proc/loadavg)
+		echo -ne "\033]0;$HOSTNAME ($KERNEL) | $LOAD | ${PWD/$HOME/~}\007"
+	fi
 }
 
 shelltags_tag() {
@@ -46,7 +50,7 @@ shelltags_tag() {
 	# execute tag
 	case $1 in
 		time)   COLOR=cyan;  OUTPUT="\A" ;;
-		error)  COLOR=red;   [ "$2" != 0 ] && OUTPUT=$2 ;;
+		error)  COLOR=red;   [ "$2" != "0" ] && OUTPUT=$2 ;;
 		screen) COLOR=green; OUTPUT=$(echo $STY | cut -d. -f2) ;;
 
 		load)
