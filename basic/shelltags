@@ -3,7 +3,7 @@
 export PROMPT_COMMAND="shelltags $*"
 
 shelltags() {
-	# needs to be the very first thing
+	# needs to be the very first thing to not lose the exit code
 	local EXITSTATUS="$?"
 
 	# save original prompt if necessary and clean it
@@ -26,9 +26,10 @@ shelltags() {
 	shift $((OPTIND-1))
 	OPTIND=0
 
-	PS1+=$PS1_ORIGINAL
+	# the last attribute is the prompt format, use original if none
+	[ -n "$*" ] && PS1+="$*" || PS1+="$PS1_ORIGINAL"
 
-	# If not screen, set a title for the terminal
+	# if not screen, set a title for the terminal
 	if [ -z "$STY" ]; then
 		KERNEL=$(uname -r)
 		LOAD=$(awk '{ print $1 }' /proc/loadavg)
@@ -42,9 +43,7 @@ shelltags_tag() {
 
 	# checks
 	case $1 in
-		temperature|battery)
-			[ -z "$(whereis acpi | cut -d: -f2-)" ] && return
-			;;
+		temperature|battery) [ ! -x "/usr/bin/acpi" ] && return ;;
 	esac
 
 	# execute tag
