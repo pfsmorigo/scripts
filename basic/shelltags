@@ -10,6 +10,9 @@ shelltags() {
 	[ -z "$PS1_ORIGINAL" ] && PS1_ORIGINAL=$PS1
 	PS1=
 
+	# set screen window title
+	[[ $TERM =~ screen.* ]] && PS1+='\[\033k\033\\\]'
+
 	# check and set parameters
 	while getopts tesglfmb OPT; do
 		case $OPT in
@@ -26,8 +29,9 @@ shelltags() {
 	shift $((OPTIND-1))
 	OPTIND=0
 
-	# the last attribute is the prompt format, use original if none
-	[ -n "$*" ] && PS1+="$*" || PS1+="$PS1_ORIGINAL"
+	# the last item is the prompt, use original if none
+	[ -n "$*" ] && PROMPT="$*" || PROMPT="$PS1_ORIGINAL"
+	PS1+="$(shelltags_tag 'prompt' "$PROMPT")"
 
 	# if not screen, set a title for the terminal
 	if [ -z "$STY" ]; then
@@ -108,6 +112,17 @@ shelltags_tag() {
 				[ "$GITSTASH" != 0 ] && OUTPUT+=" {$GITSTASH}"
 			fi
 			;;
+
+		prompt)
+			if grep -q 'emulated by qemu' /proc/cpuinfo; then
+				COLOR=magenta
+			elif [ -n "$SSH_CLIENT" ]; then
+				COLOR=green
+			else
+				COLOR=yellow
+			fi
+			OUTPUT="$2"
+			;;
 	esac
 
 	[ -z "$OUTPUT" ] && return
@@ -123,10 +138,14 @@ shelltags_tag() {
 		white|*) COLOR=7;;
 	esac
 
-	local BG="\[\033[$(( $COLOR + 40 ))m\]"
 	local FG="\[\033[1;$(( $COLOR + 30 ))m\]"
-	local WH="\[\033[1;37m\]"
+	local BG="\[\033[$(( $COLOR + 40 ))m\]"
 	local UN="\[\033[0m\]"
+	local WH="\[\033[1;37m\]"
 
-	echo -en "${BG}${FG}[${WH}${OUTPUT}${FG}]${UN} "
+	if [ "$1" != "prompt" ]; then
+		echo -en "${BG}${FG}[${WH}${OUTPUT}${FG}]${UN} "
+	else
+		echo -en "${FG}${OUTPUT}${UN}"
+	fi
 }
