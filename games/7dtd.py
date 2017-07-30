@@ -2,6 +2,7 @@
 
 import sys
 import telnetlib
+import socket
 import subprocess
 import time
 
@@ -17,9 +18,13 @@ if len(sys.argv) < 2:
 host = sys.argv[1]
 port = int(sys.argv[2])
 
-tn = telnetlib.Telnet(host, port)
-dump = tn.read_all().split(";")
-tn.close()
+try:
+    tn = telnetlib.Telnet(host, port, 5)
+    dump = tn.read_all().split(";")
+    tn.close()
+except socket.timeout:
+    print "Server Timeout"
+    sys.exit(1)
 
 servertime_line = [s for s in dump if "CurrentServerTime" in s]
 servertime = int(''.join(servertime_line).split(":")[1])
@@ -35,6 +40,6 @@ mins = int(float(float(servertime%1000)*60)/1000)
 
 time_next = 4 if (hour < 4 or hour >= 22) else 22
 time_next += 24 if (time_next < hour) else 0
-left = (((time_next-hour)*60-(60-mins))/60.)*2.5
+left = ((((time_next-hour)*60)-mins)/60.)*2.5
 
-print "%d/%d/%d %dh%02d(%d) %d" % (day, week, store, hour, mins, left, players)
+print "%d/%d/%d %dh%02d(%.0f) %d" % (day, week, store, hour, mins, left, players)
