@@ -1,18 +1,18 @@
 #! /bin/bash
+# Sources: http://weechat.org/files/doc/devel/weechat_user.en.html#fifo_plugin
 
-# Sources:
-# http://weechat.org/files/doc/devel/weechat_user.en.html#fifo_plugin
+WEECHAT_FIFO=$(ls $HOME/.config/weechat/weechat_fifo_*)
+CURRENT_STATUS=$(purple-remote "getstatusmessage")
 
-echo "irc.server.bluenet */nick $USER_lunch" >~/.weechat/weechat_fifo_*
-#echo 'irc.server.bluenet-znc */nick $USER_lunch' >~/.weechat/weechat_fifo_*
-#purple-remote "setstatus?status=away&message=I am lunching"
+echo "irc.server.bluenet */nick ${USER}_lunch" > $WEECHAT_FIFO
+purple-remote "setstatus?status=away&message=I am lunching"
 
 sleep 3
 xautolock -locknow
 
-zenity --question --text "Change status to available?"
+zenity --question --text "Change status to back to \"$CURRENT_STATUS\"?"
 if [ "$?" == "0" ]; then
-	echo "irc.server.bluenet */nick $USER" >~/.weechat/weechat_fifo_*
-	#purple-remote "setstatus?status=available&message=I am available"
+	echo "irc.server.bluenet */nick $USER" > $WEECHAT_FIFO
+	purple-remote "setstatus?status=available&message=$CURRENT_STATUS"
 fi
 
