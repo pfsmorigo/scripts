@@ -29,6 +29,7 @@ if [ -z "$(echo $LIST | xargs)" ]; then
 	Europe/Paris,
 	Europe/Zurich,
 	GMT,
+	Mexico/General,
 	US/Central,
 	US/Eastern,
 	US/Pacific,

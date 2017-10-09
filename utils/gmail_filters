@@ -38,6 +38,7 @@ case $1 in
 		add2list "FROM:*@klout.com"
 		add2list "FROM:*@linkedin.com"
 		add2list "FROM:*@plus.google.com"
+		add2list "FROM:*@slack.com"
 		add2list "FROM:*@twitter.com"
 		add2list "FROM:aboutme@about.me"
 		add2list "FROM:follow@postmaster.scribd.com"
@@ -76,6 +77,12 @@ case $1 in
 
 	jobs)
 		add2list "FROM:(monster@email.recjobs.monster.com OR jagent@route.monster.com OR monster@email.content.monster.com)"
+		;;
+
+	travel)
+		add2list "SUBJECT:(\"Boarding Pass\" OR \"Bilhete de Embarque\")"
+		add2list "FROM:(voegol@voegol.com.br)"
+		add2list "FROM:(reservaciones@aeromexico.com)"
 		;;
 
 	old_junk)
