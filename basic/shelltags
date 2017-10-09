@@ -72,11 +72,11 @@ shelltags_tag() {
 				local CRITICAL_INT=$(echo $CRITICAL | cut -d. -f1)
 				[ "$FREE_SPACE" -gt "$CRITICAL_INT" ] && return
 
-				if [ $FREE_SPACE > 1073741824 ]; then
+				if [ "$FREE_SPACE" -gt "1073741824" ]; then
 					OUTPUT=$(( $FREE_SPACE / ( 1024**3 )))GB
-				elif [ $FREE_SPACE > 1048576 ]; then
+				elif [ "$FREE_SPACE" -gt "1048576" ]; then
 					OUTPUT=$(( $FREE_SPACE / ( 1024**2 )))MB
-				elif [ $FREE_SPACE > 1024 ]; then
+				elif [ "$FREE_SPACE" -gt "1024" ]; then
 					OUTPUT=$(( $FREE_SPACE / ( 1024**1 )))KB
 				else
 					OUTPUT=${FREE_SPACE}B
@@ -86,15 +86,18 @@ shelltags_tag() {
 
 		temperature)
 			COLOR=magenta
-			OUTPUT=$(acpi -t | cut -d' ' -f4- | sed 's/\.. degrees /°/')
-			[ "$(echo $OUTPUT | cut -d° -f1)" -lt 70 ] && OUTPUT=
+			OUTPUT=$(acpi -t 2> /dev/null | cut -d' ' -f4 | cut -d. -f1)
+			[ -z "$OUTPUT" ] && return
+			[ "$OUTPUT" -lt 70 ] && return
+			OUTPUT+=°
 			;;
 
 		battery)
 			# support for multiple batteries (like Lenovo T460)
 			COLOR=magenta
-			OUTPUT=$(acpi -b | cut -d' ' -f4 | xargs | tr -d ,)
-			[ "$(echo $OUTPUT | tr -d % | tr ' ' + | bc)" -ge "50" ] && OUTPUT=
+			OUTPUT=$(acpi -b 2> /dev/null | cut -d' ' -f4 | xargs | tr -d ,)
+			[ -z "$OUTPUT" ] && return
+			[ "$(echo $OUTPUT | tr -d % | tr ' ' + | bc)" -ge "50" ] && return
 			;;
 
 		git)
