@@ -1,2 +1,2 @@
 #!/bin/bash
-GTK_THEME=Vertex-Dark /usr/bin/$(basename $0) $*
+GTK_THEME=Vertex:dark /usr/bin/$(basename $0) $*
