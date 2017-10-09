@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import keyring;
+import commands
 
-def get_password(service, username):
-    return keyring.get_password(service, username)
+def get_password(name):
+    return commands.getoutput("pass %s" % (name))
