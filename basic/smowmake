@@ -1,0 +1,36 @@
+#!/bin/bash
+
+LINUX_PATH="$HOME/projects/linux"
+
+function run_cmd() {
+	echo -e "\n$*\n----------------------------------------------------------"
+	$*
+}
+
+case $1 in
+	ipsec) run_cmd sudo systemctl stop ipsec ;;
+	*) ;;
+esac
+
+case $PWD in
+	$LINUX_PATH/drivers/crypto/vmx)
+		echo "module vios +p" | sudo tee /sys/kernel/debug/dynamic_debug/control > /dev/null
+		echo "module vmx_crypto +p" | sudo tee /sys/kernel/debug/dynamic_debug/control > /dev/null
+		echo "7" | sudo tee /proc/sys/kernel/printk > /dev/null
+		run_cmd make -C $LINUX_PATH M="$PWD" modules
+		lsmod | grep -q vmx_crypto \
+			&& run_cmd sudo rmmod vmx-crypto \
+			&& echo "VMX removed..."
+		run_cmd sudo insmod ./vmx-crypto.ko
+		;;
+
+	*) echo "What?" && exit 1 ;;
+esac
+
+case $1 in
+	ipsec) run_cmd sudo systemctl start ipsec ;;
+	tcrypt) run_cmd modprobe tcrypt mode=10 ;;
+	*) ;;
+esac
+
+echo -e "Done!\n\n"
