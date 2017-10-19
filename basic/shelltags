@@ -6,6 +6,9 @@ shelltags() {
 	# needs to be the very first thing to not lose the exit code
 	local EXITSTATUS="$?"
 
+	# change bash default to a better one (based in fedora's /etc/bashrc)
+	[ "$PS1" = "\\s-\\v\\\$ " ] && PS1="[\u@\h \W]\\$ "
+
 	# save original prompt if necessary and clean it
 	[ -z "$PS1_ORIGINAL" ] && PS1_ORIGINAL=$PS1
 	PS1=
@@ -28,6 +31,7 @@ shelltags() {
 	done
 	shift $((OPTIND-1))
 	OPTIND=0
+
 
 	# the last item is the prompt, use original if none
 	[ -n "$*" ] && PROMPT="$*" || PROMPT="$PS1_ORIGINAL"
