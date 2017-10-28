@@ -49,9 +49,10 @@ shelltags_tag() {
 	local COLOR=
 	local OUTPUT=
 
-	# checks
+	# checks dependencies
 	case $1 in
 		temperature|battery) [ ! -x "/usr/bin/acpi" ] && return ;;
+		freespace|battery) [ ! -x "/usr/bin/bc" ] && return ;;
 	esac
 
 	# execute tag
