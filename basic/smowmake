@@ -1,36 +1,70 @@
 #!/bin/bash
 
-LINUX_PATH="$HOME/projects/linux"
+PROJECTS="$HOME/projects"
+MAKE="time make -j$(grep -c ^proc /proc/cpuinfo)"
+MAKE_INSTALL="sudo make install"
 
 function run_cmd() {
 	echo -e "\n$*\n----------------------------------------------------------"
 	$*
 }
 
+################################################################# PRE EXECUTION
 case $1 in
 	ipsec) run_cmd sudo systemctl stop ipsec ;;
 	*) ;;
 esac
 
+##################################################################### EXECUTION
 case $PWD in
-	$LINUX_PATH/drivers/crypto/vmx)
+	$PROJECTS/linux/drivers/crypto/vmx)
 		echo "module vios +p" | sudo tee /sys/kernel/debug/dynamic_debug/control > /dev/null
 		echo "module vmx_crypto +p" | sudo tee /sys/kernel/debug/dynamic_debug/control > /dev/null
 		echo "7" | sudo tee /proc/sys/kernel/printk > /dev/null
-		run_cmd make -C $LINUX_PATH M="$PWD" modules
+		run_cmd make -C $PROJECTS/linux M="$PWD" modules
 		lsmod | grep -q vmx_crypto \
 			&& run_cmd sudo rmmod vmx-crypto \
 			&& echo "VMX removed..."
 		run_cmd sudo insmod ./vmx-crypto.ko
 		;;
 
+	$PROJECTS/go/*)
+		case $1 in
+			gdb)
+				run_cmd $PROJECTS/go/bin/go test -c -bench=. &&
+					run_cmd gdb $(basename $PWD).test
+				;;
+			*) run_cmd $PROJECTS/go/bin/go test -bench=. ;;
+		esac
+		;;
+
+	$PROJECTS/openssl)
+		INSTALL=
+		SHARED="shared"
+		OPTS=""
+
+		while [ -n "$1" ]; do
+			[ "$1" == "static" ] && SHARED="no-shared"
+			[ "$1" == "gdb" ] && OPTS="-g3 -ggdb -O0 -fno-inline -fno-omit-frame-pointer"
+			[ "$1" == "install" ] && INSTALL=1
+			shift
+		done
+
+		set -x
+		./Configure linux-$(uname -m) $OPTS threads $SHARED
+		$MAKE
+		[ -n "$INSTALL" ] && $MAKE_INSTALL
+		;;
+
 	*) echo "What?" && exit 1 ;;
 esac
 
+################################################################ POST EXECUTION
 case $1 in
 	ipsec) run_cmd sudo systemctl start ipsec ;;
 	tcrypt) run_cmd modprobe tcrypt mode=10 ;;
 	*) ;;
 esac
 
+######################################################################## FINISH
 echo -e "Done!\n\n"
