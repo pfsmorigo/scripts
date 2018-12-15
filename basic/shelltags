@@ -156,6 +156,6 @@ shelltags_tag() {
 	if [ "$1" != "prompt" ]; then
 		echo -en "${BG}${FG}[${WH}${OUTPUT}${FG}]${UN} "
 	else
-		echo -en "${FG}${OUTPUT}${UN}"
+		echo -en "${FG}${OUTPUT}${UN} "
 	fi
 }
