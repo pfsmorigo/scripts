@@ -63,7 +63,7 @@ shelltags_tag() {
 
 		load)
 			COLOR=magenta
-			local PROCESSOR=$(grep -c ^processor /proc/cpuinfo)
+			local PROCESSOR=$(\grep -c ^processor /proc/cpuinfo)
 			local CURLOAD=$(cat /proc/loadavg | cut -d' ' -f1)
 			local CURLOAD_INT=$(cat /proc/loadavg | cut -d'.' -f1)
 			[ "$CURLOAD_INT" -ge "$PROCESSOR" ] && OUTPUT="$CURLOAD"
@@ -91,7 +91,7 @@ shelltags_tag() {
 
 		temperature)
 			COLOR=magenta
-			OUTPUT=$(acpi -t 2> /dev/null | cut -d' ' -f4 | cut -d. -f1)
+			OUTPUT=$(acpi -t 2> /dev/null | head -n1 | cut -d' ' -f4 | cut -d. -f1)
 			[ -z "$OUTPUT" ] && return
 			[ "$OUTPUT" -lt 70 ] && return
 			OUTPUT+=°
@@ -106,7 +106,7 @@ shelltags_tag() {
 			;;
 
 		git)
-			local GIT=$(git status --short --branch 2> /dev/null | grep '^##')
+			local GIT=$(git status --short --branch 2> /dev/null | \grep '^##')
 			local GITSTATE=
 			if [ -n "$GIT" ]; then
 				COLOR=blue
@@ -122,7 +122,7 @@ shelltags_tag() {
 			;;
 
 		prompt)
-			if grep -q 'emulated by qemu' /proc/cpuinfo; then
+			if \grep -q 'emulated by qemu' /proc/cpuinfo; then
 				COLOR=magenta
 			elif [ -n "$SSH_CLIENT" ]; then
 				COLOR=green
