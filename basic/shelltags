@@ -40,7 +40,7 @@ shelltags() {
 	# if not screen, set a title for the terminal
 	if [ -z "$STY" ]; then
 		KERNEL=$(uname -r)
-		LOAD=$(awk '{ print $1 }' /proc/loadavg)
+		LOAD=$(awk '{ print $1 }' /proc/loadavg 2> /dev/null)
 		echo -ne "\033]0;$HOSTNAME ($KERNEL) | $LOAD | ${PWD/$HOME/~}\007"
 	fi
 }
@@ -63,9 +63,10 @@ shelltags_tag() {
 
 		load)
 			COLOR=magenta
+			local LOAD="$(cat /proc/loadavg 2> /dev/null)"
 			local PROCESSOR=$(\grep -c ^processor /proc/cpuinfo)
-			local CURLOAD=$(cat /proc/loadavg | cut -d' ' -f1)
-			local CURLOAD_INT=$(cat /proc/loadavg | cut -d'.' -f1)
+			local CURLOAD=$(echo "$LOAD" | cut -d' ' -f1)
+			local CURLOAD_INT=$(echo "$LOAD" | cut -d'.' -f1)
 			[ "$CURLOAD_INT" -ge "$PROCESSOR" ] && OUTPUT="$CURLOAD"
 			;;
 
