@@ -64,6 +64,7 @@ shelltags_tag() {
 		load)
 			COLOR=magenta
 			local LOAD="$(cat /proc/loadavg 2> /dev/null)"
+			[ -z "$LOAD" ] && return
 			local PROCESSOR=$(\grep -c ^processor /proc/cpuinfo)
 			local CURLOAD=$(echo "$LOAD" | cut -d' ' -f1)
 			local CURLOAD_INT=$(echo "$LOAD" | cut -d'.' -f1)
