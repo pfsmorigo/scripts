@@ -1,0 +1,11 @@
+#!/bin/bash
+
+exit
+
+for NUM in $(seq 0 10); do
+	echo -n "                                        "
+done
+
+echo "teste de texto"
+echo ""
+echo ""

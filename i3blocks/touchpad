@@ -1,0 +1,15 @@
+#!/bin/bash
+
+TOUCH_ID=$(xinput list | grep -i touchpad | sed 's/^.*id=//g' | cut -f1)
+STATE=$(xinput list-props $TOUCH_ID | grep "Device Enabled" | cut -f3)
+
+case $BLOCK_BUTTON in
+	3)
+		STATE=$(( ($STATE + 1) % 2 ))
+		xinput set-prop $TOUCH_ID "Device Enabled" $STATE
+		;;
+esac
+
+[ "$STATE" = "1" ] && echo "⬜" || echo "⬛"
+echo ""
+echo ""

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+HOSTTOTEST=google.com
+LOG=/tmp/check_network
+
+if ping -c 1 -W 5 $HOSTTOTEST > /dev/null 2>&1; then
+	[ -f "$LOG" ] && rm $LOG
+else
+	[ ! -f "$LOG" ] && date +%s > $LOG
+	echo -n " No Network ("
+	SECONDS=$(( $(date +%s) - $(cat $LOG) ))
+	[ $SECONDS -gt 86400 ] && echo "$(( $SECONDS / 86400 ))d) "   && exit 33
+	[ $SECONDS -gt  3600 ] && echo "$(( $SECONDS /  3600 ))h) "   && exit 33
+	[ $SECONDS -gt    60 ] && echo "$(( $SECONDS /    60 ))min) " && exit 33
+	echo "${SECONDS}s" && exit 33
+fi

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+[ "$1" = "swap" ] && STRING="Swap" || STRING="Mem"
+
+echo "$(free -h | grep $STRING | awk '{ print $3 }')"
+echo ""
+if [ "$STRING" = "Mem" ]; then
+	AVAILABLE=$(free | grep $STRING | awk '{ print $7 }')
+	[ $AVAILABLE -lt $(( 1*1024*1024 )) ] && echo "#ff0000" && exit
+	[ $AVAILABLE -lt $(( 2*1024*1024 )) ] && echo "#ffff00" && exit
+fi
+echo ""

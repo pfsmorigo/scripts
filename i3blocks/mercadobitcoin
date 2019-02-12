@@ -1,0 +1,19 @@
+#!/bin/bash
+
+get_value() {
+	VALUE=$(echo "$1" | grep $2 | cut -d: -f2 | sed 's/......$//')
+	echo $(echo "scale=0; ($VALUE)/1" | bc)
+}
+
+# Format:
+# {"ticker":{"high":913.00000000,"low":900.00000000,"vol":1.28565954,"last":905.00000000,"buy":886.99924000,"sell":904.98999000,"date":1414634847}}
+
+URL=https://www.mercadobitcoin.com.br/api/ticker/
+VALUES="$(wget -qO- $URL | sed 's/{"ticker"://' | tr , '\n')"
+
+HIGH=$(get_value "$VALUES" high)
+LOW=$(get_value "$VALUES" low)
+CURRENT=$(get_value "$VALUES" last)
+BUY=$(get_value "$VALUES" buy)
+SELL=$(get_value "$VALUES" sell)
+echo "H $HIGH | L $LOW | C $CURRENT | B $BUY | S $SELL"

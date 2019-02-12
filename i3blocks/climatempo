@@ -1,0 +1,18 @@
+#!/usr/bin/python
+
+import urllib2
+import json
+import sys
+import os
+#from pprint import pprint
+
+response = urllib2.urlopen('http://developers.agenciaideias.com.br/cotacoes/json')
+data = json.load(response)
+#pprint(data)
+
+instance = os.getenv('BLOCK_INSTANCE', '')
+
+if instance == '':
+    print 'need: dolar, euro or bovespa'
+else:
+    print data[instance]['cotacao']+' ('+data[instance]['variacao']+')'

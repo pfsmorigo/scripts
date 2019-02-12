@@ -1,0 +1,9 @@
+#!/bin/bash
+
+TEMPERATURE=$(acpi -t | head -n1 | awk '{ print $4 }' | cut -d. -f1)
+[ "$TEMPERATURE" -gt 80 ] && COLOR="#ffff00"
+[ "$TEMPERATURE" -gt 95 ] && COLOR="#ff0000"
+
+echo "${TEMPERATURE}°C"
+echo ""
+echo "$COLOR"

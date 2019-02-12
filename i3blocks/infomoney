@@ -1,0 +1,54 @@
+#!/bin/bash
+
+[ -n "$1" ] && BLOCK_INSTANCE=$1
+[ -z "$BLOCK_INSTANCE" ] && echo "need a index!" && exit 1
+
+TMPFILE=/tmp/infomoney
+URL=http://www.infomoney.com.br/fale-conosco
+
+[ "$BLOCK_INSTANCE" != "poupanca" ] \
+	&& GREP="li-$BLOCK_INSTANCE" \
+	|| GREP="last-child"
+
+if [ ! -f $TMPFILE ]; then
+	wget -O $TMPFILE $URL > /dev/null 2>&1
+else
+	UPDATE=$(grep -A 4 "$GREP" $TMPFILE | grep "atualização:" \
+		| sed -e 's/.*: //;s/">//g;s/[:\/]/ /g' \
+		| awk -F' ' '{ print $2"/"$1" "$3":"$4 }' \
+		| tr -d '\r')
+	DIFF=$(( $(date +%s) - $(date +%s -d "$UPDATE") ))
+	# Only get info if is old and it's working time
+	if [ "$DIFF" -gt 10000 -a $(date +%H) -gt 8 -a $(date +%H) -lt 18 ]; then
+		wget -O $TMPFILE $URL > /dev/null 2>&1 || exit 1
+	fi
+fi
+
+DIFF=$(grep -A 4 "$GREP" $TMPFILE | grep "<br />" \
+		| sed -e 's/<br \/>/|/g;s/<[^>]*>//g' \
+		| tr -d '\r' | cut -d"|" -f2)
+VALUE=$(grep -A 4 "$GREP" $TMPFILE | grep "<br />" \
+		| sed -e 's/<br \/>/|/g;s/<[^>]*>//g;s/R$ //g;s/ pts//g' \
+		| tr -d '\r' | cut -d"|" -f3)
+VARIATION=$(echo "${DIFF%\%*} * 100" | tr ',' '.' | tr -d '+' | bc)
+
+case $BLOCK_INSTANCE in
+	ibovespa) echo -n "BVP " ;;
+	nasdaq)   echo -n "NSQ " ;;
+	shanghai) echo -n "SGA " ;;
+	ifix)     echo -n "IFX " ;;
+	dolar)    echo -n "USD " ;;
+	euro)     echo -n "EUR " ;;
+	cdi)      echo -n "CDI " ;;
+	poupanca) echo -n "POU " ;;
+esac
+
+case $BLOCK_INSTANCE in
+	ibovespa|nasdaq|shanghai|ifix|dolar|euro) echo "$VALUE ($DIFF)" ;;
+	cdi|poupanca) echo "$DIFF"; VARIATION=0 ;;
+esac
+
+echo ""
+[ "${VARIATION%.*}" -gt  100 ] && echo "#bbbbff" && exit
+[ "${VARIATION%.*}" -lt -100 ] && echo "#ffbbbb" && exit
+echo ""

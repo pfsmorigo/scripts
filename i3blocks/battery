@@ -1,0 +1,50 @@
+#!/bin/bash
+
+format_time() {
+	HOUR_MINUTE=${1%:*}
+	HOUR=${HOUR_MINUTE%:*}
+	MIN=${HOUR_MINUTE#*:}
+	[ "$HOUR" == "00" ] && echo -n "${MIN}min" || echo -n "${HOUR}h${MIN}"
+}
+
+PORCENTAGE=
+STATE=
+REMAINING=
+COUNT=0
+
+ACPI="$(acpi -b | cut -d' ' -f3- | sed 's/ remaining//g' | tr '%' '+')"
+
+OLDIFS=$IFS
+IFS=$'\n'
+for LINE in $ACPI; do
+	STATE=$(echo $LINE | cut -d, -f1)
+	PORCENTAGE+="$(echo $LINE | cut -d, -f2 | xargs)"
+
+	case $STATE in
+		Charging|Discharging)
+			[ "$STATE" == "Charging" ] && SYMBOL="C" || SYMBOL="D"
+			TIME="$(format_time $(echo $LINE | cut -d, -f3 | xargs))"
+			;;
+	esac
+	COUNT=$(( $COUNT + 1 ))
+done
+IFS=$OLDIFS
+
+PORCENTAGE=$(echo $PORCENTAGE | sed 's/+$//g')
+TOTAL_PORCENTAGE=$(( $PORCENTAGE ))
+CYCLES=$(cat /sys/class/power_supply/BAT1/cycle_count)
+CYCLES=$(~/scripts/utils/unicode $CYCLES)
+
+if [ -z "$TIME" -a $(( $TOTAL_PORCENTAGE / $COUNT )) -ge 99 ]; then
+	echo "FULL $CYCLES"
+elif [ -z "$TIME" ]; then
+	echo "BS $CYCLES"
+else
+	echo "$SYMBOL $PORCENTAGE% ($TIME) $CYCLES"
+	echo "$SYMBOL $TOTAL_PORCENTAGE%"
+
+	[ "$TOTAL_PORCENTAGE" -gt 85 ] && echo "#ffffff" && exit 0
+	[ "$TOTAL_PORCENTAGE" -gt 60 ] && echo "#fff600" && exit 0
+	[ "$TOTAL_PORCENTAGE" -gt 40 ] && echo "#ffae00" && exit 0
+	echo "#ff0000"
+fi

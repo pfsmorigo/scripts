@@ -1,0 +1,25 @@
+#!/bin/bash
+
+LOG=/var/log/lsyncd.log
+#CHAR=🔄
+CHAR="(S)"
+COLOR="#00ff00"
+
+if [ -z "$(pgrep -a 'lsyncd')" ]; then
+	echo -e " off \n\n#ff0000"
+	exit 33
+fi
+
+LAST_SUCCESS=$(grep -a "Finished a list" $LOG 2> /dev/null | tail -n 1 | cut -d" " -f1-5)
+[ -z "$LAST_SUCCESS" ] && echo -e "$CHAR" && exit 33
+
+SECONDS=$(( $(date +%s) - $(date +%s -d "$LAST_SUCCESS") ))
+[ $SECONDS -gt   600 ] && COLOR="#ffffff"
+[ $SECONDS -gt  3600 ] && COLOR="#ffff00"
+[ $SECONDS -gt 86400 ] && COLOR="#ff0000"
+
+echo -e "$CHAR\n\n$COLOR"
+
+#[ $SECONDS -gt 86400 ] && echo " $(( $SECONDS / 86400 ))d "   && exit 33
+#[ $SECONDS -gt  3600 ] && echo " $(( $SECONDS /  3600 ))h "   && exit 33
+#[ $SECONDS -gt    60 ] && echo " $(( $SECONDS /    60 ))min " && exit 33

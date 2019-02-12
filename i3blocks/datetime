@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#OUTPUT=$(date +"%a, %b %d (%j) %Hh%M" | sed 's, 0, ,g;s,([0]\+,(,g')
+OUTPUT=$(date +"%a, %b %d " | sed 's, [0]\+, ,g')
+OUTPUT+=$(~/scripts/utils/unicode $(date +" %j" | sed 's, [0]\+, ,g'))
+OUTPUT+=$(date +" %Hh%M" | sed 's, [0]\+, ,g')
+
+echo "$OUTPUT"
+echo ""
+echo ""

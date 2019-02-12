@@ -1,0 +1,38 @@
+#!/bin/bash
+
+
+
+
+
+[ "$BLOCK_BUTTON" == "3" ] && exit 0
+
+
+date +%H%M
+exit 0
+
+TMPFILE=/tmp/i3blocks_xautolock
+
+[ ! -f $TMPFILE ] && exit 0
+[[ $1 =~ ^-?[0-9]+$ ]] && TIMEOUT=$1 || exit 0
+
+CURR_MOVE=$(xdotool getmouselocation 2> /dev/null)
+CURR_TIME=$(date +%s)
+
+if [ -f $TMPFILE ]; then
+	LAST_MOVE=$(cat $TMPFILE 2> /dev/null)
+	LAST_TIME=$(find $TMPFILE -printf "%T@" | cut -d. -f1)
+	[ "$LAST_MOVE" != "$CURR_MOVE" ] && rm $TMPFILE && exit
+else
+	LAST_MOVE=$CURR_MOVE
+	LAST_TIME=$CURR_TIME
+	echo $CURR_MOVE > $TMPFILE
+fi
+
+let "TIMEOUT=$TIMEOUT - ($CURR_TIME - $LAST_TIME)"
+
+echo "${TIMEOUT}s"
+echo ""
+
+sleep 2
+I3BLOCKS=$(pgrep i3blocks)
+[ -n "$I3BLOCKS" ] && kill -47 $I3BLOCKS # 34 is the base

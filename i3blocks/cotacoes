@@ -1,0 +1,16 @@
+#!/bin/bash
+
+wget --quiet -O /tmp/cotacoes http://economia.uol.com.br/cotacoes/cambio/
+
+parse_result() {
+	LINE=$(awk -F"<p class=\"cotacao\"> " "{ print $1 }" /tmp/cotacoes \
+		| sed -e 's/<[^>]*>//g')
+	echo $LINE | awk "{ print $2 }"
+}
+
+BSP=$(parse_result '$2' '$2 " (" $1 ")"')
+USD=$(parse_result '$3' '$3 " (" $1 ")"')
+ARS=$(parse_result '$4' '$3 " (" $1 ")"')
+EUR=$(parse_result '$5' '$3 " (" $1 ")"')
+
+echo "BSP $BSP  USD $USD  ARS $ARS  EUR $EUR"

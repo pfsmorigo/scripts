@@ -1,0 +1,15 @@
+#!/bin/bash
+
+test -f /usr/bin/dnf && COMMAND=dnf || COMMAND=yum
+
+UPDATE_COUNT=$($COMMAND check-update 2> /dev/null | grep "updates$" | wc -l)
+
+if [ $UPDATE_COUNT -gt 0 ]; then
+	echo "(U)"
+	#echo "🌟"
+	#echo ""
+	#echo -n "$UPDATE_COUNT up"
+	#[ $UPDATE_COUNT -gt 1 ] && echo "s" || echo ""
+	#echo "${UPDATE_COUNT}u"
+	#echo "#7777ff"
+fi

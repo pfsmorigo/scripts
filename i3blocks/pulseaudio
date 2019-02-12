@@ -1,0 +1,52 @@
+#! /bin/bash
+
+read -d '' LIST <<-EOF
+A	output:analog-stereo+input:analog-stereo
+H	output:hdmi-stereo+input:analog-stereo
+EOF
+
+get_volume() {
+	if pacmd list-sinks | grep -q "muted: no"; then
+		pacmd list-sinks | grep "volume: front-left:" | awk '{ print $5 }'
+	else
+		echo "MUTE"
+	fi
+}
+
+set_volume() {
+	case $1 in
+		up|down)
+			CURR=$(pacmd list-sinks | grep "volume: front-left" \
+				| awk '{ print $3 }')
+			[ "$1" == "up" ] && OP="+" || OP="-"
+			STEP=$(expr $((( 1024 * 64 / 100) * 5 )))
+			NEW=$(expr $(( ($CURR $OP $STEP) / $STEP * $STEP )))
+			pacmd set-sink-volume $INDEX $NEW
+			;;
+
+		mute)
+			pacmd list-sinks | grep -q "muted: no" \
+				&& ON_OFF="on" || ON_OFF="off"
+			pacmd set-sink-mute $INDEX $ON_OFF
+			;;
+	esac
+}
+
+switch_profile() {
+	NEW=$(echo "$LIST" | grep -v $PROFILE | head -n1 | cut -f2)
+	ALIAS=$(echo "$LIST" | grep $NEW | cut -f1)
+	pactl set-card-profile 0 $NEW
+}
+
+PROFILE=$(pacmd list-cards | grep 'active profile' | sed 's/.*<//g;s/>.*//g')
+INDEX=$(pacmd list-sinks | grep "* index" | head -n1 | awk '{ print $3 }')
+ALIAS=$(echo "$LIST" | grep $PROFILE | cut -f1)
+
+case $BLOCK_BUTTON in
+	2) switch_profile ;;
+	3) set_volume mute ;;
+	4) set_volume up ;;
+	5) set_volume down ;;
+esac
+
+echo "$ALIAS $(get_volume)"

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+MAXSIZE=30
+CLIPBOARD=$(copyq clipboard | tr '\n' ' ')
+[ ${#CLIPBOARD} -gt $MAXSIZE ] && CLIPBOARD="${CLIPBOARD:0:$MAXSIZE}…"
+
+echo "\"$CLIPBOARD\""

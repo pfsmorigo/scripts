@@ -1,0 +1,32 @@
+#!/bin/bash
+
+trim() {
+	[ ${#1} -gt $MAXSIZE ] && echo "${1:0:$MAXSIZE}…" || echo "$1"
+}
+
+MAXSIZE=20
+RHYTMBOXCMD="rhythmbox-client --no-start"
+
+if [ -n "$(pgrep rhythmbox)" ]; then
+	case $BLOCK_BUTTON in
+		3) $RHYTMBOXCMD --play-pause ;;  # click: play/pause
+		4) $RHYTMBOXCMD --next       ;;  # scroll up: next
+		5) $RHYTMBOXCMD --previous   ;;  # scroll down: previous
+	esac
+
+	DATA=$($RHYTMBOXCMD --print-playing-format "%ta|%tt|%at|%ay")
+	IFS='|'
+	DATA_ARRAY=($DATA)
+
+	ARTIST=${DATA_ARRAY[0]}
+	TITLE=${DATA_ARRAY[1]}
+	ALBUM=${DATA_ARRAY[2]}
+	YEAR=${DATA_ARRAY[3]}
+
+	[ -n "$ARTIST" ] && OUTPUT+="$(trim $ARTIST)"
+	[ -n "$TITLE" ] && OUTPUT+=" - $(trim $TITLE)"
+	[ -n "$ALBUM" ] && OUTPUT+=" - $(trim $ALBUM)"
+	[ -n "$YEAR" ] && OUTPUT+=" ($(trim $YEAR))"
+	echo "$OUTPUT"
+fi
+

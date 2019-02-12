@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [ "$(xset q | grep Caps | awk '{ print $4 }')" == on ]; then
+	echo "CAPSLOCK"
+	echo ""
+	echo "#FFFF00"
+fi

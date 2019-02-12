@@ -1,0 +1,4 @@
+#!/bin/bash
+
+FILE=$HOME/.config/i3blocks/local
+[ -x "$FILE" ] && $FILE
