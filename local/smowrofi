@@ -1,0 +1,13 @@
+#!/bin/bash
+
+DIR=$(basename $PWD)
+echo $DIR
+WALLPAPER="$HOME/.local/bin/wallpaper rofi list"
+DISPLAYS="$HOME/.local/bin/display"
+SHOW="${1:-run}"
+
+rofi \
+	-rnow \
+	-run-command "/bin/bash -i -c '{cmd}'" \
+	-modi run,window,ssh,wallpaper:"$WALLPAPER",display:"$DISPLAYS" \
+	-show $SHOW
