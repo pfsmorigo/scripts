@@ -13,7 +13,6 @@ if [ -n "$SERVER" ] && [ "$SERVER" != "local" ]; then
 	COMMAND="$SSH $SERVER"
 fi
 
-pgrep ${EXEC}d > /dev/null || ${EXEC}d -q -f -o > /tmp/urxvtd.log 2>&1
+pgrep $(basename ${EXEC}d) > /dev/null || ${EXEC}d -q -f -o > /tmp/urxvtd.log 2>&1
 set -xf
-
 ${EXEC}c -name $NAME -e sh -c "$COMMAND"
