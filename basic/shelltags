@@ -41,7 +41,7 @@ shelltags() {
 	if [ -z "$STY" ]; then
 		KERNEL=$(uname -r)
 		LOAD=$(awk '{ print $1 }' /proc/loadavg 2> /dev/null)
-		echo -ne "\033]0;$HOSTNAME ($KERNEL) | $LOAD | ${PWD/$HOME/~}\007"
+		echo -ne "\033]0;$HOSTNAME ($KERNEL)  $LOAD  ${PWD/$HOME/~}\007"
 	fi
 }
 
@@ -93,7 +93,12 @@ shelltags_tag() {
 
 		temperature)
 			COLOR=magenta
-			OUTPUT=$(acpi -t 2> /dev/null | head -n1 | cut -d' ' -f4 | cut -d. -f1)
+			RASP_DIR=/proc/device-tree/model
+			if [ -e "$RASP_DIR" ] && [[ "$(cat $RASP_DIR)" =~ "Raspberry" ]]; then
+				OUTPUT=$(/opt/vc/bin/vcgencmd measure_temp | cut -d= -f2 | cut -d. -f1)
+			else
+				OUTPUT=$(acpi -t 2> /dev/null | head -n1 | cut -d' ' -f4 | cut -d. -f1)
+			fi
 			[ -z "$OUTPUT" ] && return
 			[ "$OUTPUT" -lt 70 ] && return
 			OUTPUT+=°
