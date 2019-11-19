@@ -2,10 +2,14 @@
 
 #screen -list | grep "tached)$" | sed 's/\t//;s/\s\+/ /;s/\./ /' | tr -d '()' | awk '{ print $1" "$3" "$2 }' | column -t
 
+CURDIR="${PWD##*/}"
+
 COUNT=0
 SCREEN_LIST=$(screen -list | grep "tached)$" \
 	| sed 's/\./;/;s/\t/;/g;s/^;//' | column -t -s';')
-[ -z "$(echo $SCREEN_LIST | xargs)" ] && SCREEN_LIST="(new) $USER"
+
+echo "$SCREEN_LIST" | grep -q "$CURDIR" \
+	|| SCREEN_LIST="$(echo -e "$SCREEN_LIST\n(new) $CURDIR")"
 
 echo ""
 OLDIFS=$IFS

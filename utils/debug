@@ -1,0 +1,9 @@
+#!/bin/bash
+
+EXEC=$0
+LOG=~/$EXEC_$(date +%F_%H-%M).log
+
+set -x
+ulimit -c unlimited
+ulimit -c
+pkill $EXEC && strace $EXEC > $LOG 2>&1 &
