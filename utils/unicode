@@ -1,0 +1,17 @@
+#!/bin/bash
+
+SUP=" ⁽⁾ ⁺ ⁻ᐝᐟ⁰¹²³⁴⁵⁶⁷⁸⁹⁼ⁿⁱ"
+SUB=" ₍₎ ₊ ₋  ₀₁₂₃₄₅₆₇₈₉₌ₐₑₒₓ"
+
+function ascii_code() {
+	LC_CTYPE=C printf '%d' "'$1"
+}
+
+convert() {
+	CHAR=$(expr $(ascii_code "$CHAR") - 39)
+	echo -n ${SUP:$CHAR:1}
+}
+
+while read -n1 CHAR; do
+	convert "$CHAR"
+done < <(echo -n "$1")

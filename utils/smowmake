@@ -56,6 +56,15 @@ case $PWD in
 		[ -n "$INSTALL" ] && $MAKE_INSTALL
 		;;
 
+	$PROJECTS/ledger)
+		sed -i -e 's# -isystem /usr/include##g' src/CMakeFiles/libledger.dir/build.make
+		./acprep --prefix=/usr/local update
+		;;
+
+	$PROJECTS/hosts)
+		python updateHostsFile.py --extensions fakenews gambling porn
+		;;
+
 	*) echo "What?" && exit 1 ;;
 esac
 

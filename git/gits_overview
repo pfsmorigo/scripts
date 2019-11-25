@@ -1,0 +1,32 @@
+#!/bin/bash
+
+echo -e "[M]odified, [U]nkown, [B]ehind, [A]head, [S]tash\n"
+
+CURDIR=$PWD
+OUTPUT+="M,U,B,A,S,Path\n"
+
+OLDIFS=$IFS
+IFS=$'\n'
+for RAWDIR in $(find $CURDIR -name .git | sort -h); do
+	DIR=${RAWDIR%/.git}
+	cd "$DIR"
+
+	GIT=$(git status --short --branch --porcelain 2> /dev/null)
+	BEHIND_AHEAD=$(echo "$GIT" | grep "^##" | awk 'NR>1{print $1}' RS=[ FS=] | tr ',' '\n')
+
+	MOD=$(echo "$GIT" | grep "^ M" | wc -l)
+	UNK=$(echo "$GIT" | grep "^??" | wc -l)
+	BEH=$(echo "$BEHIND_AHEAD" | grep "behind" | awk '{ print $2 }')
+	AHE=$(echo "$BEHIND_AHEAD" | grep "ahead" | awk '{ print $2 }')
+	STA=$(git stash list 2> /dev/null | wc -l)
+
+	BEH=${BEH:-0}
+	AHE=${AHE:-0}
+
+	SUM=$(expr $MOD + $UNK + $BEH + $AHE + $STA)
+	[ $SUM -gt 0 ] \
+		&& OUTPUT+="$MOD,$UNK,$BEH,$AHE,$STA,$DIR\n"
+done
+IFS=$OLDIFS
+
+echo -e $OUTPUT | column -t -s,

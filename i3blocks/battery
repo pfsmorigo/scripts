@@ -7,16 +7,22 @@ format_time() {
 	[ "$HOUR" == "00" ] && echo -n "${MIN}min" || echo -n "${HOUR}h${MIN}"
 }
 
+acpi_output() {
+	acpi -b \
+		| sed 's/, rate information unavailable//g' \
+		| cut -d' ' -f3- \
+		| sed 's/ remaining//g' \
+		| tr '%' '+'
+}
+
 PORCENTAGE=
 STATE=
 REMAINING=
 COUNT=0
 
-ACPI="$(acpi -b | cut -d' ' -f3- | sed 's/ remaining//g' | tr '%' '+')"
-
 OLDIFS=$IFS
 IFS=$'\n'
-for LINE in $ACPI; do
+for LINE in $(acpi_output); do
 	STATE=$(echo $LINE | cut -d, -f1)
 	PORCENTAGE+="$(echo $LINE | cut -d, -f2 | xargs)"
 

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+read -d '' APP_LIST <<-EOF
+com.gaming.sebas.gocompanion
+EOF
+
+backup() {
+	DEVICE="$(adb devices -l | awk '{ print $5 }' | cut -d: -f2 | sed '/^$/d')"
+	BACKUP_FILE="$HOME/backup/android/$(date +%F_%H-%M-%S)_$DEVICE.ab"
+	set -x
+	#adb backup -apk -shared -f $BACKUP_FILE $APP_LIST
+	sudo adb backup -f $BACKUP_FILE $APP_LIST
+}
+
+unpack() {
+	FILE=$1
+	[ ! -f "$FILE" ] && echo "File not found" && exit 1
+
+	set -x
+	sudo dd if=$FILE bs=24 skip=1 | openssl zlib -d > ${FILE%.*}.tar
+}
+
+case $1 in
+	backup|unpack) $* ;;
+	*) echo "Invalid command" && exit 1 ;;
+esac

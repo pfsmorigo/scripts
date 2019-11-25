@@ -1,0 +1,27 @@
+#!/bin/bash
+
+SYS_PATH=/sys/class/power_supply/
+BAT_PATHS=$(find $SYS_PATH -name BAT*)
+
+for BAT_PATH in $BAT_PATHS; do
+	CHAR_FULL=$(cat $BAT_PATH/charge_full)
+	CHAR_FULL_DSGN=$(cat $BAT_PATH/charge_full_design)
+	CHAR_NOW=$(cat $BAT_PATH/charge_now)
+	CYCLES=$(cat $BAT_PATH/cycle_count)
+	STATUS=$(cat $BAT_PATH/status)
+	HEALTH="$(( $CHAR_FULL * 100 / $CHAR_FULL_DSGN ))%"
+	CUR_PERC=$(( $CHAR_NOW * 100 / $CHAR_FULL ))
+
+	CYCLES=$(~/scripts/utils/unicode $CYCLES)
+	LETTER=${STATUS:0:1}
+
+	test "$STATUS" == "Unknown" && CURRENT="BS" || CURRENT="$LETTER $CUR_PERC%"
+
+	echo "$CURRENT $HEALTH $CYCLES"
+	echo "$CURRENT"
+
+	[ "$CUR_PERC" -gt 84 ] && echo "#ffffff" && exit 0
+	[ "$CUR_PERC" -gt 60 ] && echo "#fff600" && exit 0
+	[ "$CUR_PERC" -gt 40 ] && echo "#ffae00" && exit 0
+	echo "#ff0000"
+done

@@ -8,27 +8,34 @@ LIST=""
 
 case $1 in
 	ads)
-		add2list "(FROM:service@conectcar.com AND -SUBJECT:recarga)"
 		add2list "FROM:(email@empresas.dell.com OR email@home.dell.com)"
 		add2list "FROM:*@insideapple.apple.com OR FROM:discover@new.itunes.com"
+		add2list "FROM:Gopro@e-mail.gopro.com"
 		add2list "FROM:Lenovo@enews.lenovo.com"
 		add2list "FROM:compracerta@whr.com.br"
 		add2list "FROM:comunicacao@clientesvivo.com.br"
 		add2list "FROM:comunicado@montecarlo.com.br"
+		add2list "FROM:contatohu@hotelurbano.com.br" # Hotel Urbano
 		add2list "FROM:donotreply@mail.dolce-gusto.com"
 		add2list "FROM:email.campaign@sg.booking.com"
 		add2list "FROM:email@ricardoeletro.com.br"
 		add2list "FROM:emailcenter@novidades.magazineluiza.com.br"
+		add2list "FROM:empresas@ecampaigns.dell.com" # Dell
 		add2list "FROM:info@e.mercadolivre.com.br"
 		add2list "FROM:nao-resposta@mastercard-email.com"
 		add2list "FROM:news@mkt.americanas.com"
 		add2list "FROM:noreply@getpocket.com"
 		add2list "FROM:noreply@vivino.com"
+		add2list "FROM:novidades@email.emkt.ingressorapido.com.br"
 		add2list "FROM:offers@e.godaddy.com"
 		add2list "FROM:oportunidades@ultrafarma.com.br"
 		add2list "FROM:paypal@mail.paypal.com.br"
+		add2list "FROM:promotion@aliexpress.com"
+		add2list "FROM:store-news@amazon.com"
 		add2list "FROM:vivara@news.vivara.com.br"
 		add2list "LIST:07487d1456302a286cf9c4ccc.678209.list-id.mcsv.net" # TED
+		add2list "LIST:<100012736.xt.local>" # Banco Inter
+		add2list "LIST:<6204440.xt.local>" # Cobasi
 		add2list "LIST:fa32acc7a873c8ae79cceb5a0.243017.list-id.mcsv.net" # Recanto
 		add2list "LIST:v3arcosdourados" # McDonalds
 		;;
@@ -50,14 +57,16 @@ case $1 in
 		;;
 
 	shopping)
-		add2list "FROM:*@mercadobitcoin.com.br"
-		add2list "FROM:appleid@apple.com"
-		add2list "FROM:appleid@id.apple.com"
-		add2list "FROM:do_not_reply@itunes.com"
-		add2list "FROM:ebay@ebay.com"
-		add2list "FROM:googleplay-noreply@google.com"
-		add2list "FROM:sales@dealextreme.com"
-		add2list "FROM:service@conectcar.com AND SUBJECT:recarga)"
+		add2list '(FROM:nao-responder@mercadolivre.com AND (SUBJECT:"sua compra"  OR SUBJECT:"encomenda está a caminho" OR SUBJECT:"Você tem uma mensagem"))'
+		add2list 'FROM:*@mail.mercadolivre.com'
+		add2list 'FROM:appleid@apple.com'
+		add2list 'FROM:appleid@id.apple.com'
+		add2list 'FROM:do_not_reply@itunes.com'
+		add2list 'FROM:ebay@ebay.com'
+		add2list 'FROM:googlepay-noreply@google.com'
+		add2list 'FROM:no-reply@cobasi.com.br'
+		add2list 'FROM:sac1@cobasi.com.br'
+		add2list 'FROM:sales@dealextreme.com'
 		;;
 
 	bank)
@@ -68,10 +77,11 @@ case $1 in
 		;;
 
 	bills)
-		add2list "(FROM:live-tim@timbrasil.com.br AND SUBJECT:(Sua fatura LIVE TIM já Está disponível no portal Minha Conta))"
-		add2list "FROM:adm@remaxflow.com.br"
+		add2list "(FROM:naoresponda@jaime.com.br AND SUBJECT:(Boleto))"
 		add2list "FROM:contadigitalvivo@vivo.com.br"
-		add2list "FROM:faturaporemail@servico.aeseletropaulo.com.br"
+		add2list "FROM:contato@royalimoveis.com.br"
+		add2list "FROM:faturaporemailsp@eneldistribuicaosp.com.br"
+		add2list "FROM:financeiro@mistersaudeanimal.com.br"
 		add2list "FROM:suafatura@comgas.com.br"
 		;;
 

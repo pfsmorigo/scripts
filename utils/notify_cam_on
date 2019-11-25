@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#/usr/bin/inotifywait \
+	#--timefmt "%F %T" --format "%T %w %e" --daemon \
+	#--outfile /tmp/camera.log \
+	#/dev/video*
+
+inotifywait -mq --format '%e' /dev/video* | while IFS= read -r events; do
+	echo "$events"
+done

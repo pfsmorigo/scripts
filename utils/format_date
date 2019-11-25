@@ -1,0 +1,7 @@
+#!/bin/bash
+
+SECONDS=$1
+[ $SECONDS -gt 86400 ] && echo "$(( $SECONDS / 86400 ))d"   && exit
+[ $SECONDS -gt  3600 ] && echo "$(( $SECONDS /  3600 ))h"   && exit
+[ $SECONDS -gt    60 ] && echo "$(( $SECONDS /    60 ))min" && exit
+[ $SECONDS -gt     0 ] && echo "$(( $SECONDS         ))s"   && exit

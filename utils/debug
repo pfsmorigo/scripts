@@ -1,9 +1,16 @@
 #!/bin/bash
 
-EXEC=$0
-LOG=~/$EXEC_$(date +%F_%H-%M).log
+[ -z "$1" ] && echo "Need command" && exit 1
+echo "Debuging $1..."
+
+EXEC=$1
+shift
+PARAM=$*
+
+LOG=~/logs/debug/$(basename $EXEC)_$(date +%F_%H-%M).log
 
 set -x
 ulimit -c unlimited
 ulimit -c
-pkill $EXEC && strace $EXEC > $LOG 2>&1 &
+#pkill $EXEC && strace $EXEC $PARAM > $LOG 2>&1 &
+strace $EXEC $PARAM > $LOG 2>&1 &

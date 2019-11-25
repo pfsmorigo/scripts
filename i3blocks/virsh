@@ -1,0 +1,8 @@
+#!/bin/bash
+
+LIST=$(virsh list | grep running | awk '{ print $2 }' | xargs)
+[ -n "$LIST" ] && COLOR="#00ff00"
+
+echo $LIST
+echo ""
+echo $COLOR

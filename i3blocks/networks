@@ -6,7 +6,7 @@ COLOR=
 EXITCODE=0
 IPCMD="/sbin/ip"
 
-HOST_TO_TEST=google.com
+HOST_TO_TEST=registro.br
 LOG=/tmp/check_network
 IGNORED=0
 
@@ -15,7 +15,7 @@ IFS=$'\n'
 for IF in $($IPCMD -o -4 a); do
 	NAME=$(echo $IF | awk '{ print $2 }')
 	case $NAME in
-		lo|virbr*|docker*|br-*) let IGNORED=IGNORED+1 && continue ;;
+		lo|virbr*|docker*|br-*|mpqemubr*|tun*|lxd*) let IGNORED=IGNORED+1 && continue ;;
 	esac
 
 	if [ "$(iwgetid | cut -d' ' -f1)" = "$NAME" ]; then

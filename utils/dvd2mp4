@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#INPUT="-i concat:$(find $1 -iname "VTS*.vob" | tr '\n' '|')"
+INPUT="-i $1"
+VIDEO="-acodec aac -ac 2 -ab 128k"
+AUDIO="-vcodec libx264 -crf 20 -threads 0"
+#MONO2STEREO="-filter_complex [0:a][0:a]amerge=inputs=2[a] -map [a]"
+#TIME="-ss 00:01:00 -to 00:02:00"
+
+set -x
+rm output.mp4
+ffmpeg $INPUT $VIDEO $AUDIO $MONO2STEREO $TIME $2
+
+
+#ffmpeg -i concat:"$FILES" -acodec libfaac -aq 100 -ac 2 -vcodec libx264 -vpre slow -crf 24 -threads 0 output.mp4
+

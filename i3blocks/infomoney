@@ -32,6 +32,8 @@ VALUE=$(grep -A 4 "$GREP" $TMPFILE | grep "<br />" \
 		| tr -d '\r' | cut -d"|" -f3)
 VARIATION=$(echo "${DIFF%\%*} * 100" | tr ',' '.' | tr -d '+' | bc)
 
+[ -z "$VALUE" ] && exit 0
+
 case $BLOCK_INSTANCE in
 	ibovespa) echo -n "BVP " ;;
 	nasdaq)   echo -n "NSQ " ;;

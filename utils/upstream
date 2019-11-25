@@ -1,0 +1,15 @@
+#!/bin/bash
+
+read -d '' LIST <<-EOF
+coin3 https://bitbucket.org/Coin3D
+ntp https://github.com/ntp-project/ntp
+realmd https://github.com/freedesktop/realmd
+znc https://github.com/znc/znc.git
+EOF
+
+if [ -n "$1" ]; then
+	echo $(echo "$LIST" | grep -w $1 | awk '{ print $2 }')
+else
+	echo "$LIST" | cut -d' ' -f1
+fi
+
