@@ -4,4 +4,4 @@ FILE=$(zenity --entry --entry-text="paste.patch" --text="Patch name")
 [ $? != 0 ] && exit 0
 
 echo -n "$*" > /tmp/gist_buffer
-gist -p -f "$FILE" /tmp/gist_buffer
+gist-paste -p -f "$FILE" /tmp/gist_buffer

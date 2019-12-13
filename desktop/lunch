@@ -1,18 +1,16 @@
 #! /bin/bash
 # Sources: http://weechat.org/files/doc/devel/weechat_user.en.html#fifo_plugin
 
-WEECHAT_FIFO=$(ls $HOME/.config/weechat/weechat_fifo_*)
-CURRENT_STATUS=$(purple-remote "getstatusmessage")
+WEECHAT_FIFO=$HOME/.config/weechat/weechat_fifo
+IRC_SERVER=irc.server.canonical-znc
 
-echo "irc.server.bluenet */nick ${USER}_lunch" > $WEECHAT_FIFO
-purple-remote "setstatus?status=away&message=I am lunching"
+echo "$IRC_SERVER */nick ${USER}_lunch" > $WEECHAT_FIFO
 
 sleep 3
-xautolock -locknow
+xfce4-screensaver-command -l
 
-zenity --question --text "Change status to back to \"$CURRENT_STATUS\"?"
+zenity --question --text "Start: $(date +%Hh%M)\n\nBack?"
 if [ "$?" == "0" ]; then
-	echo "irc.server.bluenet */nick $USER" > $WEECHAT_FIFO
-	purple-remote "setstatus?status=available&message=$CURRENT_STATUS"
+	echo "$IRC_SERVER */nick $USER" > $WEECHAT_FIFO
 fi
 

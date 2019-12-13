@@ -17,13 +17,19 @@ case $1 in
 		--output eDP-1 --mode 1920x1080 --rotate normal --pos 968x2160
 		;;
 
-	secondary) xrandr \
+	secondary2k) xrandr \
+		--output DP-1 --off --output HDMI-1 \
+		--mode 1920x1080 --pos 0x0 --rotate normal \
+		--output eDP-1 --off
+		;;
+
+	secondary4k) xrandr \
 		--output DP-1 --off \
 		--output HDMI-1 --mode 3840x2160 --rotate normal --pos 0x0 \
 		--output eDP-1 --off
 		;;
 
-	above) xrandr \
+	above2k) xrandr \
 		--output DP-1 --off \
 		--output HDMI-1 --mode 1920x1080 --rotate normal --pos 960x1080 \
 		--output eDP-1  --mode 1920x1080 --rotate normal --pos 960x2160 \
@@ -36,17 +42,12 @@ case $1 in
 		--output eDP-1  --mode 1920x1080 --rotate normal --pos 960x2160 \
 		--primary
 		;;
-
-	minecraft) xrandr \
-		--output DP-1 --off --output HDMI-1 \
-		--mode 1920x1080 --pos 0x0 --rotate normal \
-		--output eDP-1 --off
-		;;
 	*)
 		echo "primary"
-		echo "secondary"
+		echo "secondary2k"
+		echo "secondary4k"
+		echo "above2k"
 		echo "above4k"
-		echo "minecraft"
 		exit
 		;;
 esac

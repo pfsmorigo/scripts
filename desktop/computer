@@ -79,9 +79,10 @@ reboot() {
 }
 
 lock() {
+	xfce4-screensaver-command -l && sleep 3
     # Add a small delay to prevent suspend races
     # https://bugs.launchpad.net/ubuntu/+source/unity-2d/+bug/830348
-    i3lock -c 000000 && sleep 1
+    #i3lock -c 000000 && sleep 1
 }
 
 irc() {
@@ -115,7 +116,7 @@ wifi() {
 }
 
 touchpad() {
-	TOUCH_ID=$(xinput list | grep TouchPad | sed 's/^.*id=//g' | awk '{ print $1 }')
+	TOUCH_ID=$(xinput list | grep -i touchpad | sed 's/^.*id=//g' | awk '{ print $1 }')
 	[ -z "$TOUCH_ID" ] && notify "no touchpad id found!" && exit 1
 
 	STATE=$(on_off $(xinput list-props $TOUCH_ID | grep "Device Enabled" | cut -f 3))
@@ -137,6 +138,11 @@ touchpad() {
 
 }
 
+bluetooth() {
+	rfkill block bluetooth
+	rfkill unblock bluetooth
+}
+
 sound() {
 	[ -z "$2" ] && echo Need parameters! && exit 1
 
@@ -144,18 +150,9 @@ sound() {
 	COMMAND=$2
 
 	case $COMMAND in
-		up)
-			amixer -qM set $CONTROL 5%+
-			;;
-
-		down)
-			amixer -qM set $CONTROL 5%-
-			;;
-
-		mute)
-			amixer -qM set $CONTROL toggle
-			;;
-
+		up)   amixer -qM set $CONTROL 5%+ ;;
+		down) amixer -qM set $CONTROL 5%- ;;
+		mute) amixer -qM set $CONTROL toggle ;;
 		show)
 			AMIXER=$(amixer -M get $CONTROL | tail -n1)
 			if [[ $AMIXER =~ off ]]; then
@@ -173,7 +170,7 @@ sound() {
 }
 
 display() {
-	SECOND_DISPLAY=$(xrandr | grep ' connected' | grep -v LVDS1 | cut -d' ' -f1)
+	SECOND_DISPLAY=$(xrandr | grep ' connected' | grep -v LVDS-1 | cut -d' ' -f1)
 	if [ -n "$SECOND_DISPLAY" ]; then
 		DUAL="Dual Screen"
 		ONLY_PRI="Only Primary"
@@ -204,11 +201,11 @@ display() {
 		case $EXIT in
 			$DUAL)
 				xrandr -d :0 \
-					--output LVDS1 --mode 1600x900 --pos 146x1080 \
+					--output LVDS-1 --mode 1600x900 --pos 146x1080 \
 					--output $SECOND_DISPLAY --mode 1920x1080 --pos 0x0
-					#--output LVDS1 --mode 1600x900 --pos 1250x1080 \
+					#--output LVDS-1 --mode 1600x900 --pos 1250x1080 \
 				sleep 1
-				DISPLAY=:0 i3 move workspace "1:I 2:II 3:III 4:IV 5:V" LVDS1
+				DISPLAY=:0 i3 move workspace "1:I 2:II 3:III 4:IV 5:V" LVDS-1
 				DISPLAY=:0 i3 move workspace "6:VI 7:VII 8:VIII 9:IX 10:X" $SECOND_DISPLAY
 				;;
 			$ONLY_PRI)
@@ -217,12 +214,12 @@ display() {
 				;;
 			$ONLY_SEC)
 				xrandr -d :0 --auto
-				xrandr --output LVDS1 --off
+				xrandr --output LVDS-1 --off
 				;;
 			*) return;;
 		esac
 	else
-		xrandr --output LVDS1 --on
+		xrandr --output LVDS-1 --on
 		xrandr -d :0 --auto
 	fi
 	i3config

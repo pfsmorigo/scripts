@@ -4,7 +4,7 @@ NAME=URxvt
 SERVER=$1
 COMMAND="bash"
 
-TERMINALS="/usr/local/bin/urxvt /usr/bin/urxvt256c-ml /usr/bin/urxvt"
+TERMINALS="/usr/bin/urxvt256c-ml /usr/bin/urxvt"
 for TERM in $TERMINALS; do [ -e $TERM ] && EXEC=$TERM && break; done
 
 if [ -n "$SERVER" ] && [ "$SERVER" != "local" ]; then

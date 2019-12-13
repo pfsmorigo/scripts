@@ -7,7 +7,7 @@ check() {
 	PROC=$1
 
 	[ -n "$2" ] && PROC=$2 || PROC=$1
-	if [ -n "$(ps -x | grep $PROC | grep -v "grep\|x $1")" ]; then
+	if [ -n "$(ps -e | grep $PROC | grep $1)" ]; then
 		notify-send "$1 already on!"
 		exit 1
 	fi
@@ -24,27 +24,27 @@ case $1 in
 		$SCREEN_CMD -t vimwiki 7 vim ~/Dropbox/Wiki/index.md
 		;;
 
-	m|mutt)
-		check mutt
-		cd ~/downloads
-		$SCREEN_CMD -t mutt 8 mutt
-		;;
-
 	w|weechat)
 		check weechat
-		$SCREEN_CMD -t weechat 9 weechat
+		$SCREEN_CMD -t weechat 8 weechat
+		;;
+
+	m|mutt)
+		check neomutt
+		cd ~/downloads
+		$SCREEN_CMD -t mutt 9 neomutt
 		;;
 
 	o|offlineimap)
-		check offlineimap
+		#check offlineimap
 		$SCREEN_CMD -t offlineimap 10 offlineimap -c $HOME/.config/offlineimap/config
 		;;
 
 	all)
 		$0 newsbeuter
 		$0 vimwiki
-		$0 mutt
 		$0 weechat
+		$0 mutt
 		$0 offlineimap
 		;;
 
