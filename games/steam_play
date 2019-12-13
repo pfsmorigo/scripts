@@ -1,0 +1,10 @@
+#!/bin/bash
+
+case $0 in
+	starbound) GAME=211820 ;;
+	7d2d) GAME=251570 ;;
+	*) exit 1 ;;
+esac
+
+xhost +local: > /dev/null
+sudo su - mopsifrog steam steam://rungameid/$GAME
