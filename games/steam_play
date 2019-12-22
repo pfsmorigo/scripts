@@ -7,4 +7,4 @@ case $0 in
 esac
 
 xhost +local: > /dev/null
-sudo su - mopsifrog steam steam://rungameid/$GAME
+sudo su - mopsifrog -c "DISPLAY=:0 steam steam://rungameid/$GAME"
