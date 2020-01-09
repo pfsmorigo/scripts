@@ -1,10 +1,4 @@
 #!/bin/bash -x
 
-SCALE=1.5
-APP=Ultimaker_Cura-4.3.0
-
-[ "$0" == "crewsomemod" ] && APP=CreawsomeMod-4.1.0.mod20190530-0.3.2-x86_64
-[ -n "$1" ] && SCALE=$1
-
-#QT_SCALE_FACTOR=$SCALE /opt/cura/$APP.AppImage
-QT_FONT_DPI=140 /opt/cura/$APP.AppImage
+EXEC=$(find /opt/cura/*.AppImage | sort -h | tail -1)
+test -f $EXEC && QT_FONT_DPI=140 $EXEC
