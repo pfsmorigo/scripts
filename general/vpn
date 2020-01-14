@@ -1,0 +1,12 @@
+#!/bin/bash
+
+[ -z "$1" ] && echo "Need a name!" && exit 1
+
+case $2 in
+	up|down)
+		echo "*/disconnect -all" > $WEECHAT_HOME/weechat_fifo
+		nmcli con $2 id "$1"
+		echo "*/reconnect -all" > $WEECHAT_HOME/weechat_fifo
+		;;
+	*) echo "What?" ;;
+esac
