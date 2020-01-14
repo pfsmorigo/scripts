@@ -73,7 +73,9 @@ shelltags_tag() {
 				local FREE_SPACE=$(stat -f --printf="%a * %s\n" "$PWD" | bc)
 				local CRITICAL=$(stat -f --printf="%b * %s * 0.1\n" "$PWD" | bc)
 				local CRITICAL_INT=$(echo $CRITICAL | cut -d. -f1)
+				local CRITICAL_ABS=$(echo "20 * (1024 ^ 3)" | bc)
 				[ "$FREE_SPACE" -gt "$CRITICAL_INT" ] && return
+				[ "$FREE_SPACE" -gt "$CRITICAL_ABS" ] && return
 
 				if [ "$FREE_SPACE" -gt "1073741824" ]; then
 					OUTPUT=$(( $FREE_SPACE / ( 1024**3 )))GB
