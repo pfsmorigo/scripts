@@ -10,6 +10,8 @@ import psutil
 
 from colour import Color
 
+import os
+
 def update_i3_keys(i3conn, e):
     global keys_i3
     new_keys_i3 = ""
@@ -80,17 +82,21 @@ def update_keys():
     p2 = subprocess.Popen(["/usr/bin/g810-led", "-pp"], stdin=p1.stdout, stdout=subprocess.PIPE)
     p2.communicate()
 
-keys_i3 = ""
-keys_cpu = ""
-alarm = False
+def keyboard_is_present():
+    return os.path.exists("/dev/input/by-id/usb-Logitech_G512_SE_065938723531-event-kbd")
 
-red = Color("green")
-colors = list(red.range_to(Color("red"), 101))
+if keyboard_is_present():
+    keys_i3 = ""
+    keys_cpu = ""
+    alarm = False
 
-t = Thread(target=monitor_cpu)
-t.start()
+    red = Color("green")
+    colors = list(red.range_to(Color("red"), 101))
 
-i3 = Connection()
-i3.on(Event.WORKSPACE_FOCUS, update_i3_keys)
-i3.on('window::urgent', update_i3_keys)
-i3.main()
+    t = Thread(target=monitor_cpu)
+    t.start()
+
+    i3 = Connection()
+    i3.on(Event.WORKSPACE_FOCUS, update_i3_keys)
+    i3.on('window::urgent', update_i3_keys)
+    i3.main()
