@@ -1,0 +1,49 @@
+#!/bin/bash
+
+case $1 in
+	test1)
+		read -d '' COMMANDS <<-EOF
+		a 999999
+		g fkeys 999999
+		k 1 00ff00
+		k 2 ff0000
+		k 3 00ff00
+		k 4 0000ff
+		k 5 00ff00
+		k F1 00ff00
+		c
+		EOF
+		;;
+
+	test2)
+		read -d '' COMMANDS <<-EOF
+		a 000000
+		k w ff0000
+		k a ff0000
+		k s ff0000
+		k d ff0000
+		g fkeys 00ff00
+		c
+		a ff0000
+		c
+		EOF
+		;;
+
+	numtop)
+		read -d '' COMMANDS <<-EOF
+		a 000000
+		k num1 00ff00
+		k num2 2E7F18
+		k num3 45731E
+		k num4 675E24
+		k num5 8D472B
+		k num6 B13433
+		k num7 C82538
+		k num8 ff0000
+		c
+		EOF
+		;;
+	*) echo "Use: test1|test2|numtop" ;;
+esac
+
+echo "$COMMANDS" | g810-led -pp

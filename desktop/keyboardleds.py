@@ -48,6 +48,11 @@ def monitor_cpu():
 
         keys_cpu = new_keys_cpu
         update_keys()
+        check_alarms()
+
+def check_alarms():
+    global alarm
+    # alarm = False if alarm else True
 
 def is_screensaver_active():
     result = subprocess.run(['/usr/bin/xfce4-screensaver-command', '-q'], stdout=subprocess.PIPE)
@@ -63,9 +68,12 @@ def get_color(percentage):
 def update_keys():
     global keys_i3
     global keys_cpu
+    global alarm
 
     keys_all = "ff9999" if is_screensaver_active() else "999999"
-    output = "a %s\\n%s\\n%s\\nc" % (keys_all, keys_i3, keys_cpu)
+    keys_alarm = "k pause_break "
+    keys_alarm += "ff0000" if alarm is True else "0000ff"
+    output = "a %s\\n%s\\n%s\\n%s\\nc" % (keys_all, keys_i3, keys_cpu, keys_alarm)
     # print(output)
 
     p1 = subprocess.Popen(["echo", "-e", output], stdout=subprocess.PIPE)
@@ -74,6 +82,7 @@ def update_keys():
 
 keys_i3 = ""
 keys_cpu = ""
+alarm = False
 
 red = Color("green")
 colors = list(red.range_to(Color("red"), 101))
