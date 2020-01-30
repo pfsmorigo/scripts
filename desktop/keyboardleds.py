@@ -60,6 +60,10 @@ def is_screensaver_active():
     result = subprocess.run(['/usr/bin/xfce4-screensaver-command', '-q'], stdout=subprocess.PIPE)
     return False if b"The screensaver is inactive" in result.stdout else True
 
+def is_syncthing_active():
+    result = subprocess.run(['/usr/bin/pgrep', 'syncthing'], stdout=subprocess.PIPE)
+    return False if len(result.stdout.strip()) == 0 else True
+
 def get_color(percentage):
     global colors
     shift = 30
@@ -72,10 +76,20 @@ def update_keys():
     global keys_cpu
     global alarm
 
-    keys_all = "ff9999" if is_screensaver_active() else "999999"
-    keys_alarm = "k pause_break "
-    keys_alarm += "ff0000" if alarm is True else "0000ff"
-    output = "a %s\\n%s\\n%s\\n%s\\nc" % (keys_all, keys_i3, keys_cpu, keys_alarm)
+    # All keys color / i3 / cpu usage
+    output = "a ff9999" if is_screensaver_active() else "a 999999"
+    output += "\\n%s\\n%s" % (keys_i3, keys_cpu)
+
+    # Alarm
+    output += "\\nk pause_break "
+    output += "ff0000" if alarm is True else "0000ff"
+
+    # Syncthing
+    output += "\\nk s "
+    output += "0000ff" if is_syncthing_active() is True else "ff0000"
+
+    # Commit
+    output += "\\nc\\n"
     # print(output)
 
     p1 = subprocess.Popen(["echo", "-e", output], stdout=subprocess.PIPE)
