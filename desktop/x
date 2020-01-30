@@ -21,7 +21,7 @@ case $1 in
 
 	v|vimwiki)
 		check vimwiki "Wiki/index.md"
-		$SCREEN_CMD -t vimwiki 7 vim ~/Dropbox/Wiki/index.md
+		$SCREEN_CMD -t vimwiki 7 vim ~/snap/syncthing/common/notes/index.md
 		;;
 
 	w|weechat)
