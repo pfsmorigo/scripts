@@ -1,0 +1,50 @@
+#!/bin/bash
+
+read -d '' TRASH_LIST <<-EOF
+.jline-jython.history
+.jython-cache
+.sqlite_history
+.thumbnails
+.wget-hsts
+.xsel.log
+.xsession-errors
+.xsession-errors.old
+EOF
+
+clean_trash() {
+	DEST=/tmp/homeclean-$(date +"%F")
+	mkdir -p $DEST
+
+	cd $HOME
+	echo -e "\nMoving to $DEST...\n"
+	for ITEM in $TRASH_LIST; do
+		if [ -e "$ITEM" ]; then
+			echo "$ITEM"
+			mv $ITEM $DEST/
+		fi
+	done
+	echo -e "\nDone\n"
+}
+
+COMMAND=$1
+shift
+
+case $COMMAND in
+	clean)
+		clean_trash
+		;;
+	git)
+		case $1 in
+			status|pull)
+				for REPO in ansible dotfiles scripts; do
+					echo -e "========================================"
+					echo -e "$REPO"
+					echo -e "----------------------------------------"
+					cd $HOME/$REPO
+					git $*
+					echo ""
+				done
+				;;
+		esac
+		;;
+esac
