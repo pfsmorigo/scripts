@@ -11,6 +11,7 @@ import psutil
 from colour import Color
 
 import os
+import sys
 
 def update_i3_keys(i3conn, e):
     global keys_i3
@@ -96,10 +97,22 @@ def update_keys():
     p2 = subprocess.Popen(["/usr/bin/g810-led", "-pp"], stdin=p1.stdout, stdout=subprocess.PIPE)
     p2.communicate()
 
-def keyboard_is_present():
-    return os.path.exists("/dev/input/by-id/usb-Logitech_G512_SE_065938723531-event-kbd")
+def is_keyboard_present():
+    #return os.path.exists("/dev/input/by-id/usb-Logitech_G512_SE_065938723531-event-kbd")
+    return os.path.exists("/dev/input/by-id/usb-Logitech_G512_RGB_MECHANICAL_GAMING_KEYBOARD_097A38553232-event-kbd")
 
-if keyboard_is_present():
+def is_process_running():
+    curpid = os.getpid()
+    for p in psutil.process_iter():
+        if p.pid != curpid \
+                and len(p.cmdline()) > 1 \
+                and p.cmdline()[0] == "python3" \
+                and p.cmdline()[1].endswith("/keyboardleds.py"):
+            print("Process already running (%s)" % p.pid)
+            return True
+    return False
+
+if not is_process_running() and is_keyboard_present():
     keys_i3 = ""
     keys_cpu = ""
     alarm = False
