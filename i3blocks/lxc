@@ -1,0 +1,8 @@
+#!/bin/bash
+
+LIST=$(lxc list | grep RUNNING | awk '{ print $2 }')
+TOTAL=$(echo $LIST | wc -w)
+
+echo $LIST # full text
+echo $TOTAL # short text
+echo "#FFFFFF"
