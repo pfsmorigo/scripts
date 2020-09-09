@@ -31,8 +31,7 @@ case $1 in
 
 	m|mutt)
 		check neomutt
-		cd ~/downloads
-		$SCREEN_CMD -t mutt 9 neomutt
+		$SCREEN_CMD -t mutt 9 bash -c "cd ~/downloads && neomutt"
 		;;
 
 	o|offlineimap)

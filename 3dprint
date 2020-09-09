@@ -1,0 +1,21 @@
+#!/bin/bash
+
+STREAMING_URL=http://jerry:8080/?action=stream
+
+cmd_view() {
+	google-chrome --app=$STREAMING_URL
+}
+
+cmd_record() {
+	OUTPUT=~/3dprint/recording/3dprint_$(date +%F_%H-%M-%S).mp4
+	youtube-dl $STREAMING_URL --no-part -o $OUTPUT
+}
+
+case $1 in
+	record)
+		cmd_record ;;
+	view)
+		cmd_view ;;
+	*)
+		;;
+esac

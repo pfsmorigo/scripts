@@ -8,6 +8,7 @@ LIST=""
 
 case $1 in
 	ads)
+		add2list "(FROM:noreply@steampowered.com AND SUBJECT:\"on sale!\")"
 		add2list "FROM:(email@empresas.dell.com OR email@home.dell.com)"
 		add2list "FROM:*@insideapple.apple.com OR FROM:discover@new.itunes.com"
 		add2list "FROM:Gopro@e-mail.gopro.com"
@@ -20,7 +21,7 @@ case $1 in
 		add2list "FROM:email.campaign@sg.booking.com"
 		add2list "FROM:email@ricardoeletro.com.br"
 		add2list "FROM:emailcenter@novidades.magazineluiza.com.br"
-		add2list "FROM:empresas@ecampaigns.dell.com" # Dell
+		add2list "FROM:*@ecampaigns.dell.com" # Dell
 		add2list "FROM:info@e.mercadolivre.com.br"
 		add2list "FROM:nao-resposta@mastercard-email.com"
 		add2list "FROM:news@mkt.americanas.com"
@@ -36,8 +37,11 @@ case $1 in
 		add2list "LIST:07487d1456302a286cf9c4ccc.678209.list-id.mcsv.net" # TED
 		add2list "LIST:<100012736.xt.local>" # Banco Inter
 		add2list "LIST:<6204440.xt.local>" # Cobasi
+		add2list "LIST:DX.com"
 		add2list "LIST:fa32acc7a873c8ae79cceb5a0.243017.list-id.mcsv.net" # Recanto
 		add2list "LIST:v3arcosdourados" # McDonalds
+		add2list "FROM:marketing@sampaingressos.com.br"
+		add2list 'FROM:no.reply@brighttalk.com'
 		;;
 
 	social)
@@ -57,8 +61,6 @@ case $1 in
 		;;
 
 	shopping)
-		add2list '(FROM:nao-responder@mercadolivre.com AND (SUBJECT:"sua compra"  OR SUBJECT:"encomenda está a caminho" OR SUBJECT:"Você tem uma mensagem"))'
-		add2list 'FROM:*@mail.mercadolivre.com'
 		add2list 'FROM:appleid@apple.com'
 		add2list 'FROM:appleid@id.apple.com'
 		add2list 'FROM:do_not_reply@itunes.com'
@@ -77,7 +79,9 @@ case $1 in
 		;;
 
 	bills)
+		add2list "(FROM:info@equipe.locaweb.com.br AND SUBJECT:(Aviso de Vencimento))"
 		add2list "(FROM:naoresponda@jaime.com.br AND SUBJECT:(Boleto))"
+		add2list "FROM:contadigital@vivo.com.br"
 		add2list "FROM:contadigitalvivo@vivo.com.br"
 		add2list "FROM:contato@royalimoveis.com.br"
 		add2list "FROM:faturaporemailsp@eneldistribuicaosp.com.br"

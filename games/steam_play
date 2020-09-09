@@ -1,10 +1,11 @@
 #!/bin/bash
 
-case $0 in
-	starbound) GAME=211820 ;;
-	7d2d) GAME=251570 ;;
-	*) exit 1 ;;
+case $(basename $0) in
+	starbound)   GAME=211820 ;;
+	7d2d)        GAME=251570 ;;
+	moonlighter) GAME=606150 ;;
 esac
 
+test -n "$GAME" && ATTR="steam://rungameid/$GAME"
 xhost +local: > /dev/null
 sudo su - mopsifrog -c "DISPLAY=:0 steam steam://rungameid/$GAME"
