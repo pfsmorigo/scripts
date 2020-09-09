@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#ProxyCommand nc $(lxc list -c s4 $(echo %h | sed "s/\.lxd//g") | grep eth0 | cut -d' ' -f4) %p
+#ProxyCommand nc $(lxc list -c s4 $(echo %h | sed "s/\.lxd//g") | grep eth0 | awk -F'|' '{ print $3 }' | awk '{ print $1 }') %p
+
+HOST=$2
+PORT=$3
+
+case $1 in
+	lxc) IP=$(lxc list -c s4 $(echo $HOST | sed "s/\.lxd//g") | grep eth0 | cut -d'|' -f3 | cut -d' ' -f2) ;;
+	multipass) IP=$(multipass list --format csv | grep  $(echo %h | sed "s/\.mp//g") | cut -d, -f3) ;;
+	*) echo "error" && exit 1 ;;
+esac
+
+nc $IP $PORT
