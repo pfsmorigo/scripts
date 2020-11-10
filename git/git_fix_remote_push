@@ -1,0 +1,9 @@
+#!/bin/bash
+
+[ -z "$1" ] && echo "Need a branch name!" && exit 1
+
+BRANCH=$1
+URL=$(git remote -v | grep "^$BRANCH" | grep "(fetch)$" | awk '{ print $2 }')
+NEWURL=$(echo $URL | sed -E 's,http(|s)://(|www.)github.com/,git@github.com:,')
+
+git remote set-url --push $BRANCH $NEWURL
