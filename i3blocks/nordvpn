@@ -1,0 +1,12 @@
+#!/bin/bash
+
+nordvpn status | grep -q Disconnected && exit 0
+
+SERVER=$(nordvpn status | grep "^Current server" | awk '{ print $3 }' | cut -d. -f1)
+TECH=$(nordvpn status | grep "^Current tech" | awk '{ print $3 }')
+TRANSFER=$(nordvpn status | grep "^Transfer" | awk '{ print $2$3 }')
+
+test -z "$SERVER" && exit 0
+echo "$SERVER ($TECH) $TRANSFER"
+echo "$SERVER"
+echo "#33FF33"

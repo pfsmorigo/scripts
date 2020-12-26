@@ -1,0 +1,15 @@
+#!/bin/bash
+
+OUTPUT="$(pacmd list-cards | grep -B 2 'device.api = "bluez"' | cut -d= -f2 | tr -d '\"')"
+[ -z "$OUTPUT" ] && exit 0
+
+NAME=$(echo "$OUTPUT" | sed -n 1p | xargs)
+#MAC=$(echo "$OUTPUT" | sed -n 2p | xargs)
+
+FULL=$NAME
+SHORT=$NAME
+[ -n "$MAC" ] && FULL+=" ($MAC)"
+
+echo $FULL # full text
+echo $SHORT # short text
+echo "#7777FF"
