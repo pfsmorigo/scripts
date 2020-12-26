@@ -10,6 +10,7 @@ case $1 in
 	ads)
 		add2list "(FROM:noreply@steampowered.com AND SUBJECT:\"on sale!\")"
 		add2list "FROM:(email@empresas.dell.com OR email@home.dell.com)"
+		add2list "FROM:*@ecampaigns.dell.com" # Dell
 		add2list "FROM:*@insideapple.apple.com OR FROM:discover@new.itunes.com"
 		add2list "FROM:Gopro@e-mail.gopro.com"
 		add2list "FROM:Lenovo@enews.lenovo.com"
@@ -21,8 +22,8 @@ case $1 in
 		add2list "FROM:email.campaign@sg.booking.com"
 		add2list "FROM:email@ricardoeletro.com.br"
 		add2list "FROM:emailcenter@novidades.magazineluiza.com.br"
-		add2list "FROM:*@ecampaigns.dell.com" # Dell
 		add2list "FROM:info@e.mercadolivre.com.br"
+		add2list "FROM:marketing@sampaingressos.com.br"
 		add2list "FROM:nao-resposta@mastercard-email.com"
 		add2list "FROM:news@mkt.americanas.com"
 		add2list "FROM:noreply@getpocket.com"
@@ -38,59 +39,16 @@ case $1 in
 		add2list "LIST:<100012736.xt.local>" # Banco Inter
 		add2list "LIST:<6204440.xt.local>" # Cobasi
 		add2list "LIST:DX.com"
+		add2list "LIST:cordial.1.13.sparkpostmail.com" # Humble Bundle
+		add2list "LIST:cordial.1.545.sparkpostmail.com" # Fanatical
 		add2list "LIST:fa32acc7a873c8ae79cceb5a0.243017.list-id.mcsv.net" # Recanto
 		add2list "LIST:v3arcosdourados" # McDonalds
-		add2list "FROM:marketing@sampaingressos.com.br"
 		add2list 'FROM:no.reply@brighttalk.com'
 		;;
 
-	social)
-		add2list "FROM:*@facebookmail.com"
-		add2list "FROM:*@klout.com"
-		add2list "FROM:*@linkedin.com"
-		add2list "FROM:*@plus.google.com"
-		add2list "FROM:*@slack.com"
-		add2list "FROM:*@twitter.com"
-		add2list "FROM:aboutme@about.me"
-		add2list "FROM:follow@postmaster.scribd.com"
-		add2list "FROM:members@e.tripadvisor.com"
-		add2list "FROM:no-reply@endomondo.com"
-		add2list "FROM:noreply@e.digg.com"
-		add2list "FROM:noreply@foursquare.com"
-		add2list "FROM:noreply@youtube.com"
-		;;
-
-	shopping)
-		add2list 'FROM:appleid@apple.com'
-		add2list 'FROM:appleid@id.apple.com'
-		add2list 'FROM:do_not_reply@itunes.com'
-		add2list 'FROM:ebay@ebay.com'
-		add2list 'FROM:googlepay-noreply@google.com'
-		add2list 'FROM:no-reply@cobasi.com.br'
-		add2list 'FROM:sac1@cobasi.com.br'
-		add2list 'FROM:sales@dealextreme.com'
-		;;
-
-	bank)
-		add2list "FROM:*@itau-unibanco.com.br"
-		add2list "FROM:*@nubank.com.br"
-		add2list "FROM:*@santander.com.br"
-		add2list "FROM:AmericanExpress@welcome.aexp.com"
-		;;
-
-	bills)
-		add2list "(FROM:info@equipe.locaweb.com.br AND SUBJECT:(Aviso de Vencimento))"
-		add2list "(FROM:naoresponda@jaime.com.br AND SUBJECT:(Boleto))"
-		add2list "FROM:contadigital@vivo.com.br"
-		add2list "FROM:contadigitalvivo@vivo.com.br"
-		add2list "FROM:contato@royalimoveis.com.br"
-		add2list "FROM:faturaporemailsp@eneldistribuicaosp.com.br"
-		add2list "FROM:financeiro@mistersaudeanimal.com.br"
-		add2list "FROM:suafatura@comgas.com.br"
-		;;
-
-	jobs)
-		add2list "FROM:(monster@email.recjobs.monster.com OR jagent@route.monster.com OR monster@email.content.monster.com)"
+	ads_inbox)
+		add2list "FROM:hello@discover.vivino.com"
+		add2list "LIST:(<7205417.xt.local>)" # LATAM
 		;;
 
 	travel)
