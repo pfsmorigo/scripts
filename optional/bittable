@@ -1,0 +1,17 @@
+#!/bin/bash
+
+name() {
+	case $1 in
+		 1) echo "byte";;
+		 2) echo "halfword";;
+		 4) echo "word";;
+		 8) echo "doubleword";;
+		16) echo "quadword";;
+		 *) echo "";;
+	esac
+}
+
+for BIT in 1 2 4 8 16 32 64 128; do
+	BITE=$(($BIT * 8))
+	printf "%4d %4d  %s\n" $BIT $BITE $(name $BIT)
+done

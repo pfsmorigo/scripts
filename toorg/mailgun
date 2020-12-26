@@ -1,0 +1,15 @@
+#!/bin/bash
+
+API_KEY=$(keyring.py get mailgun_api $USER)
+DOMAIN=$(keyring.py get mailgun_domain $USER)
+
+[ -z "$API_KEY" ] && echo "No API!" && exit 1
+[ -z "$DOMAIN" ] && echo "No domain!" && exit 2
+
+set -x
+curl -s --user "api:$API_KEY" \
+	https://api.mailgun.net/v3/$DOMAIN/messages \
+	-F from='Mailgun <mailgun@$$DOMAIN>' \
+	-F to=$USER@gmail.com \
+	-F subject='Hello' \
+	-F text='Testing some Mailgun awesomness!'
