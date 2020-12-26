@@ -1,0 +1,20 @@
+#!/bin/bash
+
+ADDR="${BLOCK_INSTANCE:-127.0.0.1}"
+
+CMD="TOGGLE"
+case $1 in
+	on|off) CMD=$1;;
+esac
+
+RES=$(curl -s http://${ADDR}/cm?cmnd=Power%20${CMD})
+ONOFF=$(echo $RES | cut -d":" -f2 | tr -d '}' | tr -d '"')
+
+#test "$ONOFF" = "ON" && SYMBOL=⏽ || SYMBOL=⭘
+#test "$ONOFF" = "ON" && SYMBOL=⏼ || SYMBOL=⭘
+#SYMBOL=⏻
+SYMBOL=💡
+
+echo "$SYMBOL"
+echo ""
+[ "$ONOFF" == "ON" ] && echo "#ffffff" || echo "#999999"
