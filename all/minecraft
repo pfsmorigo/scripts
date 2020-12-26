@@ -1,0 +1,24 @@
+#!/bin/bash
+clear
+
+MINECRAFT_DIR=$HOME/.minecraft
+TMPFILE=/tmp/minecraft_changes
+RAM=2048
+#LIBRT=/usr/lib/librt-2.20.so
+LIBRT=/usr/lib64/librt.so
+export LD_PRELOAD=$LIBRT __GL_THREADED_OPTIMIZATIONS=1
+#ulimit -c unlimited
+COMMAND="exec /usr/bin/java"
+
+cd ~/.minecraft
+
+case $1 in
+        original)
+			$COMMAND -Xmx${RAM}M -Xms${RAM}M -jar Minecraft.jar
+			;;
+
+        *)
+			java -jar MagicLauncher.jar
+			;;
+esac
+

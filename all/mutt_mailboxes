@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd $!
+find -maxdepth 1 \
+	| sort \
+	| sed -e 's,^./,mailboxes "=,' \
+	| sed -e 's,$,",'

@@ -1,0 +1,54 @@
+#!/bin/bash
+
+[ -z "$STY" ] && SCREEN_NAME=$USER || SCREEN_NAME=$(echo $STY | cut -d. -f2)
+SCREEN_CMD="screen -S $SCREEN_NAME -X screen"
+
+check() {
+	PROC=$1
+
+	[ -n "$2" ] && PROC=$2 || PROC=$1
+	if [ -n "$(ps -e | grep $PROC | grep $1)" ]; then
+		notify-send "$1 already on!"
+		exit 1
+	fi
+}
+
+case $1 in
+	n|newsbeuter)
+		check newsbeuter
+		$SCREEN_CMD -t newsbeuter 6 newsbeuter
+		;;
+
+	v|vimwiki)
+		check vimwiki "Wiki/index.md"
+		$SCREEN_CMD -t vimwiki 7 vim ~/snap/syncthing/common/notes/index.md
+		;;
+
+	w|weechat)
+		check weechat
+		$SCREEN_CMD -t weechat 8 weechat
+		;;
+
+	m|mutt)
+		check neomutt
+		$SCREEN_CMD -t mutt 9 bash -c "cd ~/downloads && neomutt"
+		;;
+
+	o|offlineimap)
+		#check offlineimap
+		$SCREEN_CMD -t offlineimap 10 offlineimap -c $HOME/.config/offlineimap/config
+		;;
+
+	all)
+		$0 newsbeuter
+		$0 vimwiki
+		$0 weechat
+		$0 mutt
+		$0 offlineimap
+		;;
+
+	*)
+		echo "error!"
+		;;
+esac
+

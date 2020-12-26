@@ -1,0 +1,66 @@
+#!/bin/bash
+
+function get_workspaces() {
+	i3-msg -t get_workspaces \
+		| tr ',' '\n' \
+		| grep num \
+		| cut -d: -f 2 \
+		| sort -h
+}
+
+echo "$*" >> /tmp/disp
+
+case $1 in
+	primary) xrandr \
+		--output DP-1 --off \
+		--output HDMI-1 --off \
+		--output eDP-1 --mode 1920x1080 --rotate normal --pos 968x2160
+		;;
+
+	secondary2k) xrandr \
+		--output DP-1 --off --output HDMI-1 \
+		--mode 1920x1080 --pos 0x0 --rotate normal \
+		--output eDP-1 --off
+		;;
+
+	secondary4k) xrandr \
+		--output DP-1 --off \
+		--output HDMI-1 --mode 3840x2160 --rotate normal --pos 0x0 \
+		--output eDP-1 --off
+		;;
+
+	above2k) xrandr \
+		--output DP-1 --off \
+		--output HDMI-1 --mode 1920x1080 --rotate normal --pos 960x1080 \
+		--output eDP-1  --mode 1920x1080 --rotate normal --pos 960x2160 \
+		--primary
+		;;
+
+	above4k) xrandr \
+		--output DP-1 --off \
+		--output HDMI-1 --mode 3840x2160 --rotate normal --pos 0x0 \
+		--output eDP-1  --mode 1920x1080 --rotate normal --pos 960x2160 \
+		--primary
+		;;
+	*)
+		echo "primary"
+		echo "secondary2k"
+		echo "secondary4k"
+		echo "above2k"
+		echo "above4k"
+		exit
+		;;
+esac
+
+i3config
+
+SECOND_DISPLAY=$(xrandr | grep ' connected' | grep -v eDP-1 | cut -d' ' -f1)
+if [ -n "$SECOND_DISPLAY" ]; then
+	for NUM in $(get_workspaces); do
+		[ $NUM -lt 6 ] && OUTPUT="eDP-1" || OUTPUT=$SECOND_DISPLAY
+		printf "%2d to %6s: " $NUM $OUTPUT
+		DISPLAY=:0 i3-msg [workspace=$NUM] move workspace to output $OUTPUT
+	done
+fi
+
+wallpaper same

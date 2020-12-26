@@ -1,0 +1,25 @@
+#!/bin/bash
+
+RAM=4096
+JAR_LIST=$(find -maxdepth 1 -name "*.jar" -printf "%f\n" | sort)
+
+echo ""
+OLDIFS=$IFS
+IFS=$'\n'
+for JAR in $JAR_LIST; do
+	COUNT=$(( $COUNT + 1 ))
+	JAR_ARRAY[$COUNT]=$JAR
+	printf "%5s)\t%s\n" $COUNT $JAR
+done
+IFS=$OLDIFS
+echo ""
+
+read -p "Pick one: " PICK
+[ -z "$PICK" ] && PICK=1
+[[ ! "$PICK" =~ ^[0-9]+$ ]] && echo "Not a number!" && exit 2
+[ "$PICK" -lt 1 -o "$PICK" -gt $COUNT ] && echo "Out of the range!" && exit 2
+JAR_SELECTED=$(echo ${JAR_ARRAY[$PICK]} | cut -d' ' -f1)
+
+#while true; do
+	java -Xmx${RAM}M -Xms${RAM}M -jar $JAR_SELECTED nogui
+#done

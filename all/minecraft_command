@@ -1,0 +1,41 @@
+#!/bin/bash
+
+USERS="pfsmorigo Atomic360"
+
+creative() {
+	run_all "/op"
+	run_all "/gamemode c"
+}
+
+survival() {
+	run_all "/deop"
+	run_all "/gamemode s"
+}
+
+scoreboard() {
+	run "/scoreboard objectives add Deaths deathCount"
+	run "/scoreboard objectives setdisplay sidebar Deaths"
+}
+
+reset() {
+	run "/scoreboard players set @a Deaths 0"
+}
+
+keep() {
+	run "/gamerule keepInventory true"
+}
+
+run() {
+	screen -S pfsmorigo -p 0 -X stuff "$*\n"
+}
+
+run_all() {
+	for USER in $USERS; do
+		run "$1 $USER"
+	done
+}
+
+case $1 in
+	creative|survival|scoreboard|keep|reset)
+		$1;;
+esac

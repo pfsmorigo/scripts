@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PATCH_FILE=$(mktemp mutt-patch.XXXXXX)
+cat > $PATCH_FILE
+MAILBOX=`cat $PATCH_FILE | formail -c -xSubject: | tr "'" "." | sed -e '{ s@\[@@g; s@\]@@g; s@[*()" \t]@_@g; s@[/:]@-@g; s@^ \+@@; s@\.\.@.@g; s@-_@_@g; s@__@_@g; s@\.$@@; }' | cut -c 1-70`.patch
+
+mkdir -p "$HOME/incoming"
+mv "$PATCH_FILE" "$HOME/incoming/$MAILBOX"

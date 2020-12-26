@@ -1,0 +1,24 @@
+#!/bin/bash
+
+change() {
+	VALUE=$2
+	case $1 in
+		inc) VALUE=400 ;;
+		dec) VALUE=400 ;;
+	esac
+
+	RAW_VALUE=$(awk "BEGIN {printf \"%d\", $RAW_MAX * ( $VALUE / 100 ) }")
+	#echo $RAW_VALUE
+	echo $RAW_VALUE | sudo tee $SYSTEM/brightness
+}
+
+SYSTEM=/sys/class/backlight/intel_backlight
+RAW_CURRENT=$(cat $SYSTEM/actual_brightness)
+RAW_MAX=$(cat $SYSTEM/max_brightness)
+CURRENT=$(( ($RAW_CURRENT * 100 ) / $RAW_MAX ))
+
+case $1 in
+	get) echo "$CURRENT%" ;;
+	set|inc|dec) change $1 $2 ;;
+	*) echo "invalid value" && exit 1;;
+esac

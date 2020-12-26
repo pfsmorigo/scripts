@@ -1,0 +1,20 @@
+#!/bin/bash
+
+cd ~/.config/i3 || exit 1
+cat config-general > config
+
+COUNTER=0
+
+for OUTPUT in $(xrandr | grep ' connected' | grep 'mm' | cut -d' ' -f1); do
+	echo "$OUTPUT..."
+
+	case $COUNTER in
+		"0") cat config-primary >> config ;;
+		"1") cat config-secondary >> config ;;
+	esac
+
+	sed -i "s/DISPLAYNAME/$OUTPUT/g" config
+	let COUNTER=COUNTER+1
+done
+
+i3-msg restart

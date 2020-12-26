@@ -1,6 +1,6 @@
 #!/bin/bash
 
-STREAMING_URL=http://jerry:8080/?action=stream
+STREAMING_URL=http://hank:8080/?action=stream
 
 cmd_view() {
 	google-chrome --app=$STREAMING_URL

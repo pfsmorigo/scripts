@@ -1,0 +1,22 @@
+#!/bin/bash
+
+DIR=$HOME/media/backgrounds/use
+SAVE=/tmp/wallpaper
+FILE=
+
+case $1 in
+	same) [ -f "$SAVE" ] && FILE="$(cat $SAVE)" || exit 1 ;;
+	rofi)
+		case $2 in
+			'') rofi -show wallpaper -modi wallpaper:$0\ rofi\ list; exit ;;
+			list)
+				case $3 in
+					'') find $DIR -type l -printf %"f\n" | sort -h; exit ;;
+					*) FILE="$DIR/$3" ;;
+				esac ;;
+		esac ;;
+	*) FILE="$(find $DIR -type l | shuf -n 1)"; echo "$FILE" > $SAVE ;;
+esac
+
+/usr/bin/feh --bg-scale "$FILE"
+
