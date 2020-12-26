@@ -106,7 +106,7 @@ shelltags_tag() {
 			# support for multiple batteries (like Lenovo T460)
 			COLOR=magenta
 			OUTPUT=$(acpi -b 2> /dev/null | cut -d' ' -f4 | xargs | tr -d ,)
-			[ -z "$OUTPUT" ] && return
+			[ -z "$OUTPUT" -o "$OUTPUT" = "0%" ] && return
 			[ "$(echo $OUTPUT | tr -d % | tr ' ' + | bc)" -ge "50" ] && return
 			;;
 
