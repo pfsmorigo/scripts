@@ -1,0 +1,5 @@
+#!/bin/bash
+
+INPUT=$1
+OUTPUT="${INPUT%.*}_fixed.${INPUT##*.}"
+ffmpeg -i "$INPUT" -c:v libx264 -profile:v baseline -level 3.0 -pix_fmt yuv420p "$OUTPUT"
