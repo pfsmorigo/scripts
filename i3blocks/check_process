@@ -1,0 +1,9 @@
+#!/bin/bash
+
+test -n "$1" && PROCESS=$*
+test -n "$BLOCK_INSTANCE" && PROCESS=$BLOCK_INSTANCE
+test -z "$PROCESS" && echo "???" && exit 33
+test -n "$(/usr/bin/pgrep $PROCESS)" && exit 0
+
+echo "  $PROCESS  "
+exit 33
