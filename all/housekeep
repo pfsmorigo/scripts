@@ -26,6 +26,12 @@ clean_trash() {
 	echo -e "\nDone\n"
 }
 
+git_args() {
+	test $1 != "home" \
+		&& echo "-C $HOME/$1" \
+		|| echo "-C $HOME --git-dir=$HOME/.config/housekeep"
+}
+
 COMMAND=$1
 shift
 
@@ -35,16 +41,21 @@ case $COMMAND in
 		;;
 	git)
 		case $1 in
-			status|pull)
-				for REPO in ansible dotfiles scripts; do
+			status|pull|remote)
+				for REPO in ansible dotfiles scripts home; do
 					echo -e "========================================"
 					echo -e "$REPO"
 					echo -e "----------------------------------------"
-					cd $HOME/$REPO
-					git $*
+					git $(git_args $REPO) $*
 					echo ""
 				done
 				;;
+			ansible|dotfiles|scripts|home)
+				REPO=$1
+				shift
+				git $(git_args $REPO) $*
+				;;
 		esac
 		;;
+	gs) housekeep git status -s ;;
 esac
