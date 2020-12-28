@@ -5,4 +5,4 @@ TOTAL=$(echo $LIST | wc -w)
 
 echo $LIST # full text
 echo $TOTAL # short text
-echo "#FFFFFF"
+echo "#FFFF00"
