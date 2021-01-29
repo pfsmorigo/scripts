@@ -3,7 +3,7 @@
 NAME=URxvt
 SERVER=$1
 
-export SHELL="/usr/bin/fish"
+#export SHELL="/usr/bin/fish"
 TERMINALS="/usr/bin/urxvt256c-ml /usr/bin/urxvt"
 for TERM in $TERMINALS; do [ -e $TERM ] && EXEC=$TERM && break; done
 
