@@ -33,18 +33,11 @@ case $1 in
 		check neomutt
 		$SCREEN_CMD -t mutt 9 bash -c "cd ~/downloads && neomutt"
 		;;
-
-	o|offlineimap)
-		#check offlineimap
-		$SCREEN_CMD -t offlineimap 10 offlineimap -c $HOME/.config/offlineimap/config
-		;;
-
 	all)
 		$0 newsbeuter
 		$0 vimwiki
 		$0 weechat
 		$0 mutt
-		$0 offlineimap
 		;;
 
 	*)
