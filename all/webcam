@@ -1,0 +1,75 @@
+#!/bin/bash
+
+BRIGHTNESS=128
+CONTRAST=128
+SATURATION=128
+GAIN=0
+WHITE_BALANCE_TEMPERATURE=3949
+SHARPNESS=128
+BACKLIGHT_COMPENSATION=0
+EXPOSURE_AUTO_PRIORITY=0
+
+EXPOSURE_ABSOLUTE=625
+FOCUS_ABSOLUTE=45
+
+EXPOSURE_AUTO=3
+FOCUS_AUTO=1
+WHITE_BALANCE_TEMPERATURE_AUTO=1
+
+ZOOM_ABSOLUTE=0
+
+for ITEM in $*; do
+	case $ITEM in
+		one)
+			BRIGHTNESS=200
+			;;
+		two)
+			BRIGHTNESS=200
+			ZOOM_ABSOLUTE=130
+			#WHITE_BALANCE_TEMPERATURE_AUTO=0
+			WHITE_BALANCE_TEMPERATURE=3400
+			;;
+		hulk)
+			;;
+
+		blur)
+			FOCUS_AUTO=0
+			FOCUS_ABSOLUTE=200
+			;;
+		*)
+			echo "What is \"$ITEM?\""
+			exit 1
+			;;
+	esac
+done
+
+COMMAND="v4l2-ctl"
+COMMAND+=" --set-ctrl=brightness=$BRIGHTNESS"
+COMMAND+=" --set-ctrl=contrast=$CONTRAST"
+COMMAND+=" --set-ctrl=saturation=$SATURATION"
+COMMAND+=" --set-ctrl=gain=$GAIN"
+COMMAND+=" --set-ctrl=sharpness=$SHARPNESS"
+COMMAND+=" --set-ctrl=backlight_compensation=$BACKLIGHT_COMPENSATION"
+COMMAND+=" --set-ctrl=exposure_auto_priority=$EXPOSURE_AUTO_PRIORITY"
+COMMAND+=" --set-ctrl=zoom_absolute=$ZOOM_ABSOLUTE"
+
+# Exposure
+COMMAND+=" --set-ctrl=exposure_auto=$EXPOSURE_AUTO"
+if [ $EXPOSURE_AUTO == 1 ]; then
+	COMMAND+=" --set-ctrl=exposure_absolute=$EXPOSURE_ABSOLUTE"
+fi
+
+# Focus
+COMMAND+=" --set-ctrl=focus_auto=$FOCUS_AUTO"
+if [ $FOCUS_AUTO == 0 ]; then
+	COMMAND+=" --set-ctrl=focus_absolute=$FOCUS_ABSOLUTE"
+fi
+
+# White Balance
+COMMAND+=" --set-ctrl=white_balance_temperature_auto=$WHITE_BALANCE_TEMPERATURE_AUTO"
+if [ $WHITE_BALANCE_TEMPERATURE_AUTO == 0 ]; then
+	COMMAND+=" --set-ctrl=white_balance_temperature=$WHITE_BALANCE_TEMPERATURE"
+fi
+
+set -x
+$COMMAND
