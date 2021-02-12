@@ -1,0 +1,27 @@
+#!/bin/bash
+
+FULL=
+SHORT=
+
+for TYPE in lxc multipass; do
+	case $TYPE in
+		lxc)
+			LIST=$(lxc list --format=csv | grep RUNNING | cut -d, -f1)
+			COLOR="#0033AA"
+			;;
+		multipass)
+			LIST=$(multipass list --format csv | grep -v "^Name" | cut -d, -f1)
+			COLOR="#006611"
+			;;
+	esac
+
+	COUNT=0
+	for ITEM in $LIST; do
+		FULL+="<span background=\"$COLOR\"> $ITEM </span> "
+		((COUNT=COUNT+1))
+	done
+	SHORT+="<span background=\"$COLOR\"> $COUNT </span> "
+done
+
+echo $FULL
+echo $SHORT
