@@ -1,10 +1,10 @@
 #!/bin/bash
 
 COMMAND="/usr/bin/xdg-open $*"
-HOST=squanchy
+HOST=10.3.3.5
 
 if ping -4 -c 1 -W 1 $HOST > /dev/null 2>&1; then
-	ssh -x $HOST -C "export DISPLAY=:0.0 && $COMMAND"
+	ssh -4 -x $HOST -C "export DISPLAY=:0.0 && $COMMAND"
 	exit 0
 fi
 
