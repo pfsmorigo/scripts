@@ -1,0 +1,18 @@
+#!/bin/bash
+
+COMMAND="VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json steam"
+
+[ -n "$1" ] && GAME=$1 || GAME=$(basename $0)
+echo $GAME
+
+case $GAME in
+	7d2d)        ID=251570 ;;
+	moonlighter) ID=606150 ;;
+	rdr2)        ID=1174180 ;;
+	starbound)   ID=211820 ;;
+esac
+test -n "$ID" && COMMAND+=" steam://rungameid/$ID"
+
+set -x
+xhost +local: > /dev/null
+sudo su - mopsifrog -c "DISPLAY=:0 $COMMAND"
