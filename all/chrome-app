@@ -1,14 +1,17 @@
 #!/bin/bash
 
-EXEC=$(basename $0)
-shift
-
-case $EXEC in
-	gmusic)  URL=https://play.google.com/music/listen ;;
+case $(basename $0) in
 	ingress) URL=https://ingress.com/intel ;;
-	meeting) URL=https://meet.google.com/?authuser=1 ;;
 	netflix) URL=https://netflix.com/browse ;;
 	youtube) URL=https://youtube.com ;;
+	meeting)
+		case $1 in
+			canonical) AUTHUSER=1 ;;
+			unicamp)   AUTHUSER=2 ;;
+			*)         AUTHUSER=0 ;;
+		esac
+		URL=https://meet.google.com/?authuser=$AUTHUSER
+		;;
 	*) echo "What?" && exit 1 ;;
 esac
 
