@@ -1,0 +1,42 @@
+#!/bin/bash
+
+if [ "$1" = "setup" ]; then
+	set -x
+   	xfconf-query -c xfce4-session -p /general/LockCommand -s "$0"
+	exit
+fi
+
+RESOLUTION=$(xdpyinfo | grep dimensions | sed -r "s/^[^0-9]*([0-9]+x[0-9]+).*$/\1/")
+CONTACT_FILE=~/.config/lockscreen_contact
+OUTPUT=~/.cache/wallpaper.png
+
+test -f $CONTACT_FILE \
+	&& TEXT="If you found this device, kindly contact:\n$(cat $CONTACT_FILE)"
+
+echo "Generating imagem..."
+ffmpeg \
+	-y \
+	-f x11grab \
+	-video_size $RESOLUTION \
+	-loglevel quiet \
+	-i $DISPLAY \
+	-vframes 1 \
+	-vf "gblur=sigma=8" \
+	$OUTPUT
+
+if [ -n "$TEXT" ]; then
+	echo "Inserting text..."
+	convert \
+		-font ubuntu-bold \
+		-pointsize 30 \
+		-fill white \
+		-stroke black \
+		-strokewidth 1 \
+		-gravity Center \
+		-annotate +0+300 "$TEXT" \
+		$OUTPUT \
+		$OUTPUT
+fi
+
+echo "Locking screen..."
+/usr/bin/i3lock --image $OUTPUT
