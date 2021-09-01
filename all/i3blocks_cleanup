@@ -1,0 +1,13 @@
+#!/bin/bash
+
+I3BLOCKS_CONFIG=$HOME/.config/i3blocks
+I3BLOCKS_SCRIPTS=$HOME/scripts/i3blocks
+INUSE="$(grep -h "^\[" $I3BLOCKS_CONFIG/config-* | tr -d '[|]' | cut -d' ' -f1 | sort -u)"
+
+mkdir -p $I3BLOCKS_SCRIPTS/notused
+
+for FILE in $(\ls -1 $I3BLOCKS_SCRIPTS); do
+	[ "$FILE" == "notused" ] && continue
+	echo "$INUSE" | grep -q $FILE || mv $I3BLOCKS_SCRIPTS/{,notused/}$FILE
+done
+
