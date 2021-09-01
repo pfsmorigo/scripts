@@ -1,0 +1,3 @@
+#!/bin/bash
+
+playerctl metadata --format '{{ emoji(status) }} {{ artist }} - {{ title }}' 2> /dev/null
