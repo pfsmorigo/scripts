@@ -20,5 +20,13 @@ case $COMMAND in
 		fi
 		;;
 
+	update)
+		ssh $TARGET "opkg list-upgradable | cut -f 1 -d ' '"
+		echo ""
+		read -p "Update all? " -r
+		[[ $REPLY =~ ^[Yy]$ ]] \
+			&& ssh $TARGET "opkg list-upgradable | cut -f 1 -d ' ' | xargs opkg upgrade"
+		;;
+
 	*) ;;
 esac

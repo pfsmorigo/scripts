@@ -11,6 +11,9 @@ read -d '' TRASH_LIST <<-EOF
 .xsession-errors.old
 EOF
 
+HOME_REPO=$HOME/.local/share/housekeep
+HOME_REPO_IGNOREFILE=$HOME/.config/housekeep_ignore
+
 clean_trash() {
 	DEST=/tmp/homeclean-$(date +"%F")
 	mkdir -p $DEST
@@ -26,10 +29,19 @@ clean_trash() {
 	echo -e "\nDone\n"
 }
 
+setup_housekeep_home() {
+	GIT_CMD="echo git $(git_args home)"
+	if [ ! -d $HOME_REPO ]; then
+		$GIT_CMD init
+		$GIT_CMD config core.excludesfile $HOME_REPO_IGNOREFILE
+		$GIT_CMD commit --allow-empty -m "Initial commit"
+	fi
+}
+
 git_args() {
 	test $1 != "home" \
 		&& echo "-C $HOME/$1" \
-		|| echo "-C $HOME --git-dir=$HOME/.config/housekeep"
+		|| echo "-C $HOME --git-dir=$HOME_REPO"
 }
 
 COMMAND=$1
@@ -40,6 +52,8 @@ case $COMMAND in
 		clean_trash
 		;;
 	git)
+		setup_housekeep_home
+		exit
 		case $1 in
 			ansible|dotfiles|scripts|home)
 				REPO=$1
@@ -57,5 +71,5 @@ case $COMMAND in
 				;;
 		esac
 		;;
-	gs) housekeep git status -s ;;
+	'') housekeep git status -s ;;
 esac

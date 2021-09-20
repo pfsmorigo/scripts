@@ -12,21 +12,29 @@ from colour import Color
 
 import os
 import sys
+import logging
+
+KEYBOARDS = [
+        "usb-Logitech_G512_SE_065938723531-event-kbd",
+        "usb-Logitech_G512_RGB_MECHANICAL_GAMING_KEYBOARD_097A38553232-event-kbd"]
 
 def update_i3_keys(i3conn, e):
     global keys_i3
     new_keys_i3 = ""
-    workspaces = i3conn.get_tree().workspaces()
-    focused = int(i3conn.get_tree().find_focused().workspace().name.split(":")[0])
-    for workspace in workspaces:
-        number = int(workspace.name.split(":")[0])
-        new_keys_i3 += "k %s " % workspace2key(number)
-        if workspace.urgent:
-            new_keys_i3 += "ff0000\\n"
-        if number == focused:
-            new_keys_i3 += "0000ff\\n"
-        else:
-            new_keys_i3 += "00ff00\\n"
+    try:
+        workspaces = i3conn.get_tree().workspaces()
+        focused = int(i3conn.get_tree().find_focused().workspace().name.split(":")[0])
+        for workspace in workspaces:
+            number = int(workspace.name.split(":")[0])
+            new_keys_i3 += "k %s " % workspace2key(number)
+            if workspace.urgent:
+                new_keys_i3 += "ff0000\\n"
+            if number == focused:
+                new_keys_i3 += "0000ff\\n"
+            else:
+                new_keys_i3 += "00ff00\\n"
+    except Exception:
+        logging.exception("Oops:")
     keys_i3 = new_keys_i3
     update_keys()
 
@@ -55,14 +63,14 @@ def monitor_cpu():
 
 def check_alarms():
     global alarm
-    # alarm = False if alarm else True
+    alarm = False if alarm else True
 
 def is_screensaver_active():
     result = subprocess.run(['/usr/bin/xfce4-screensaver-command', '-q'], stdout=subprocess.PIPE)
     return False if b"The screensaver is inactive" in result.stdout else True
 
-def is_syncthing_active():
-    result = subprocess.run(['/usr/bin/pgrep', 'syncthing'], stdout=subprocess.PIPE)
+def is_active(process):
+    result = subprocess.run(['/usr/bin/pgrep', process], stdout=subprocess.PIPE)
     return False if len(result.stdout.strip()) == 0 else True
 
 def get_color(percentage):
@@ -78,16 +86,16 @@ def update_keys():
     global alarm
 
     # All keys color / i3 / cpu usage
-    output = "a ff9999" if is_screensaver_active() else "a 999999"
+    output = "a 000000" if is_screensaver_active() else "a 999999"
     output += "\\n%s\\n%s" % (keys_i3, keys_cpu)
 
     # Alarm
     output += "\\nk pause_break "
-    output += "ff0000" if alarm is True else "0000ff"
+    output += "00aaff" if alarm is True else "00ffaa"
 
     # Syncthing
     output += "\\nk s "
-    output += "0000ff" if is_syncthing_active() is True else "ff0000"
+    output += "0000ff" if is_active("syncthing") is True else "ff0000"
 
     # Commit
     output += "\\nc\\n"
@@ -98,8 +106,10 @@ def update_keys():
     p2.communicate()
 
 def is_keyboard_present():
-    #return os.path.exists("/dev/input/by-id/usb-Logitech_G512_SE_065938723531-event-kbd")
-    return os.path.exists("/dev/input/by-id/usb-Logitech_G512_RGB_MECHANICAL_GAMING_KEYBOARD_097A38553232-event-kbd")
+    for keyboard in KEYBOARDS:
+        if os.path.exists("/dev/input/by-id/" + keyboard):
+            return True
+    return False
 
 def is_process_running():
     curpid = os.getpid()
@@ -111,6 +121,8 @@ def is_process_running():
             print("Process already running (%s)" % p.pid)
             return True
     return False
+
+logging.basicConfig(level=logging.DEBUG, filename='/tmp/keyboardleds.log')
 
 if not is_process_running() and is_keyboard_present():
     keys_i3 = ""
