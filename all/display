@@ -42,6 +42,12 @@ case $1 in
 		--output eDP-1  --mode 1920x1080 --rotate normal --pos 960x2160 \
 		--primary
 		;;
+	right4k) xrandr \
+		--output DP-1 --off \
+		--output HDMI-1 --mode 3840x2160 --rotate normal --pos 1920x0 \
+		--output eDP-1  --mode 1920x1080 --rotate normal --pos 0x1080
+		--primary
+		;;
 	*)
 		echo "primary"
 		echo "secondary2k"
