@@ -1,0 +1,41 @@
+#! /bin/bash
+
+PULSE_CONFIG="$HOME/.pulse/client.conf"
+
+test -n "$1" && SERVER=$1
+test -n "$BLOCK_INSTANCE" && SERVER=$BLOCK_INSTANCE
+test -z "$SERVER" && exit 1
+
+is_server() {
+	grep -q ^default-server $PULSE_CONFIG
+}
+
+is_online() {
+	ping -c 1 -W 1  $SERVER > /dev/null
+}
+
+enable_server() {
+	is_server && return
+	echo "default-server = $SERVER" >> $PULSE_CONFIG
+	restart_pulseaudio
+}
+
+disable_server() {
+	is_server || return
+	sed -i '/^default-server =/d' $PULSE_CONFIG
+	restart_pulseaudio
+}
+
+toggle_server() {
+	is_server && disable_server || enable_server
+}
+
+restart_pulseaudio() {
+	pulseaudio -k
+	sleep 3
+	pulseaudio -D
+}
+
+is_online || { disable_server; exit; }
+test "$BLOCK_BUTTON" = "3" && toggle_server
+is_server && echo "🅢" || echo "🅛"
