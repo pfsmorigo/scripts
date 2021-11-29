@@ -6,7 +6,7 @@ HOST=$(echo $2 | sed "s/\..*//g")
 PORT=$3
 
 case $1 in
-	lxc) IP=$(lxc list -c s4 --format csv $HOST | grep eth0 | cut -d' ' -f1) ;;
+	lxc) IP=$(lxc list --format=yaml $HOST | grep "address: 10." | awk '{ print $2 }') ;;
 	multipass) IP=$(multipass list --format csv | grep  $HOST | cut -d, -f3) ;;
 	virsh) IP=$(virsh --connect qemu:///system domifaddr $HOST | awk -F'[ /]+' '{if (NR>2 && $5) print $5}' | tail -1) ;;
 	*) echo "error" && exit 1 ;;
