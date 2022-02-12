@@ -49,7 +49,7 @@ else
 	echo "$SYMBOL $PORCENTAGE% ($TIME) $CYCLES"
 	echo "$SYMBOL $TOTAL_PORCENTAGE%"
 
-	[ "$TOTAL_PORCENTAGE" -gt 85 ] && echo "#ffffff" && exit 0
+	[ "$TOTAL_PORCENTAGE" -gt 80 ] && echo "#ffffff" && exit 0
 	[ "$TOTAL_PORCENTAGE" -gt 60 ] && echo "#fff600" && exit 0
 	[ "$TOTAL_PORCENTAGE" -gt 40 ] && echo "#ffae00" && exit 0
 	echo "#ff0000"

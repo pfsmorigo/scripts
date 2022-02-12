@@ -8,8 +8,8 @@ else
 	TEMPERATURE=$(acpi -t | head -n1 | awk '{ print $4 }' | cut -d. -f1)
 fi
 
-[ "$TEMPERATURE" -gt 80 ] && COLOR="#ffff00"
-[ "$TEMPERATURE" -gt 95 ] && COLOR="#ff0000"
+[ "$TEMPERATURE" -gt 70 ] && COLOR="#ffff00"
+[ "$TEMPERATURE" -gt 85 ] && COLOR="#ff0000"
 
 echo "${TEMPERATURE}°C"
 echo ""

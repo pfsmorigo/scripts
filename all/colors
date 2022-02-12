@@ -1,0 +1,31 @@
+#!/bin/bash
+
+BASE0=16
+while [ $BASE0 -lt 52 ]; do
+    SEC=$[$BASE0+36]
+    THI=$[$SEC+36]
+    FOU=$[$THI+36]
+    FIV=$[$FOU+36]
+    SIX=$[$FIV+36]
+    SEV=$[$SIX+36]
+    [ $SEV -gt 250 ] && SEV=$[$SEV-251]
+
+    echo -en "\033[38;5;$(echo $BASE0)m█ "
+    printf "%03d" $BASE0
+    echo -en "   \033[38;5;$(echo $SEC)m█ "
+    printf "%03d" $SEC
+    echo -en "   \033[38;5;$(echo $THI)m█ "
+    printf "%03d" $THI
+    echo -en "   \033[38;5;$(echo $FOU)m█ "
+    printf "%03d" $FOU
+    echo -en "   \033[38;5;$(echo $FIV)m█ "
+    printf "%03d" $FIV
+    echo -en "   \033[38;5;$(echo $SIX)m█ "
+    printf "%03d" $SIX
+    echo -en "   \033[38;5;$(echo $SEV)m█ "
+    printf "%03d" $SEV
+
+    BASE0=$[$BASE0+1]
+    printf '\r\n'
+done
+

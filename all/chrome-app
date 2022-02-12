@@ -1,19 +1,15 @@
 #!/bin/bash
 
 case $(basename $0) in
-	ingress)       URL=https://ingress.com/intel ;;
-	netflix)       URL=https://netflix.com/browse ;;
-	hbomax)        URL=https://play.hbomax.com;;
-	youtube)       URL=https://youtube.com ;;
-	flightradar24) URL=https://www.flightradar24.com/-23.62,-46.66/14 ;;
-	meeting)
-		case $1 in
-			canonical) AUTHUSER=1 ;;
-			unicamp)   AUTHUSER=2 ;;
-			*)         AUTHUSER=0 ;;
-		esac
-		URL=https://meet.google.com/?authuser=$AUTHUSER
-		;;
+	flightradar24)  URL=https://www.flightradar24.com/-23.62,-46.66/14 ;;
+	geforcenow)     URL=https://play.geforcenow.com ;;
+	hbomax)         URL=https://play.hbomax.com;;
+	ingress)        URL=https://ingress.com/intel ;;
+	livecgh)        URL=https://www.youtube.com/watch?v=ULw3hEMoCBs ;;
+	meet)           URL=https://meet.google.com ;;
+	meet_canonical) URL=https://meet.google.com/?authuser=1 ;;
+	netflix)        URL=https://netflix.com/browse ;;
+	youtube)        URL=https://youtube.com ;;
 	*) echo "What?" && exit 1 ;;
 esac
 
