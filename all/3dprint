@@ -1,21 +1,79 @@
 #!/bin/bash
 
-STREAMING_URL=http://hank:8080/?action=stream
+FILENAME=/tmp/streamview.html
+STREAMING_URL=file://$FILENAME
+HOST=doha
+
+export HOST
+
+envsubst > $FILENAME <<EOF
+<html>
+<head>
+<title>Live Feed</title>
+<script>
+ASPECT_RATIO = 4.0 / 3.0;
+IMAGE_SRC = "http://$HOST/webcam/?action=stream"
+
+function initialize() {
+	var elem = document.getElementById("liveFeed")
+	var border = 0
+
+    // Create function to handle resize
+    function updateStreamSize(){
+        var containWidth = document.body.clientWidth
+        var containHeight = document.body.clientHeight
+
+        if(containWidth > 0 && containHeight > 0 &&
+           containWidth > border * 2 && containHeight > border * 2){
+
+            // Check for skewing of ratio
+            if((containWidth - border * 2) /
+               (containHeight - border * 2) < ASPECT_RATIO){
+
+                var width = containWidth - border * 2
+                var height = width / ASPECT_RATIO
+            }
+            else{
+                var height = containHeight - border * 2
+                var width = height * ASPECT_RATIO
+            }
+        }
+        else{
+            var width = 0
+            var height = 0
+        }
+
+        // Update image size
+        elem.style.width = width
+        elem.style.height = height
+        elem.style.top = (containHeight - height) / 2
+        elem.style.right = (containWidth - width) / 2
+    }
+
+    // Register for resize events and do initial layout
+    window.onresize = updateStreamSize
+    updateStreamSize()
+
+    // Now finally give the image its source
+    elem.src = IMAGE_SRC
+}
+</script>
+</head>
+<body onload="initialize()" style="background-color: black">
+<img id="liveFeed" style="font-family: monospace; text-align: center; color: white; position: absolute" alt="There seems to be a problem with the live feed..."/>
+</body>
+</html>
+EOF
 
 cmd_view() {
 	google-chrome --app=$STREAMING_URL
 }
 
 cmd_record() {
-	OUTPUT=~/3dprint/recording/3dprint_$(date +%F_%H-%M-%S).mp4
-	youtube-dl $STREAMING_URL --no-part -o $OUTPUT
+	youtube-dl $STREAMING_URL --no-part -o 3dprint_$(date +%F_%H-%M-%S).mp4
 }
 
 case $1 in
-	record)
-		cmd_record ;;
-	view)
-		cmd_view ;;
-	*)
-		;;
+	record) cmd_record ;;
+	*) cmd_view ;;
 esac
