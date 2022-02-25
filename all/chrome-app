@@ -9,6 +9,7 @@ case $(basename $0) in
 	meet)           URL=https://meet.google.com ;;
 	meet_canonical) URL=https://meet.google.com/?authuser=1 ;;
 	netflix)        URL=https://netflix.com/browse ;;
+	sketchup)       URL=https://app.sketchup.com/app ;;
 	youtube)        URL=https://youtube.com ;;
 	*) echo "What?" && exit 1 ;;
 esac
