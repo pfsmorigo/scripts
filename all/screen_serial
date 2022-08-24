@@ -1,0 +1,21 @@
+#!/bin/bash
+
+SERIAL=$(ls -1 /dev/ttyUSB*)
+TEMPCONF=$(mktemp)
+LOGFILE=/tmp/serial_$(date +%Y-%m-%d_%H-%M-%S).log
+
+PROC=$(pgrep -a screen | grep ttyUSB | cut -d" " -f1)
+[ -n "$PROC" ] && echo kill $PROC
+
+tee $TEMPCONF > /dev/null <<EOF
+logfile $LOGFILE
+logfile flush 1
+log on
+logtstamp string \"[ %t: %Y-%m-%d %c:%s ]\012\"
+logtstamp after 1
+logtstamp on
+deflog on
+EOF
+
+screen -c $TEMPCONF $SERIAL 115200
+rm $TEMPCONF

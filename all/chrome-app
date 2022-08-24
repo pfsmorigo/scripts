@@ -1,6 +1,14 @@
 #!/bin/bash
 
 case $(basename $0) in
+	geforcenow)     ID=egmafekfmcnknbdlbfbhafbllplmjlhn ;;
+	sketchup)       ID=beodkchghmjjfhojholjdhdfodleinln ;;
+	youtube-music)  ID=cinhimbnkkaeohfgghhklpknlkffjgod ;;
+esac
+
+[ -n "$ID" ] && google-chrome --app-id=$ID && exit
+
+case $(basename $0) in
 	flightradar24)  URL=https://www.flightradar24.com/-23.62,-46.66/14 ;;
 	geforcenow)     URL=https://play.geforcenow.com ;;
 	hbomax)         URL=https://play.hbomax.com;;
@@ -11,7 +19,9 @@ case $(basename $0) in
 	netflix)        URL=https://netflix.com/browse ;;
 	sketchup)       URL=https://app.sketchup.com/app ;;
 	youtube)        URL=https://youtube.com ;;
+	youtube-music)  URL=https://music.youtube.com ;;
 	*) echo "What?" && exit 1 ;;
 esac
 
+[ ! -n "$URL"] && echo "No app found" && exit 1
 google-chrome --app=$URL

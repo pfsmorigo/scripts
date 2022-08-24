@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+
+import datetime
+import json
+import urllib.request
+
+DATE_FORMAT="%m-%d-%Y"
+
+today = datetime.datetime.now()
+start = (today - datetime.timedelta(days = 10)).strftime(DATE_FORMAT)
+end = today.strftime(DATE_FORMAT)
+url = f"https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?@dataInicial='{start}'&@dataFinalCotacao='{end}'&$top=100&$format=json"
+
+req = urllib.request.Request(url)
+with urllib.request.urlopen(req) as response:
+   data = json.load(response)["value"]
+
+   old = data[0]["cotacaoCompra"]
+   new = data[-1]["cotacaoCompra"]
+   date = datetime.datetime.strptime(data[-1]["dataHoraCotacao"][:10], "%Y-%m-%d")
+   diff_days = (today - date).days
+   diff_perc = new / (new - old)
+
+   full = f"{new}"
+   short = full
+   full += f" (-{diff_days}d)" if diff_days > 1 else ""
+   full += f" {diff_perc:.0f}%"
+
+   print(full)
+   print(short)

@@ -12,4 +12,4 @@ SHORT=$NAME
 
 echo $FULL # full text
 echo $SHORT # short text
-echo "#7777FF"
+echo "#FFFFFF"
