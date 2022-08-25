@@ -4,4 +4,4 @@ DOCKER_NAME=${@: -1}
 while [ "$1" != "$DOCKER_NAME" ]; do ARGS="$ARGS $1"; shift; done
 
 IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $DOCKER_NAME)
-ping $ARGS $IP
+[ -n "$IP" ] && ping $ARGS $IP || exit 1

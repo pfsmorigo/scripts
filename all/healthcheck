@@ -1,0 +1,12 @@
+#!/bin/bash
+
+function check_docker() {
+	~/scripts/all/ping_docker -c 1 $1 > /dev/null
+}
+
+case $1 in
+	backuppc) UUID=90e582d5-233f-4f0b-9096-adf7dc0ad348; check_docker $1; RESULT=$? ;;
+	*) echo "wat?" ;;
+esac
+
+curl -m 10 --retry 5 https://hc-ping.com/$UUID/$RESULT
