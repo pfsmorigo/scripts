@@ -5,8 +5,8 @@ function check_docker() {
 }
 
 case $1 in
-	backuppc) UUID=90e582d5-233f-4f0b-9096-adf7dc0ad348; check_docker $1; RESULT=$? ;;
+	backuppc) check_docker $1; RESULT=$? ;;
 	*) echo "wat?" ;;
 esac
 
-curl -m 10 --retry 5 https://hc-ping.com/$UUID/$RESULT
+curl -m 10 --retry 5 https://hc-ping.com/$2/$RESULT
