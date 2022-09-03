@@ -6,6 +6,17 @@ NAME=${TARGET%.*}
 NETWORK=${TARGET##*.}
 BACKUP_DIR=$HOME/backup/openwrt/$NETWORK/$NAME
 
+update_config() {
+	DEST="${1/-opkg/}"
+	DEST_PATH="${DEST/$BACKUP_DIR/}"
+	meld $DEST $1
+	read -p "Update? " -r
+	[[ $REPLY =~ ^[Yy]$ ]] && scp $DEST $TARGET:$DEST_PATH || return
+	read -p "Delete -opkg? " -r
+	[[ $REPLY =~ ^[Yy]$ ]] && ssh $TARGET "rm $DEST_PATH-opkg"
+	echo ""
+}
+
 test -z "$NAME" && echo "No machine defined" && exit 1
 test "$NAME" = "$NETWORK" && echo "No network defined" && exit 2
 
@@ -27,6 +38,11 @@ case $COMMAND in
 		[[ $REPLY =~ ^[Yy]$ ]] \
 			&& ssh $TARGET "opkg list-upgradable | cut -f 1 -d ' ' | xargs opkg upgrade"
 		;;
-
+	update-config)
+		for CONF in $(find $BACKUP_DIR -name "*-opkg"); do
+			read -p "Edit $CONF? " -r
+			[[ $REPLY =~ ^[Yy]$ ]] && update_config $CONF
+		done
+		;;
 	*) ;;
 esac
