@@ -1,0 +1,63 @@
+#!/bin/bash
+
+function check_config() {
+	echo -e "\n[$1]"
+	CONFIG=$1
+	DIR=$(dirname $CONFIG)
+	test ! -d "$DIR" && echo "$DIR not found!" && exit 1
+	if [ -f $CONFIG ]; then
+		read -p "Config file already exists. Override? " -r
+		[[ $REPLY =~ ^[Yy]$ ]] || return 1
+	fi
+}
+
+function config_user() {
+	check_config $1 || return
+
+	read -p "Username? " NEW_USER
+	PASSWORD=$(openssl passwd -6)
+	echo "$NEW_USER:$PASSWORD" >> $1
+
+	cat $1
+}
+
+function config_wifi() {
+	check_config $1 || return
+
+	read -d '' CONFIG <<-EOF
+	ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+	update_config=1
+	country=BR
+
+	EOF
+
+	while [ 1 ]; do
+		read -p "WiFi name? " SSID
+		test -z $SSID && break
+		read -p "Password name? " PASSWORD
+		test -z $PASSWORD && break
+		echo ""
+
+		CONFIG+="\nnetwork={"
+		CONFIG+="\n	ssid=\"$SSID\""
+		CONFIG+="\n	psk=\"$PASSWORD\""
+		CONFIG+="\n}"
+	done
+
+	echo -e "$CONFIG" > $1
+}
+
+BASE_DIR=/media/$USER
+OS=$(cat $BASE_DIR/rootfs/etc/issue 2> /dev/null)
+
+case $OS in
+	*Raspbian*)
+		echo "Raspberry OS identified"
+		config_user $BASE_DIR/boot/userconf.txt
+		config_wifi $BASE_DIR/boot/wpa_supplicant.conf
+		;;
+	*)
+		echo "OS not identified!"
+		exit 1
+		;;
+esac
