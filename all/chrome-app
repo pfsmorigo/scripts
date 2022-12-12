@@ -11,11 +11,12 @@ esac
 case $(basename $0) in
 	flightradar24)  URL=https://www.flightradar24.com/-23.62,-46.66/14 ;;
 	geforcenow)     URL=https://play.geforcenow.com ;;
-	hbomax)         URL=https://play.hbomax.com;;
+	globoplay)      URL=https://globoplay.globo.com ;;
+	hbomax)         URL=https://play.hbomax.com ;;
 	ingress)        URL=https://ingress.com/intel ;;
 	livecgh)        URL=https://www.youtube.com/watch?v=ULw3hEMoCBs ;;
 	meet)           URL=https://meet.google.com ;;
-	meet_canonical) URL=https://meet.google.com/?authuser=1 ;;
+	meet_work)      URL=https://meet.google.com/?authuser=1 ;;
 	netflix)        URL=https://netflix.com/browse ;;
 	sketchup)       URL=https://app.sketchup.com/app ;;
 	youtube)        URL=https://youtube.com ;;
@@ -23,5 +24,5 @@ case $(basename $0) in
 	*) echo "What?" && exit 1 ;;
 esac
 
-[ ! -n "$URL"] && echo "No app found" && exit 1
+[ ! -n "$URL" ] && echo "No app found" && exit 1
 google-chrome --app=$URL
