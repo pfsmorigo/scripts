@@ -1,8 +1,19 @@
 #!/bin/bash
 
-read -d '' APP_LIST <<-EOF
-com.gaming.sebas.gocompanion
-EOF
+# https://www.droidwin.com/debloat-remove-bloatware-from-samsung-devices-via-adb/
+
+install() {
+	run adb shell cmd package install-existing $1
+}
+
+uninstall() {
+	run adb shell pm uninstall --user 0 $1
+}
+
+run() {
+	echo $*
+	$*
+}
 
 backup() {
 	DEVICE="$(adb devices -l | awk '{ print $5 }' | cut -d: -f2 | sed '/^$/d')"
@@ -15,12 +26,37 @@ backup() {
 unpack() {
 	FILE=$1
 	[ ! -f "$FILE" ] && echo "File not found" && exit 1
-
 	set -x
 	sudo dd if=$FILE bs=24 skip=1 | openssl zlib -d > ${FILE%.*}.tar
 }
 
+read -d '' APP_LIST <<-EOF
+Samsung Calendar,com.samsung.android.calendar
+EOF
+
 case $1 in
-	backup|unpack) $* ;;
+	install|uninstall) ;;
+	#backup|unpack) $* ;;
+	'') echo "Need a subcommand!" && exit 1 ;;
 	*) echo "Invalid command" && exit 1 ;;
 esac
+
+echo ""
+COUNT=0
+OLDIFS=$IFS
+IFS=$'\n'
+for ITEM in $APP_LIST; do
+	COUNT=$(( $COUNT + 1 ))
+	APP=${ITEM%,*}
+	ADR=${ITEM#*,}
+	APP_ARRAY[$COUNT]=$ADR
+	printf "%5s) %s\n" $COUNT $APP
+done
+IFS=$OLDIFS
+echo ""
+
+read -p "Pick one: " PICK
+[ -z "$PICK" ] && exit
+
+echo ""
+$1 ${APP_ARRAY[$PICK]}
