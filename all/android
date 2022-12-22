@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # https://www.droidwin.com/debloat-remove-bloatware-from-samsung-devices-via-adb/
+# https://r1.community.samsung.com/t5/others/how-to-remove-samsung-bloatware-without-root/td-p/5817510
 
 install() {
 	run adb shell cmd package install-existing $1
@@ -31,7 +32,8 @@ unpack() {
 }
 
 read -d '' APP_LIST <<-EOF
-Samsung Calendar,com.samsung.android.calendar
+com.samsung.android.calendar,Samsung Calendar
+com.sec.android.gallery3d,Gallery
 EOF
 
 case $1 in
@@ -47,8 +49,8 @@ OLDIFS=$IFS
 IFS=$'\n'
 for ITEM in $APP_LIST; do
 	COUNT=$(( $COUNT + 1 ))
-	APP=${ITEM%,*}
-	ADR=${ITEM#*,}
+	APP=${ITEM#*,}
+	ADR=${ITEM%,*}
 	APP_ARRAY[$COUNT]=$ADR
 	printf "%5s) %s\n" $COUNT $APP
 done

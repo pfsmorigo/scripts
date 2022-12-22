@@ -1,0 +1,82 @@
+#!/bin/bash -e
+
+export LC_ALL=C
+
+log() {
+	echo "$*" >&2
+	if command -v notify-send &>/dev/null; then
+		notify-send "$*"
+	fi
+}
+
+# Check dependencies
+for dep in pactl grep gawk; do
+	if command -v "$dep"l &> /dev/null; then
+		log "Missing dependency: $dep"
+		exit 1
+	fi
+done
+
+# Found the default audio sink
+default_sink=$(
+	pactl info | gawk '
+	/^Default Sink:/ {
+		gsub(/^.*:\s*/, "")
+		print($0)
+	}')
+
+sink="${default_sink%.*}"
+card="${sink//sink/card}"
+profile="${default_sink##*.}"
+if [ -z "$card" ] || [ -z "$profile" ] ||
+	   ! echo "$card" | grep -q blue 2>/dev/null; then
+	log "No bluetooth sink set as default."
+	exit 0
+fi
+
+# Retrieve all the profiles available
+readarray -t profiles < <(
+	pactl list cards |
+	gawk -v"target=${card##*.}" '
+	/^Card\>/ {
+		id=""
+	}
+	/^\tName:/ {
+		sub(/.*\./, "", $2)
+		id=$2
+	}
+	reading_profiles && /^\t[^\t]/ {
+		reading_profiles=0
+	}
+	id == target && /^\tProfiles:/ {
+		reading_profiles=1
+	}
+	reading_profiles && /^\t\t/ {
+		sub(/:.*/, "", $1)
+		if ($1 != "off")
+		   print($1)
+	}
+	')
+if [ "${#profiles[@]}" -le 0 ]; then
+	log "No profiles available!"
+	exit
+fi
+
+# Find the next profile
+current_profile_id=
+for i in "${!profiles[@]}"; do
+	if [ "${profiles[$i]}" == "$profile" ]; then
+		current_profile_id="$i"
+		break
+	fi
+done
+if [ -z "$current_profile_id" ]; then
+	log "Invalid profile!"
+	exit 1
+fi
+next_profile_id=$(((current_profile_id + 1) % ${#profiles[@]}))
+next_profile="${profiles[$next_profile_id]}"
+
+# Change the audio profile
+log "Setting bluetooth to profile: $next_profile"
+pactl set-card-profile "$card" "$next_profile"

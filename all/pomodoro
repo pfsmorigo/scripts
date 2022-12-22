@@ -1,45 +1,23 @@
 #!/bin/bash
 
-show() {
-	load
-
-	DIFF=$(( $POMODORO_TIME - $NOW ))
-	[ "$POMODORO_STAGE" = "T" ] && DIFF=$(( $NOW - $POMODORO_TIME ))
-
-	echo "$POMODORO_STAGE $(date -u -d @${DIFF} +%T) ($POMODORO_COUNT)"
-}
-
 start() {
-	load
 	[ "$POMODORO_STAGE" = "S" ] && echo "Already started!" && return
 	POMODORO_STAGE=S
 	POMODORO_TIME=$(( $NOW + $POMODORO_GOING * 60 ))
 	# set the at to the end of the current state (using sleep to get seconds precision)
 	POMODORO_ATJOB=$(echo "sleep $(date -d @$POMODORO_TIME "+%S"); $0 stop" \
-		             | at "$(date -d @$POMODORO_TIME "+%H:%M %b %d")" 2>&1 \
+		             | at "$(date -d @$POMODORO_TIME "+%H:%M")" 2>&1 \
 					 | grep "^job" \
 					 | awk '{ print $2 }')
 	save
-	show
 }
 
 stop() {
-	load
 	[ "$POMODORO_STAGE" = "T" ] && echo "Already stopped!" && return
 	POMODORO_STAGE=T
 	let POMODORO_COUNT++
 	[ "$(atq | cut -f1 | grep $POMODORO_ATJOB)" != "" ] && atrm $POMODORO_ATJOB
 	save
-	show
-}
-
-load() {
-	[ ! -f $POMODORO_FILE ] && reset
-	POMODORO_DATA=($(cat $POMODORO_FILE))
-	POMODORO_STAGE=${POMODORO_DATA[0]}
-	POMODORO_TIME=${POMODORO_DATA[1]}
-	POMODORO_COUNT=${POMODORO_DATA[2]}
-	POMODORO_ATJOB=${POMODORO_DATA[3]}
 }
 
 save() {
@@ -54,23 +32,29 @@ reset() {
 	echo "T $NOW 0 0" > $POMODORO_FILE
 }
 
-# config
-POMODORO_FILE=~/.cache/pomodoro
+POMODORO_FILE=/tmp/pomodoro
 POMODORO_GOING=25
 POMODORO_SHORTBREAK=5
 POMODORO_LONGBREAK=15
 
-POMODORO_STAGE=
-POMODORO_TIME=
-POMODORO_COUNT=
-POMODORO_ATJOB=
+[ ! -f $POMODORO_FILE ] && reset
+POMODORO_DATA=($(cat $POMODORO_FILE))
+POMODORO_STAGE=${POMODORO_DATA[0]}
+POMODORO_TIME=${POMODORO_DATA[1]}
+POMODORO_COUNT=${POMODORO_DATA[2]}
+POMODORO_ATJOB=${POMODORO_DATA[3]}
 
 NOW=$(date -u +%s)
 
 case $1 in
-	'') show;;
 	start|stop|reset) $1;;
 esac
+
+DIFF=$(( $POMODORO_TIME - $NOW ))
+[ "$POMODORO_STAGE" = "T" ] && DIFF=$(( $NOW - $POMODORO_TIME ))
+
+#echo "$POMODORO_STAGE $(date -u -d @${DIFF} +%M:%S) ($POMODORO_COUNT)"
+echo "$(date -u -d @${DIFF} +%M:%S)"
 
 exit
 

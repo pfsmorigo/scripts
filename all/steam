@@ -1,9 +1,9 @@
 #!/bin/bash
 
 COMMAND="VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json steam"
+#COMMAND="steam"
 
 [ -n "$1" ] && GAME=$1 || GAME=$(basename $0)
-echo $GAME
 
 case $GAME in
 	7d2d)        ID=251570 ;;
@@ -12,6 +12,10 @@ case $GAME in
 	starbound)   ID=211820 ;;
 esac
 test -n "$ID" && COMMAND+=" steam://rungameid/$ID"
+
+# Enable VR
+#sudo setcap cap_sys_nice+eip \
+	#/home/mopsifrog/.steam/steam/steamapps/common/SteamVR/bin/linux64/vrcompositor-launcher
 
 set -x
 xhost +local: > /dev/null

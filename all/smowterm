@@ -2,19 +2,18 @@
 
 NAME=URxvt
 SERVER=$1
-
-#export SHELL="/usr/bin/fish"
 TERMINALS="/usr/bin/urxvt256c-ml /usr/bin/urxvt"
+
 for TERM in $TERMINALS; do [ -e $TERM ] && EXEC=$TERM && break; done
 
 if [ -n "$SERVER" ] && [ "$SERVER" != "local" ]; then
 	NAME+="Remote"
 	grep -q ^${SERVER}$ ~/.ssh/mosh && SSH="mosh" || SSH="ssh -tY"
-	COMMAND="$SSH $SERVER"
+	COMMAND=". $HOME/.ssh/environment; $SSH $SERVER"
 else
 	COMMAND="$SHELL"
 fi
 
 pgrep $(basename ${EXEC}d) > /dev/null || ${EXEC}d -q -f -o > /tmp/urxvtd.log 2>&1
 set -xf
-${EXEC}c -name $NAME -e sh -c "$COMMAND"
+${EXEC}c -name $NAME -e /usr/bin/bash -c "$COMMAND"

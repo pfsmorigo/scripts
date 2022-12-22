@@ -1,0 +1,38 @@
+#!/bin/bash -e
+
+DOMAIN=$(pass domain/name)
+TOKEN=$(pass domain/do_token)
+RECORD_ID="$1"
+LOG=~/.cache/ddns-digitalocean.log
+
+[ -z "$TOKEN" ] && echo "Error: Missing token. Create a new token in the portal." >&2 && exit 2
+[ -z "$DOMAIN" ] && echo "Error: Missing domain." >&2 && exit 2
+[ -f "$LOG" ] || touch "$LOG"
+
+# List records
+
+if [ -z "$RECORD_ID" ]; then
+	curl -s -L \
+		-H "Content-Type: application/json" \
+		-H "Authorization: Bearer $TOKEN" \
+		"https://api.digitalocean.com/v2/domains/$DOMAIN/records" | json_pp
+	echo "Error: Missing record. Pick one." >&2
+	exit 2
+fi
+
+exit 33
+
+# Update DNS
+
+curr_ip=$(dig -4 +short myip.opendns.com @resolver1.opendns.com)
+prev_ip=$(awk -F, '/^#/ { ip=$2 } END { print ip }' "$LOG")
+
+if [ "$curr_ip" != "$prev_ip" ]; then
+	echo "#$(date -Is),$curr_ip" >> "$LOG"
+	(curl -s -L -X PUT \
+		-H "Content-Type: application/json" \
+		-H "Authorization: Bearer $TOKEN" \
+		-d '{"data":"'"$curr_ip"'"}' \
+		"https://api.digitalocean.com/v2/domains/$DOMAIN/records/$RECORD_ID";
+			echo) >> "$LOG"
+fi

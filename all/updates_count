@@ -1,0 +1,7 @@
+#!/bin/bash
+
+OUTPUT=$(/usr/lib/update-notifier/apt-check --human-readable)
+NORMAL=$(echo "$OUTPUT" | grep "can be applied" | cut -d" " -f1)
+SECURITY=$(echo "$OUTPUT" | grep "standard security" | cut -d" " -f1)
+
+exit $SECURITY

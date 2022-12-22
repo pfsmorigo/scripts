@@ -4,6 +4,10 @@ DIR=$HOME/backgrounds/use
 SAVE=/tmp/wallpaper
 FILE=
 
+get_list() {
+	find $DIR -type l -printf %"f\n" | sort -h
+}
+
 case $1 in
 	same) [ -f "$SAVE" ] && FILE="$(cat $SAVE)" || exit 1 ;;
 	rofi)

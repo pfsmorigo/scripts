@@ -36,11 +36,16 @@ if [ -z "$(echo $LIST | xargs)" ]; then
 	EOF
 fi
 
-[ -n "$1" ] && ADD=$1 || ADD=0
+[ -n "$1" ] && DATE_ATT="--date "$*"" || DATE_ATT=
+set -x
+TZ=$(echo $ITEM | cut -d, -f1) date +"%H:%M,%Z" $DATE_ATT
+exit
+
+
 OLDIFS=$IFS
 IFS=$'\n'
 for ITEM in $LIST; do
-	CURR_TIME=$(TZ=$(echo $ITEM | cut -d, -f1) date +"%H:%M,%Z" --date "now + $ADD")
+	CURR_TIME=$(TZ=$(echo $ITEM | cut -d, -f1) date +"%H:%M,%Z" $DATE_ATT)
 	HOUR=$(echo $CURR_TIME | cut -d: -f1)
 	TIMEZONE_LIST+="$(set_color $HOUR "$CURR_TIME,$ITEM")\n"
 done

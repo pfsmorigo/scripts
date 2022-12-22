@@ -1,0 +1,14 @@
+#!/bin/bash -x
+
+OUTPUT=$1
+shift
+
+echo /usr/bin/gs \
+	-sDEVICE=pdfwrite \
+	-dCompatibilityLevel=1.4 \
+	-dDownsampleColorImages=true \
+    -dColorImageResolution=150 \
+	-dNOPAUSE \
+	-dBATCH \
+	-sOutputFile=$OUTPUT \
+	$*

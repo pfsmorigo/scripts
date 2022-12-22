@@ -1,7 +1,6 @@
 #!/bin/bash
 
 case $(basename $0) in
-	geforcenow)     ID=egmafekfmcnknbdlbfbhafbllplmjlhn ;;
 	sketchup)       ID=beodkchghmjjfhojholjdhdfodleinln ;;
 	youtube-music)  ID=cinhimbnkkaeohfgghhklpknlkffjgod ;;
 esac

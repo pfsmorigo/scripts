@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Sources
+# https://www.reddit.com/r/kvm/comments/dnyx5i/virtinstall_gpu_passthrough_command/
+# https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.173-2/
+
+# lspci -nnk | grep VGA                                                     21.5s  13:40:04
+# 01:00.0 VGA compatible controller [0300]: NVIDIA Corporation TU106 [GeForce RTX 2060 Rev. A] [10de:1f08] (rev a1)
+
+NAME=win11pro
+VARIANT=win10
+TITLE="Windows 11 Pro"
+
+CPUS=2
+MEM=$(expr 16 \* 1024)
+SIZE=50
+
+BRIDGE=virtbr0
+
+VIRTIO=./virtio-win-0.1.173.iso
+ISO=./Win11_EnglishInternational_x64v1.iso
+
+GPUHOST="01:00.0"
+
+set -x
+virt-install \
+	--name=$NAME \
+	--os-variant=$VARIANT \
+	--network network=default \
+	--disk path=./${NAME}.img,size=${SIZE},format=raw,sparse=true,bus=scsi,cache=writethrough,discard=unmap,io=threads \
+	--cdrom $ISO \
+	--graphics spice \
+	--ram=$MEM
+
+
+exit
+
+set -x
+virt-install \
+	--debug \
+	--virt-type kvm \
+	--name=$NAME \
+	--os-variant=$VARIANT \
+	--vcpus $CPUS \
+	--cpu host-passthrough \
+	--memory $MEM \
+	--features kvm_hidden=on \
+	--disk path=./${NAME}.img,size=${SIZE},format=raw,sparse=true,bus=scsi,cache=writethrough,discard=unmap,io=threads \
+	--controller type=scsi,model=virtio-scsi \
+	--channel unix,target_type=virtio,name=org.qemu.guest_agent.0 \
+	--network bridge=${BRIDGE},model=virtio \
+	--metadata title="$TITLE" \
+	--disk ${VIRTIO},device=cdrom \
+	--cdrom $ISO \
+	--graphics spice \
+	--hostdev ${GPUHOST},address.type=pci,address.multifunction=on \
+	--boot loader=/usr/share/OVMF/OVMF_CODE.fd,loader.readonly=yes,loader.type=pflash
+
+	#--hostdev 02:00.1,address.type=pci \
+	#--hostdev 001.003 \
