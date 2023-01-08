@@ -5,8 +5,8 @@ DISKS=$(sudo lsblk -d | grep "disk" | cut -d" " -f1)
 PRINT="Disk;Power;Short;Long"
 
 for DISK in $DISKS; do
-	INFO="$(sudo smartctl -a /dev/$DISK)"
-	POWER_ON=$(echo "$INFO" | grep Power_On_Hours | awk '{print $(NF-3)}')
+	INFO="$(sudo smartctl -x /dev/$DISK)"
+	POWER_ON=$(echo "$INFO" | grep "  Power-on Hours" | awk '{ print $4 }')
 	test -z "$POWER_ON" && continue
 	POWER_ON_DAYS="$((POWER_ON/24))"
 	SHORT_STAMP=$(echo "$INFO" | grep " Short offline " | head -1 | awk '{ print  $(NF-1)}')
