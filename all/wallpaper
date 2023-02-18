@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DIR=$HOME/backgrounds/use
+DIR=$HOME/projects/wallpapers/in_use
 SAVE=/tmp/wallpaper
 FILE=
 
