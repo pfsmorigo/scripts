@@ -22,5 +22,5 @@ case $1 in
 	*) FILE="$(find $DIR -type l | shuf -n 1)"; echo "$FILE" > $SAVE ;;
 esac
 
-/usr/bin/feh --bg-scale "$FILE"
+/usr/bin/feh --bg-fill "$FILE"
 
