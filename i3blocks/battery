@@ -1,5 +1,10 @@
 #!/bin/bash
 
+read -d '' CYCLE_PATHS <<-EOF
+/sys/class/power_supply/BAT1/cycle_count
+/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0C0A:00/power_supply/BAT1/cycle_count
+EOF
+
 format_time() {
 	HOUR_MINUTE=${1%:*}
 	HOUR=${HOUR_MINUTE%:*}
@@ -13,6 +18,15 @@ acpi_output() {
 		| cut -d' ' -f3- \
 		| sed 's/ remaining//g' \
 		| tr '%' '+'
+}
+
+get_cycles() {
+	for DIR in $CYCLE_PATHS; do
+		if [ -e $DIR ]; then
+			~/scripts/all/unicode $(cat $DIR)
+			return
+		fi
+	done
 }
 
 PORCENTAGE=
@@ -38,8 +52,7 @@ IFS=$OLDIFS
 
 PORCENTAGE=$(echo $PORCENTAGE | sed 's/+$//g')
 TOTAL_PORCENTAGE=$(( $PORCENTAGE ))
-CYCLES=$(cat /sys/class/power_supply/BAT1/cycle_count)
-CYCLES=$(~/scripts/utils/unicode $CYCLES)
+CYCLES=$(get_cycles)
 
 if [ -z "$TIME" -a $(( $TOTAL_PORCENTAGE / $COUNT )) -ge 99 ]; then
 	echo "FULL $CYCLES"

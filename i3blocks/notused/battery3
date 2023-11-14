@@ -12,7 +12,7 @@ for BAT_PATH in $BAT_PATHS; do
 	HEALTH="$(( $CHAR_FULL * 100 / $CHAR_FULL_DSGN ))%"
 	CUR_PERC=$(( $CHAR_NOW * 100 / $CHAR_FULL ))
 
-	CYCLES=$(~/scripts/utils/unicode $CYCLES)
+	CYCLES=$(~/scripts/all/unicode $CYCLES)
 	LETTER=${STATUS:0:1}
 
 	test "$STATUS" == "Unknown" && CURRENT="BS" || CURRENT="$LETTER $CUR_PERC%"

@@ -34,5 +34,5 @@ else
 fi
 
 [ "$SCREEN_SELECTED" = "$STY" ] && echo "Already in $SCREEN_SELECTED" && exit 3
-test -f /usr/bin/fish && export SHELL=/usr/bin/fish
+command -v fish && export SHELL=$(command -v fish)
 screen -AOxRR $SCREEN_SELECTED

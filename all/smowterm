@@ -9,7 +9,7 @@ for TERM in $TERMINALS; do [ -e $TERM ] && EXEC=$TERM && break; done
 if [ -n "$SERVER" ] && [ "$SERVER" != "local" ]; then
 	NAME+="Remote"
 	grep -q ^${SERVER}$ ~/.ssh/mosh && SSH="mosh" || SSH="ssh -tY"
-	COMMAND=". $HOME/.ssh/environment; $SSH $SERVER"
+	COMMAND="$SSH $SERVER"
 else
 	COMMAND="$SHELL"
 fi

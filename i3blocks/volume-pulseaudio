@@ -1,0 +1,11 @@
+#!/bin/bash
+
+EXEC=$HOME/projects/i3blocks-contrib/volume-pulseaudio/volume-pulseaudio
+OUTPUT=$($EXEC -F "\$VOL% \$NAME" -f "\$VOL%")
+
+OUTPUT=$(echo "$OUTPUT" | sed "s/analog-stereo//")
+OUTPUT=$(echo "$OUTPUT" | sed "s/hdmi-stereo/󰡁/")
+
+#󰡁󰋋
+
+echo "󰕾 $OUTPUT"
