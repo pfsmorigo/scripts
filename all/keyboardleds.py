@@ -66,11 +66,11 @@ def check_alarms():
     alarm = False if alarm else True
 
 def is_screensaver_active():
-    result = subprocess.run(['/usr/bin/xfce4-screensaver-command', '-q'], stdout=subprocess.PIPE)
+    result = subprocess.run(["/usr/bin/xfce4-screensaver-command", "-q"], stdout=subprocess.PIPE)
     return False if b"The screensaver is inactive" in result.stdout else True
 
 def is_active(process):
-    result = subprocess.run(['/usr/bin/pgrep', process], stdout=subprocess.PIPE)
+    result = subprocess.run(["/usr/bin/pgrep", process], stdout=subprocess.PIPE)
     return False if len(result.stdout.strip()) == 0 else True
 
 def get_color(percentage):
@@ -122,7 +122,7 @@ def is_process_running():
             return True
     return False
 
-logging.basicConfig(level=logging.DEBUG, filename='/tmp/keyboardleds.log')
+logging.basicConfig(level=logging.DEBUG, filename="/tmp/keyboardleds.log")
 
 if not is_process_running() and is_keyboard_present():
     keys_i3 = ""
@@ -135,7 +135,7 @@ if not is_process_running() and is_keyboard_present():
     t = Thread(target=monitor_cpu)
     t.start()
 
-    i3 = Connection()
+    i3 = Connection(auto_reconnect=True)
     i3.on(Event.WORKSPACE_FOCUS, update_i3_keys)
     i3.on('window::urgent', update_i3_keys)
     i3.main()

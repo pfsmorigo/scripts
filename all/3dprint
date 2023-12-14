@@ -2,7 +2,7 @@
 
 FILENAME=/tmp/streamview.html
 STREAMING_URL=file://$FILENAME
-HOST=doha
+HOST=octopi.lan
 
 export HOST
 
@@ -66,7 +66,8 @@ function initialize() {
 EOF
 
 cmd_view() {
-	google-chrome --app=$STREAMING_URL
+	mplayer -fps 30 -demuxer lavf "http://${HOST}:8080/?action=stream&ignored.mjpg"
+	#google-chrome --app=$STREAMING_URL
 }
 
 cmd_record() {

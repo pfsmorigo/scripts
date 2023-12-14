@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Source: https://nvidia.custhelp.com/app/answers/detail/a_id/3751/~/useful-nvidia-smi-queries
+
+case $1 in
+	nvidia)
+		case $2 in
+			temp) QUERY="temperature.gpu"; SUFFIX="°C";;
+			fan)  QUERY="fan.speed" ;;
+			maxtemp) echo "100"; exit ;;
+			maxfan) echo "100"; exit ;;
+		esac
+		test -n "$QUERY" && echo $(nvidia-smi --query-gpu=$QUERY --format=csv | tr -d " " | tail -1)$SUFFIX
+		;;
+	ping) ping -q -c1 -w1 $2 2>&1 > /dev/null && echo Yes || echo No ;;
+esac
+

@@ -39,4 +39,7 @@ def print_ordered():
         print(card)
 
 # print_choice_card()
+# print(Card('7', 'hearts') in deck)
+# print(Card('7', 'bearts') in deck)
 print_ordered()
+

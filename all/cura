@@ -1,4 +1,4 @@
 #!/bin/bash -x
 
-EXEC=$(find /opt/cura/*.AppImage | sort -h | tail -1)
+EXEC=$(find /home/resources/appimage Ultimaker-Cura*.AppImage | sort -h | tail -1)
 test -f $EXEC && QT_FONT_DPI=140 $EXEC

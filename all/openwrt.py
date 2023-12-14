@@ -2,7 +2,7 @@
 
 import subprocess
 
-ROUTERS = ["router", "extender"]
+ROUTERS = ["brno", "extender"]
 # ROUTERS = ["router"]
 WLANS = ["wlan0", "wlan1"]
 
@@ -41,7 +41,7 @@ def get_iw_info(host, wlan):
                 result[station][field] = line.split(":")[1].strip()
     return result
 
-dhcp = get_dhcp_lease("router")
+dhcp = get_dhcp_lease("brno")
 
 iw_info = {}
 for router in ROUTERS:

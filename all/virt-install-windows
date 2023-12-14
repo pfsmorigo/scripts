@@ -15,7 +15,7 @@ CPUS=2
 MEM=$(expr 16 \* 1024)
 SIZE=50
 
-BRIDGE=virtbr0
+BRIDGE=virbr0
 
 VIRTIO=./virtio-win-0.1.173.iso
 ISO=./Win11_EnglishInternational_x64v1.iso
@@ -25,6 +25,7 @@ GPUHOST="01:00.0"
 set -x
 virt-install \
 	--name=$NAME \
+	--metadata title="$TITLE" \
 	--os-variant=$VARIANT \
 	--network network=default \
 	--disk path=./${NAME}.img,size=${SIZE},format=raw,sparse=true,bus=scsi,cache=writethrough,discard=unmap,io=threads \

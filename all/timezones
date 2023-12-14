@@ -5,11 +5,11 @@ CONFIG_FILE="$HOME/.config/timezones"
 
 set_color() {
 	if [ $1 -lt 8 ]; then
-		COLOR=32
+		COLOR=32 # Green
 	elif [ $1 -ge 18 ]; then
-		COLOR=34
+		COLOR=34 # Blue
 	else
-		COLOR=33
+		COLOR=33 # Yellow
 	fi
 	echo -n "\033[0;${COLOR}m"
 	echo -n "$2"

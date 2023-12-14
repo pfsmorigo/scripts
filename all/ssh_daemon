@@ -1,0 +1,13 @@
+#!/bin/bash
+
+case $1 in
+	ubuntu-jammy.lxd)
+		for PORT_FWD in "8079:10.246.74.221:8079" "2000:localhost:2000"; do
+			pgrep -a ssh | grep -q "$PORT_FWD" || echo nohup ssh -f -L${PORT_FWD} $1 -N
+		done
+		;;
+	*)
+		echo wat?
+		exit 1
+		;;
+esac
