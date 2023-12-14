@@ -1,0 +1,29 @@
+#! /bin/bash
+
+is_connected() {
+	bluetoothctl info "$1" | grep "Connected: yes" -q && return 0 || return 1
+}
+
+NAME=$1
+test -z "$NAME" && echo "Need a name!" && exit 1
+ICON=$2
+test -z "$ICON" && echo "Need a icon!" && exit 1
+MAC=$(bluetoothctl devices | grep "$NAME" | cut -d" " -f2)
+test -z "$MAC" && echo "Device not found!" && exit 1
+
+# event handler
+case $BLOCK_BUTTON in
+	3) # right click
+		is_connected $MAC && COMMAND=disconnect || COMMAND=connect
+		bluetoothctl $COMMAND $MAC  > /dev/null 2>&1
+		pkill -SIGRTMIN+10 i3blocks
+		#echo "$(date) bluetoothctl $COMMAND $MAC" >> /tmp/testi3
+		;;
+
+	4|5) # scroll up or scroll down
+		;;
+esac
+
+echo "$ICON"
+echo ""
+is_connected $MAC && echo "#FFFFFF" || echo "#777777"
