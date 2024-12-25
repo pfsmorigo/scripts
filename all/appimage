@@ -1,0 +1,4 @@
+#!/bin/bash
+
+EXEC=$(find /home/resources/appimage -iname "$(basename ${0:2})*" | sort | tail -1)
+QT_SCALE_FACTOR=1.25 $EXEC

@@ -1,17 +1,26 @@
 #!/bin/bash
 
 # Source: https://nvidia.custhelp.com/app/answers/detail/a_id/3751/~/useful-nvidia-smi-queries
+# nvidia-smi --help-query-gpu
+
+gpu() {
+	echo "$(nvidia-smi --query-gpu=$1 --format=csv | tr -d " " | tail -1 | cut -d"." -f1)$2"
+}
 
 case $1 in
-	nvidia)
+	gpu_temp)
 		case $2 in
-			temp) QUERY="temperature.gpu"; SUFFIX="°C";;
-			fan)  QUERY="fan.speed" ;;
-			maxtemp) echo "100"; exit ;;
-			maxfan) echo "100"; exit ;;
+			big) gpu temperature.gpu "°C" ;;
+			small) gpu fan.speed ;;
 		esac
-		test -n "$QUERY" && echo $(nvidia-smi --query-gpu=$QUERY --format=csv | tr -d " " | tail -1)$SUFFIX
 		;;
+
+	gpu_power)
+		case $2 in
+			big) gpu power.draw "W";;
+			small) echo "$(gpu pstate) $(gpu power.limit)W" ;;
+		esac
+		;;
+
 	ping) ping -q -c1 -w1 $2 2>&1 > /dev/null && echo Yes || echo No ;;
 esac
-

@@ -8,8 +8,10 @@ esac
 [ -n "$ID" ] && google-chrome --app-id=$ID && exit
 
 case $(basename $0) in
+	chatgpt)        URL=https://chat.chatbotapp.ai/?model=gpt-4 ;;
 	flightradar24)  URL=https://www.flightradar24.com/-23.62,-46.66/14 ;;
 	geforcenow)     URL=https://play.geforcenow.com ;;
+	gemini)         URL=https://gemini.google.com/app ;;
 	globoplay)      URL=https://globoplay.globo.com ;;
 	hbomax)         URL=https://play.hbomax.com ;;
 	ingress)        URL=https://ingress.com/intel ;;

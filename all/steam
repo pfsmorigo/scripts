@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMMAND="VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json steam"
+COMMAND="VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json steam -forcedesktopscaling 2.0"
 #COMMAND="steam"
 
 [ -n "$1" ] && GAME=$1 || GAME=$(basename $0)
@@ -16,6 +16,9 @@ test -n "$ID" && COMMAND+=" steam://rungameid/$ID"
 # Enable VR
 #sudo setcap cap_sys_nice+eip \
 	#/home/mopsifrog/.steam/steam/steamapps/common/SteamVR/bin/linux64/vrcompositor-launcher
+
+# Limit card power
+#sudo nvidia-smi -pl 100
 
 set -x
 xhost +local: > /dev/null

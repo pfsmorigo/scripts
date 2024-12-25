@@ -25,7 +25,7 @@ case $COMMAND in
 		if ping -4 -c 1 -W 1 $TARGET > /dev/null 2>&1; then
 			for DIR in etc www root; do
 				mkdir -p $BACKUP_DIR/$DIR
-				rsync -av --delete root@$TARGET:/$DIR/* $BACKUP_DIR/$DIR/
+				rsync -av --delete root@$TARGET:/$DIR/ $BACKUP_DIR/$DIR/
 			done
 			ssh $TARGET "opkg list-installed" > $BACKUP_DIR/installed
 		fi

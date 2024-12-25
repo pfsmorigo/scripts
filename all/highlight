@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+
+BEF=$(echo -e "\e[1;32m\0")
+AFT=$'\e[0m'
+sed -u s"/$*/$BEF\0$AFT/g"
