@@ -1,0 +1,12 @@
+#!/bin/bash
+
+EXEC=$HOME/projects/i3blocks-contrib/volume-pipewire/volume-pipewire
+OUTPUT=$($EXEC -F "\$VOL% \$NAME" -f "\$VOL%")
+
+OUTPUT=$(echo "$OUTPUT" | sed "s/PHL 288P6L/󰡁/")
+OUTPUT=$(echo "$OUTPUT" | sed "s/analog-stereo//")
+OUTPUT=$(echo "$OUTPUT" | sed "s/hdmi-stereo.*/󰡁/")
+
+#󰡁󰋋
+
+echo "󰕾 $OUTPUT"

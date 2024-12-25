@@ -2,10 +2,24 @@
 
 PULSE_CONFIG="$HOME/.pulse/client.conf"
 
-read -d '' LIST <<-EOF
-A	output:analog-stereo+input:analog-stereo
-H	output:hdmi-stereo+input:analog-stereo
-EOF
+case $(hostname) in
+	morty)
+		read -d '' LIST <<-EOF
+		A output:analog-stereo+input:analog-stereo
+		H output:hdmi-stereo+input:analog-stereo
+		EOF
+		;;
+	squanchy)
+		read -d '' LIST <<-EOF
+		A output:iec958-stereo+input:iec958-stereo
+		H output:hdmi-stereo+input:iec958-stereo
+		EOF
+		;;
+esac
+
+echo "$LIST"
+
+exit
 
 get_volume() {
 	if pacmd list-sinks | grep -q "muted: no"; then

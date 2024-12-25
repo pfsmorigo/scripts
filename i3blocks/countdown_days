@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+
+import sys
+import datetime
+
+target = datetime.datetime.strptime(sys.argv[1], '%Y-%m-%d')
+difference = target-datetime.datetime.now()
+color = '#ff0000' if difference.days < 10 else '#00ffff'
+
+if difference.days > 0:
+    print(f'{difference.days} day{"s" if difference.days != 1 else ""}')
+    print()
+    print(color)
