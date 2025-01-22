@@ -1,0 +1,11 @@
+#!/bin/bash
+
+test -z "$1" && echo "Need a address!" && exit 1
+ADDR=$1
+
+test -z "$2" && PORT=443 || PORT=$2
+
+echo \
+	| openssl s_client -servername ${ADDR} -connect ${ADDR}:${PORT} 2>/dev/null \
+	| openssl x509 -noout -text
+	#| openssl x509 -noout -dates

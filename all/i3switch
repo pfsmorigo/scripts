@@ -1,0 +1,8 @@
+#!/bin/bash
+
+WORKSPACE=$1
+echo $WORKSPACE > /tmp/test
+shift
+i3-msg -t get_workspaces | grep -q "$WORKSPACE" && START=yes
+i3-msg workspace number $WORKSPACE
+test $START || i3-msg exec "$*"

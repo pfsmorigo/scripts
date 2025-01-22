@@ -1,6 +1,9 @@
 #!/bin/bash
 
-COMMAND="VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json steam -forcedesktopscaling 2.0"
+pactl load-module module-native-protocol-tcp port=4656 listen=0.0.0.0 auth-anonymous=true
+
+PIREWIRE="pactl load-module module-tunnel-sink server=tcp:127.0.0.1:4656"
+COMMAND="$PIREWIRE; DISPLAY=:1 VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json steam -forcedesktopscaling 2.0"
 #COMMAND="steam"
 
 [ -n "$1" ] && GAME=$1 || GAME=$(basename $0)
@@ -22,4 +25,4 @@ test -n "$ID" && COMMAND+=" steam://rungameid/$ID"
 
 set -x
 xhost +local: > /dev/null
-sudo su - mopsifrog -c "DISPLAY=:0 $COMMAND"
+sudo su - mopsifrog -c "$COMMAND"

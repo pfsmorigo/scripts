@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for FILE in $*; do
+	FILENAME="${FILE%.*}"
+	test -f $FILENAME.avi && FILENAME+="_new"
+	ffmpeg -i $FILE -c:v libx264 -crf 15 ${FILENAME}.avi
+done
+

@@ -33,7 +33,7 @@ for node in json.loads(__exec('lxc list --format=json')):
         for net in node['state']['network']['eth0']['addresses']:
             if net['family'] == 'inet' and net['scope'] == 'global':
                     ip = net['address']
+                    hosts[hostname+'.lxd'] = ip
                     break
-        hosts[hostname+'.lxd'] = ip
 
 update_hosts(hosts)
