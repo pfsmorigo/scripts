@@ -17,7 +17,7 @@ for IF in $($IPCMD -o -4 a); do
 	SUFFIX=
 
 	case $NAME in
-		lo|virbr*|docker*|br-*|mpqemubr*|tun*|lxd*|lxc*) let IGNORED=IGNORED+1 && continue ;;
+		lo|virbr*|docker*|br-*|mpqemubr*|tun*|lxd*|lxc*|wg*) let IGNORED=IGNORED+1 && continue ;;
 	esac
 
 	if [ "$(iwgetid | cut -d' ' -f1)" = "$NAME" ]; then

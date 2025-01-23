@@ -16,7 +16,7 @@
 # will be in countdown timer mode (C).
 
 TIME_FRACTION=${1:-300}
-TIME_FORMAT=${2:-%H:%M:%S}
+TIME_FORMAT=${2:-%M:%S}
 
 STORE_FILE=/tmp/i3blocks_stopwatch_countdown
 NOW=$(date +%s)
@@ -68,7 +68,15 @@ fi
 [ $COUNTER -lt 0 ] && COUNTER=0
 
 # if it reachs 0 trigger the alarm
-[ $MODE = C -a $COUNTER -eq 0 -a $EPOCH -ne 0 ] && EXIT=33
+if [ $MODE = C -a $COUNTER -eq 0 -a $EPOCH -ne 0 ]; then
+	notify-send -u normal -i /usr/share/icons/Humanity/apps/32/gnome-panel-clock.svg "Timer" "Time is over!"
+	paplay /usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga
+	MODE=S
+	EXIT=33
+fi
+
+# hide time if time is zero
+[ $MODE = S -a $COUNTER -eq 0 ] && OUTPUT="🕑" || OUTPUT="($(date -u -d @$COUNTER +$TIME_FORMAT))"
 
 # if instance is set and alarm is set, execute its content
 [ -n "$EXIT" -a -n "$BLOCK_INSTANCE" ] && $BLOCK_INSTANCE && EPOCH=0
@@ -77,7 +85,7 @@ fi
 echo "$MODE,$COUNTER,$EPOCH" > $STORE_FILE
 
 # print
-echo "$MODE $(date -u -d @$COUNTER +$TIME_FORMAT)"
+echo "$OUTPUT"
 echo ""
 [ $EPOCH -eq 0 ] && echo "#ffffff" || echo "#00ff00"
 
