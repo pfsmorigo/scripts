@@ -1,0 +1,3 @@
+#!/bin/bash
+
+virsh list | grep running | grep -q " personal " && echo 💻

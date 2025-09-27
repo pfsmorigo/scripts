@@ -33,7 +33,7 @@ for IF in $($IPCMD -o -4 a); do
 
 	IP=$(echo $IF | awk '{ print $4 }')
 	SHORT_TEXT+="$(echo $IP | cut -d/ -f1)  "
-	FULL_TEXT+="${IP}${SUFFIX}  "
+	FULL_TEXT+="${IP}${SUFFIX} "
 done
 IFS=$OLDIFS
 

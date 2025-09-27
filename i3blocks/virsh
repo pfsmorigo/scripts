@@ -3,6 +3,7 @@
 LIST=$(virsh list | grep running | awk '{ print $2 }' | xargs)
 [ -n "$LIST" ] && COLOR="#00ff00"
 
+[ "$LIST" == "personal" ] && exit
 echo $LIST
 echo ""
 echo $COLOR

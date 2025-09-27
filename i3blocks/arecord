@@ -1,0 +1,4 @@
+#!/bin/bash -x
+
+PIDS=$(pgrep arecord | wc -w)
+test $PIDS -gt 2 && echo -e "REC\n\n#FF0000" || echo ""

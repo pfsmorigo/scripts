@@ -1,18 +1,17 @@
 #!/bin/bash
 
 clean_clock() {
-	echo ""
+	read INPUT
+	echo $INPUT | sed 's, [0]\+, ,g'
 }
 
-HOMETZ=America/Sao_Paulo
+HOME_TIME="$(TZ=America/Sao_Paulo date +%Hh%M)"
+CURR_TIME="$(date +%Hh%M)"
 
-#OUTPUT=$(date +"%a, %b %d (%j) %Hh%M" | sed 's, 0, ,g;s,([0]\+,(,g')
-OUTPUT=$(date +"%a, %b %d " | sed 's, [0]\+, ,g')
-OUTPUT+=$(~/scripts/all/unicode $(date +" %j" | sed 's, [0]\+, ,g'))
-OUTPUT+=$(date +" %Hh%M" | sed 's, [0]\+, ,g')
-
-grep -q $HOMETZ /etc/timezone \
-	|| OUTPUT+=" ($(TZ=America/Sao_Paulo date +%Hh%M))"
+OUTPUT=$(date +"%a, %b %d " | clean_clock)
+OUTPUT+=$(~/scripts/all/unicode $(date +" %j" | clean_clock))
+OUTPUT+=" $(echo $CURR_TIME | clean_clock)"
+[ "$HOME_TIME" != "$CURR_TIME" ] && OUTPUT+=" ($(echo $HOME_TIME | clean_clock))"
 
 echo "$OUTPUT"
 echo ""

@@ -2,15 +2,23 @@
 
 RASP_DIR=/proc/device-tree/model
 
-if [ -e "$RASP_DIR" ] && [[ "$(cat $RASP_DIR)" =~ "Raspberry" ]]; then
-	TEMPERATURE=$(/opt/vc/bin/vcgencmd measure_temp | cut -d= -f2 | cut -d. -f1)
+if [ -e /usr/bin/sensors ]; then
+	TEM=$(/usr/bin/sensors | grep "CPU temp:" | cut -d"+" -f2 | cut -d"." -f1)
+	FAN=$(/usr/bin/sensors | grep "CPU fan:" | awk '{ print $3 }')
+elif [ -e "$RASP_DIR" ] && [[ "$(cat $RASP_DIR)" =~ "Raspberry" ]]; then
+	TEM=$(/opt/vc/bin/vcgencmd measure_temp | cut -d= -f2 | cut -d. -f1)
 else
-	TEMPERATURE=$(acpi -t | head -n1 | awk '{ print $4 }' | cut -d. -f1)
+	TEM=$(acpi -t | head -n1 | awk '{ print $4 }' | cut -d. -f1)
 fi
 
-[ "$TEMPERATURE" -gt 70 ] && COLOR="#ffff00"
-[ "$TEMPERATURE" -gt 85 ] && COLOR="#ff0000"
+OUTPUT="${TEM}°C"
+test -n "$FAN" && test "$FAN" != "0" && OUTPUT+=" ($FAN)"
 
-echo "${TEMPERATURE}°C"
+[ "$TEM" -gt   70 ] && COLOR="#ffff00"
+[ "$TEM" -gt   85 ] && COLOR="#ff0000"
+[ "$FAN" -gt 5000 ] && COLOR="#ffff00"
+[ "$FAN" -gt 7000 ] && COLOR="#ff0000"
+
+echo "$OUTPUT"
 echo ""
 echo "$COLOR"
