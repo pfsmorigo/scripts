@@ -31,7 +31,7 @@ case $1 in
 
 	m|mutt)
 		check neomutt
-		$SCREEN_CMD -t mutt 9 bash -c "cd ~/downloads && neomutt"
+		$SCREEN_CMD -t mutt 9 bash -c "cd ~/Downloads && neomutt"
 		;;
 	all)
 		$0 newsbeuter

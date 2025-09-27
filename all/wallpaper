@@ -1,11 +1,12 @@
 #!/bin/bash
 
-DIR=$HOME/wallpapers/in_use
+PERSONAL=$HOME/wallpapers/in_use
+test -d $PERSONAL && DIR=$PERSONAL || DIR=/usr/share/backgrounds
 SAVE=/tmp/wallpaper
 FILE=
 
 get_list() {
-	find $DIR -type l -printf %"f\n" | sort -h
+	find $DIR -type f -printf %"f\n" | sort -h
 }
 
 case $1 in
@@ -15,11 +16,11 @@ case $1 in
 			'') rofi -show wallpaper -modi wallpaper:$0\ rofi\ list; exit ;;
 			list)
 				case $3 in
-					'') find $DIR -type l -printf %"f\n" | sort -h; exit ;;
+					'') get_list; exit ;;
 					*) FILE="$DIR/$3" ;;
 				esac ;;
 		esac ;;
-	*) FILE="$(find $DIR -type l | shuf -n 1)"; echo "$FILE" > $SAVE ;;
+	*) FILE="$(find $DIR -type f | shuf -n 1)"; echo "$FILE" > $SAVE ;;
 esac
 
 /usr/bin/feh --bg-fill "$FILE"
