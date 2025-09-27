@@ -1,0 +1,15 @@
+#!/bin/bash -x
+
+DIR=$HOME/Music/Recording
+FILENAME=$(date +%F_%T).wav
+
+
+if pgrep arecord; then
+	pkill arecord
+else
+	mkdir -p $DIR
+	arecord -f S32_LE -r 44100 -c 2 $DIR/$FILENAME &
+fi
+
+
+

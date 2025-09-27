@@ -1,0 +1,3 @@
+#!/bin/bash
+
+rm -f *.dsc *.tar.xz *.build *.buildinfo *.changes *.upload *.deb

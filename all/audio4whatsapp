@@ -1,0 +1,6 @@
+#!/bin/bash
+
+INPUT=$1
+OUTPUT="${INPUT%.*}_fixed.aac"
+ffmpeg -i "$INPUT" -c:a aac "$OUTPUT"
+
