@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+
+import datetime
+import json
+import urllib.request
+
+url = 'https://economia.awesomeapi.com.br/json/last/USD'
+
+req = urllib.request.Request(url)
+with urllib.request.urlopen(req) as response:
+    data = json.load(response)['USDBRL']
+    #print(f"{data['low']} {data['bid']} {data['high']}")
+    print(f"{data['bid']}")

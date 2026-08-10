@@ -1,0 +1,23 @@
+#!/bin/bash
+
+COMMAND=$1
+shift
+
+case $COMMAND in
+	m4a2aac)  ARGS="-acodec copy" ;;
+	sound)    ARGS="-vn -acodec copy" ;;
+	whatsapp) ARGS="-c:v libx264 -profile:v baseline -level 3.0 -pix_fmt yuv420p" ;;
+	*) echo "wat? $COMMAND is invalid! Use: whatsapp or sound" && exit 1 ;;
+esac
+
+for INPUT in $*; do
+	case $COMMAND in
+		whatsapp) OUTPUT="${INPUT%.*}_fixed.${INPUT##*.}" ;;
+		sound)    OUTPUT="${INPUT%.*}.aac" ;;
+		*) exit 1 ;;
+	esac
+	set -x
+	EXEC="ffmpeg -i $INPUT $ARGS $OUTPUT"
+	echo "Run: $EXEC"
+	$EXEC
+done

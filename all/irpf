@@ -1,3 +1,9 @@
 #!/bin/bash
-java -Dsun.java2d.uiScale=2 -jar ./irpf.jar
-#java -Dglass.gtk.uiScale=2.0 -jar ./irpf.jar
+
+IRPF_DIR=$HOME/IRPF2026/
+JAVA=/usr/lib/jvm/java-17-openjdk-amd64/bin/java
+[ ! -e $JAVA ] && echo "run:  apt install openjdk-17-jre" && exit
+
+cd $IRPF_DIR
+$JAVA -Dsun.java2d.uiScale=2 -jar ./irpf.jar
+#$JAVA -Dglass.gtk.uiScale=2.0 -jar ./irpf.jar
